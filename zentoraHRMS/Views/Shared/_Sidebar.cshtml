@@ -1,0 +1,74 @@
+﻿@model zentoraHRMS.Models.SidebarViewModel
+
+<div class="scrollbar" data-simplebar>
+    <ul class="side-nav">
+        @if (Model != null && Model.ParentModules != null)
+        {
+            foreach (var parent in Model.ParentModules)
+            {
+                var targetId = "sidebar" + parent.ParentModuleId;
+
+                <li class="side-nav-item mb-1">
+                    @if (parent.Children != null && parent.Children.Any())
+                    {
+                        <a data-bs-toggle="collapse" href="#@targetId" aria-expanded="false" aria-controls="@targetId" class="side-nav-link">
+                            <span class="menu-icon"><i data-lucide="@parent.IconClass"></i></span>
+                            <span class="menu-text"> @parent.ModuleName </span>
+                            <span class="menu-arrow"></span>
+                        </a>
+
+                        <div class="collapse" id="@targetId">
+                            <ul class="sub-menu">
+                                @foreach (var child in parent.Children)
+                                {
+                                    var subTargetId = "subSidebar" + child.ChildModuleId;
+
+                                    <li class="side-nav-item mt-1">
+                                        @if (child.SubChildren != null && child.SubChildren.Any())
+                                        {
+                                            <a data-bs-toggle="collapse" href="#@subTargetId" aria-expanded="false" aria-controls="@subTargetId" class="side-nav-link">
+                                                <span class="menu-text">@child.ModuleName</span>
+                                                <span class="menu-arrow"></span>
+                                            </a>
+                                            <div class="collapse" id="@subTargetId">
+                                                <ul class="sub-menu">
+                                                    @foreach (var sub in child.SubChildren)
+                                                    {
+                                                        <li class="side-nav-item mt-1">
+                                                            <a href="@(sub.RouteUrl == "#" ? "javascript:void(0);" : sub.RouteUrl)" class="side-nav-link">
+                                                                <span class="menu-text">@sub.ModuleName</span>
+                                                            </a>
+                                                        </li>
+                                                    }
+                                                </ul>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <a href="@(child.RouteUrl == "#" ? "javascript:void(0);" : child.RouteUrl)" class="side-nav-link">
+                                                <span class="menu-text">@child.ModuleName</span>
+                                            </a>
+                                        }
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    }
+                    else
+                    {
+                        <a href="@(parent.RouteUrl == "#" ? "javascript:void(0);" : parent.RouteUrl)" class="side-nav-link">
+                            <span class="menu-icon"><i data-lucide="@parent.IconClass"></i></span>
+                            <span class="menu-text">@parent.ModuleName</span>
+                        </a>
+                    }
+                </li>
+            }
+        }
+    </ul>
+</div>
+
+<div class="menu-collapse-box d-none d-xl-block">
+    <button class="button-collapse-toggle">
+        <i data-lucide="square-chevron-left" class="align-middle flex-shrink-0"></i> <span>Collapse Menu</span>
+    </button>
+</div>

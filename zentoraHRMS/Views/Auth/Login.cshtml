@@ -1,0 +1,142 @@
+﻿
+@{
+    ViewBag.Title = "Dashboard";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Sign In | Zentora </title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="admin dashboard template on Themeforest. Perfect for building CRM, CMS, project management tools, and custom web apps with clean UI, responsive design, and powerful features.">
+    <meta name="keywords" content="Simple, Admin dashboard, Themeforest, HTML template,Shadcn, Bootstrap admin, CRM template, CMS template, responsive admin, web app UI, admin theme, best admin template">
+    <meta name="author" content="Coderthemes">
+
+    <!-- App favicon -->
+    <link rel="shortcut icon" href="~/assets/images/favicon.ico">
+
+    <!-- Theme Config Js -->
+    <script src="~/assets/js/config.js"></script>
+
+    <!-- Vendor css -->
+    <link href="~/assets/css/vendors.min.css" rel="stylesheet" type="text/css">
+
+    <!-- App css -->
+    <link href="~/assets/css/app.min.css" rel="stylesheet" type="text/css">
+
+    <script src="~/assets/plugins/lucide/lucide.min.js"></script>
+
+</head>
+
+<body onload="noBack();" onpageshow="if (event.persisted) noBack();">
+
+    <div class="auth-box overflow-hidden align-items-center d-flex">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-xxl-4 col-md-6 col-sm-8">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="auth-brand mb-4">
+                                <a href="index.html" class="logo-dark">
+                                    <span class="d-flex align-items-center gap-1">
+                                        <span class="avatar avatar-xs rounded-1 text-bg-dark">
+                                            <span class="avatar-title">
+                                                <i data-lucide="atom" class="fs-md"></i>
+                                            </span>
+                                        </span>
+                                        <span class="logo-text text-body fw-bold fs-xl">ZENTORA</span>
+                                    </span>
+                                </a>
+                                <a href="index.html" class="logo-light">
+                                    <span class="d-flex align-items-center gap-1">
+                                        <span class="avatar avatar-xs rounded-1 text-bg-dark">
+                                            <span class="avatar-title">
+                                                <i data-lucide="atom" class="fs-md"></i>
+                                            </span>
+                                        </span>
+                                        <span class="logo-text text-white fw-bold fs-xl">ZENTORA</span>
+                                    </span>
+                                </a>
+                                <p class="text-muted w-lg-75 mt-3">Let’s get you signed in. Enter your email and password to continue.</p>
+                            </div>
+
+                            <div class="">
+                                <form id="loginForm">
+                                    <div class="mb-3">
+                                        <label for="userIdentifier" class="form-label">
+                                            Username / Phone / Email <span class="text-danger">*</span>
+                                        </label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" id="userIdentifier" name="UserIdentifier"
+                                                   placeholder="Enter Username, Phone or Email" required>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="userPassword" class="form-label">Password <span class="text-danger">*</span></label>
+                                        <div class="input-group">
+                                            <input type="password" class="form-control" id="userPassword" name="Password" placeholder="••••••••" required>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-grid">
+                                        <button type="submit" id="btnLogin" class="btn btn-primary fw-semibold py-2">Sign In</button>
+                                    </div>
+                                </form>
+
+                                <!-- Placeholder for error -->
+                                <div id="loginError" class="text-danger mt-2"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- end auth-fluid-->
+    <!-- Vendor js -->
+    <script src="~/assets/js/vendors.min.js"></script>
+
+    <!-- App js -->
+    <script src="~/assets/js/app.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $("#loginForm").on("submit", function (e) {
+                e.preventDefault();
+
+                var userIdentifier = $("#userIdentifier").val(); // can be email / phone / username
+                var password = $("#userPassword").val();
+
+                $.ajax({
+                    url: '/Auth/Login',
+                    type: 'POST',
+                    data: {
+                        UserIdentifier: userIdentifier,
+                        Password: password
+                    },
+                    success: function (response) {
+                        if (response.success) {
+                            // redirect to dashboard or home
+                            window.location.href = response.redirectUrl;
+                        } else {
+                            $("#loginError").text(response.message);
+                        }
+                    },
+                    error: function () {
+                        $("#loginError").text("An error occurred. Please try again.");
+                    }
+                });
+            });
+        });
+    </script>
+    <script>
+        // Disable back button after logout
+        window.history.forward();
+        function noBack() { window.history.forward(); }
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,147 @@
+@model IEnumerable<zentoraHRMS.Models.EmployeeSalaryModel>
+@{
+    ViewBag.Title = "Employee Payslips";
+}
+
+<div class="container-fluid">
+    <div class="row justify-content-center py-5">
+        <div class="col-xxl-5 col-xl-7 text-center">
+            <a href="@Url.Action("Index","Home")" class="badge badge-default fw-normal shadow px-2 py-1 mb-2 fst-italic fs-xxs">
+                <i data-lucide="square-check" class="fs-sm me-1"></i> DashBoard
+            </a>
+            <h3 class="fw-bold">Employee Payslips</h3>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-xxl-12">
+            <div class="card rounded-2">
+                <div class="card-header justify-content-between">
+                    <h5 class="card-title">Generate & Print Payslips</h5>
+                </div>
+
+                <div class="card-body">
+                    <table id="checkbox-select-data" class="table table-striped dt-responsive checkbox-select-datatable align-middle mb-0">
+                        <thead class="thead-sm text-uppercase fs-xxs">
+                            <tr>
+                                <th class="fs-sm" style="width: 1%;"></th>
+                                <th>Employee Name</th>
+                                <th>Basic Salary</th>
+                                <th>Allowances</th>
+                                <th>Deductions</th>
+                                <th>Net Salary</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var c in Model)
+                            {
+                                var net = c.BasicSalary + c.Allowance - c.Deduction;
+                                <tr>
+                                    <td class="fs-sm" style="width: 1%;"></td>
+                                    <td>@c.EmployeeName</td>
+                                    <td>$@c.BasicSalary.ToString("N2")</td>
+                                    <td>$@c.Allowance.ToString("N2")</td>
+                                    <td>$@c.Deduction.ToString("N2")</td>
+                                    <td class="fw-bold text-primary">$@net.ToString("N2")</td>
+                                    <td>
+                                        <button onclick="ViewPayslip('@c.EmployeeName', '@c.BasicSalary', '@c.Allowance', '@c.Deduction')" class="btn btn-sm btn-soft-primary">
+                                            <i class="me-1" data-lucide="printer"></i> Print Payslip
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payslip View Modal -->
+    <div id="PayslipModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Payslip Statement</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-dark" id="payslipContent">
+                    <div class="text-center mb-4">
+                        <h4 class="fw-bold mb-0">ZENTORA HRMS INC.</h4>
+                        <p class="text-muted fs-xxs">Noida HQ, Sector-62, UP, India</p>
+                        <h5 class="text-decoration-underline fw-bold">SALARY STATEMENT</h5>
+                    </div>
+                    <hr />
+                    <div class="row mb-3 fs-xs">
+                        <div class="col-6"><strong>Employee:</strong> <span id="pName"></span></div>
+                        <div class="col-6 text-end"><strong>Period:</strong> July 2026</div>
+                    </div>
+                    <table class="table table-bordered table-sm fs-xs align-middle">
+                        <thead>
+                            <tr class="table-light">
+                                <th>Description</th>
+                                <th class="text-end">Earnings</th>
+                                <th class="text-end">Deductions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Basic Pay Rate</td>
+                                <td class="text-end text-success" id="pBasic"></td>
+                                <td class="text-end">-</td>
+                            </tr>
+                            <tr>
+                                <td>Allowances & HRA</td>
+                                <td class="text-end text-success" id="pAllowance"></td>
+                                <td class="text-end">-</td>
+                            </tr>
+                            <tr>
+                                <td>Provident Fund / Tax Deductions</td>
+                                <td class="text-end">-</td>
+                                <td class="text-end text-danger" id="pDeduction"></td>
+                            </tr>
+                            <tr class="table-light fw-bold">
+                                <td>Total Net Salary Paid</td>
+                                <td colspan="2" class="text-end text-primary fs-sm" id="pNet"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="mt-5 pt-3 d-flex justify-content-between fs-xxs text-muted">
+                        <div>Prepared By: HR Manager</div>
+                        <div>Authorized Signature: _____________</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-soft-primary" onclick="PrintDiv('payslipContent')">Print Document</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function ViewPayslip(name, basic, allowance, deduction) {
+        var basicVal = parseFloat(basic);
+        var allowanceVal = parseFloat(allowance);
+        var deductionVal = parseFloat(deduction);
+        var netVal = basicVal + allowanceVal - deductionVal;
+
+        $("#pName").text(name);
+        $("#pBasic").text("$" + basicVal.toFixed(2));
+        $("#pAllowance").text("$" + allowanceVal.toFixed(2));
+        $("#pDeduction").text("$" + deductionVal.toFixed(2));
+        $("#pNet").text("$" + netVal.toFixed(2));
+        $("#PayslipModal").modal("show");
+    }
+
+    function PrintDiv(divId) {
+        var printContents = document.getElementById(divId).innerHTML;
+        var originalContents = document.body.innerHTML;
+        document.body.innerHTML = printContents;
+        window.print();
+        document.body.innerHTML = originalContents;
+        window.location.reload();
+    }
+</script>

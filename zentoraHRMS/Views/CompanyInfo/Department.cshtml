@@ -1,0 +1,387 @@
+﻿@model IEnumerable<zentoraHRMS.Models.DepartmentModel>
+@{
+    ViewBag.Title = "Department";
+}
+
+<div class="container-fluid">
+
+    <div class="row justify-content-center py-5">
+        <div class="col-xxl-5 col-xl-7 text-center">
+            <a href="@Url.Action("Index","Home")" class="badge badge-default fw-normal shadow px-2 py-1 mb-2 fst-italic fs-xxs">
+                <i data-lucide="square-check" class="fs-sm me-1"></i> DashBoard
+            </a>
+            <h3 class="fw-bold">
+                Department
+            </h3>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-xxl-12">
+            <div class="card rounded-2">
+                <div class="card-header justify-content-between">
+                    <h5 class="card-title"> Department Details </h5>
+                    <button type="button" class="btn btn-sm btn-soft-primary" data-bs-toggle="modal" data-bs-target="#AddDepartment"><i class="me-1" data-lucide="plus"></i> Add Department </button>
+                </div>
+
+                <div class="card-body">
+                    <table id="checkbox-select-data" class="table table-striped dt-responsive checkbox-select-datatable align-middle mb-0">
+                        <thead class="thead-sm text-uppercase fs-xxs">
+                            <tr>
+                                <th class="fs-sm" style="width: 1%;"></th>
+                                <th>Branch</th>
+                                <th>Department Name</th>
+                                <th>Department Code</th>
+                                <th>Head Of Department</th>
+                                <th>Number Of Employees</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach(var d in Model)
+                            {
+                                <tr>
+                                    <td class="fs-sm" style="width: 1%;"></td>
+                                    <td>@d.BranchName</td>
+                                    <td>@d.DepartmentName</td>
+                                    <td>@d.DepartmentCode</td>
+                                    <td>@d.HeadOfDepartment</td>
+                                    <td>@d.NumberOfEmployees</td>
+                                    <td><span class="badge badge-label badge-soft-success">Active</span></td>
+                                    <td>
+                                        <a onclick="UpdateDepartment(@d.DepartmentId)" data-bs-toggle="modal" data-bs-target="#UpdateDepartment" class="btn btn-sm btn-soft-info mt-1" title="Update"><i data-lucide="square-pen"></i></a>
+                                        <a onclick="DeleteDepartment(@d.DepartmentId)" class="btn btn-sm btn-soft-danger mt-1" title="Delete"><i data-lucide="trash-2"></i></a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AddDepartment Start -->
+    <div id="AddDepartment" class="modal fade" tabindex="-1" role="dialog"
+         aria-labelledby="fullWidthModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <form id="DepartmentForm" class="needs-validation" novalidate method="post">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="fullWidthModalLabel"> Add Department Details </h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Button-style Tabs -->
+                        <ul class="nav nav-pills mb-3 justify-content-center" id="DepartmentTab" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="btn btn-sm btn-soft-secondary me-1 mb-1 rounded-1 active" id="Department-tab" data-bs-toggle="tab" data-bs-target="#Department" type="button" role="tab"> Department Info </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="btn btn-sm btn-soft-secondary me-1 mb-1 rounded-1" id="optional-tab" data-bs-toggle="tab" data-bs-target="#optional" type="button" role="tab"> Optional </button>
+                            </li>
+                        </ul>
+                        <div class="tab-content mt-3" id="DepartmentTabContent">
+                            <!-- Department Info -->
+                            <div class="tab-pane fade show active" id="Department" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-md-4 mt-3">
+                                        <label for="branch" class="form-label"> Branch <span class="text-danger">*</span></label>
+                                        <select id="branch" data-choices class="form-select"></select>
+                                        <div class="invalid-feedback">Please select a Branch.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="Department_name" class="form-label">Department Name <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="Department_name" required>
+                                        <div class="invalid-feedback">Please provide a valid Department Name.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="Department_code" class="form-label">Department Code <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="Department_code" required>
+                                        <div class="invalid-feedback">Please provide a valid Department Code.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="head_email" class="form-label"> HeadEmail <span class="text-danger">*</span></label>
+                                        <input type="email" class="form-control" id="head_email" required>
+                                        <div class="invalid-feedback">Please provide a valid HeadEmail.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="head_phone" class="form-label"> HeadPhone <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="head_phone" required>
+                                        <div class="invalid-feedback">Please provide a valid HeadPhone.</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Optional Info -->
+                            <div class="tab-pane fade" id="optional" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-md-4 mt-3">
+                                        <label for="description" class="form-label">Description <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="description" required>
+                                        <div class="invalid-feedback">Please provide a valid Fax Number.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="HOD" class="form-label">Head Of Department <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="HOD" required>
+                                        <div class="invalid-feedback">Please provide a valid Website.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="NOE" class="form-label">Number Of Employees <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="NOE" required>
+                                        <div class="invalid-feedback">Please provide a valid Fax Number.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="notes" class="form-label">Notes <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="notes" required>
+                                        <div class="invalid-feedback">Please provide a valid Website.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="reset" class="btn btn-soft-warning"> Reset </button>
+                        <button type="submit" class="btn btn-soft-primary"> Save changes </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- AddDepartment End -->
+
+    <!-- UpdateDepartment Start -->
+    <div id="UpdateDepartment" class="modal fade" tabindex="-1" role="dialog"
+         aria-labelledby="fullWidthModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <form id="UpdateDepartmentForm" class="needs-validation" novalidate method="post">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="fullWidthModalLabel"> Update Department Details </h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Button-style Tabs -->
+                        <ul class="nav nav-pills mb-3 justify-content-center" id="DepartmentTab" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="btn btn-sm btn-soft-secondary me-1 mb-1 rounded-1 active" id="Department-tab" data-bs-toggle="tab" data-bs-target="#Update-Department" type="button" role="tab"> Department Info </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="btn btn-sm btn-soft-secondary me-1 mb-1 rounded-1" id="optional-tab" data-bs-toggle="tab" data-bs-target="#Update-optional" type="button" role="tab"> Optional </button>
+                            </li>
+                        </ul>
+                        <div class="tab-content mt-3" id="DepartmentTabContent">
+                            <!-- Department Info -->
+                            <div class="tab-pane fade show active" id="Update-Department" role="tabpanel">
+                                <div class="row">
+                                    <input type="hidden" id="department_id" name="department_id" />
+                                    <div class="col-md-4 mt-3">
+                                        <label for="ubranch" class="form-label"> Branch <span class="text-danger">*</span></label>
+                                        <select id="ubranch" data-choices class="form-select"></select>
+                                        <div class="invalid-feedback">Please select a Branch.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="Department_name" class="form-label">Department Name <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="udepartment_name" required>
+                                        <div class="invalid-feedback">Please provide a valid Department Name.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="Department_code" class="form-label">Department Code <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="udepartment_code" required>
+                                        <div class="invalid-feedback">Please provide a valid Department Code.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="email" class="form-label"> HeadEmail <span class="text-danger">*</span></label>
+                                        <input type="email" class="form-control" id="uhead_email" required>
+                                        <div class="invalid-feedback">Please provide a valid Email.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="phone" class="form-label"> HeadPhone <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="uhead_phone" required>
+                                        <div class="invalid-feedback">Please provide a valid Phone.</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Optional Info -->
+                            <div class="tab-pane fade" id="Update-optional" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-md-4 mt-3">
+                                        <label for="description" class="form-label">Description <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="udescription" required>
+                                        <div class="invalid-feedback">Please provide a valid Fax Number.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="HOD" class="form-label">Head Of Department <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="uHOD" required>
+                                        <div class="invalid-feedback">Please provide a valid Website.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="NOE" class="form-label">Number Of Employees <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="uNOE" required>
+                                        <div class="invalid-feedback">Please provide a valid Fax Number.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="notes" class="form-label">Notes <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="unotes" required>
+                                        <div class="invalid-feedback">Please provide a valid Website.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="reset" class="btn btn-soft-warning"> Reset </button>
+                        <button type="submit" class="btn btn-soft-primary"> Save changes </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- UpdateDepartment End -->
+</div>
+
+<script>
+    // Add Department Start
+    $.ajax({
+        type: "GET",
+        url: '/CompanyInfo/GetBranch',
+        dataType: "json",
+        success: function (data) {
+            var s = '<option value="" selected disabled>Select Branch</option>';
+            for (var i = 0; i < data.length; i++) {
+                s += '<option value="' + data[i].BranchId + '">' + data[i].BranchName + '</option>';
+            }
+            $("#branch").html(s);
+        },
+        error: function (xhr, status, error) {
+            console.log("Error: " + error);
+        }
+    });
+    // Add Department End
+
+    // Update Department Start
+    $.ajax({
+        type: "GET",
+        url: '/CompanyInfo/GetBranch',
+        dataType: "json",
+        success: function (data) {
+            var s = '<option value="" selected disabled>Select Branch</option>';
+            for (var i = 0; i < data.length; i++) {
+                s += '<option value="' + data[i].BranchId + '">' + data[i].BranchName + '</option>';
+            }
+            $("#ubranch").html(s);
+        },
+        error: function (xhr, status, error) {
+            console.log("Error: " + error);
+        }
+    });
+    // Update Department End
+
+    $(document).ready(function () {
+        $("#DepartmentForm").on("submit", function (e) {
+            e.preventDefault();
+
+            var formData = {
+                DepartmentName: $("#Department_name").val(),
+                BranchId: $("#branch").val(),
+                DepartmentCode: $("#Department_code").val(),
+                HeadEmail: $("#head_email").val(),
+                HeadPhone: $("#head_phone").val(),
+                Description: $("#description").val(),
+                HeadOfDepartment: $("#HOD").val(),
+                NumberOfEmployees: $("#NOE").val(),
+                Notes: $("#notes").val()
+            };
+
+            $.ajax({
+                url: '@Url.Action("SaveDepartment", "CompanyInfo")',
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(formData),
+                success: function () {
+                    location.reload();
+                },
+                error: function () {
+                    alert("Error saving Department details.");
+                }
+            });
+        });
+
+        $("#UpdateDepartmentForm").on("submit", function (e) {
+            e.preventDefault();
+
+            var formData = {
+                DepartmentId: $("#department_id").val(),
+                DepartmentName: $("#udepartment_name").val(),
+                BranchId: $("#ubranch").val(),
+                DepartmentCode: $("#udepartment_code").val(),
+                HeadEmail: $("#uhead_email").val(),
+                HeadPhone: $("#uhead_phone").val(),
+                Description: $("#udescription").val(),
+                HeadOfDepartment: $("#uHOD").val(),
+                NumberOfEmployees: $("#uNOE").val(),
+                Notes: $("#unotes").val()
+            };
+
+            $.ajax({
+                url: '/CompanyInfo/UpdateDepartment',
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(formData),
+                success: function (res) {
+                    if (res.success) {
+                        location.reload();
+                    } else {
+                        alert("Error: " + res.message);
+                    }
+                }
+            });
+        });
+    });
+
+    function UpdateDepartment(id) {
+        $.ajax({
+            url: '/CompanyInfo/GetDepartmentById',
+            type: 'GET',
+            data: { id: id },
+            success: function (data) {
+                if (data) {
+                    $("#department_id").val(data.DepartmentId);
+                    $("#ubranch").val(data.BranchId);
+                    $("#udepartment_name").val(data.DepartmentName);
+                    $("#udepartment_code").val(data.DepartmentCode);
+                    $("#uhead_email").val(data.HeadEmail);
+                    $("#uhead_phone").val(data.HeadPhone);
+                    $("#uHOD").val(data.HeadOfDepartment);
+                    $("#uNOE").val(data.NumberOfEmployees);
+                    $("#udescription").val(data.Description);
+                    $("#unotes").val(data.Notes);
+
+                    $("#UpdateDepartment").modal("show");
+                }
+            },
+            error: function () {
+                alert("Error loading branch details.");
+            }
+        });
+    }
+
+    function DeleteDepartment(id) {
+        $.ajax({
+            url: '@Url.Action("DeleteDepartment", "CompanyInfo")',
+            type: "POST",
+            data: { departmentId: id },
+            success: function (response) {
+                if (response.success) {
+                    location.reload();
+                } else {
+                    alert.error("Error: " + response.message);
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error("AJAX Error:", xhr.responseText);
+                alert.error("AJAX Error: " + error);
+            }
+        });
+    }
+</script>

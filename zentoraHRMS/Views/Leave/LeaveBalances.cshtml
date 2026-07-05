@@ -1,0 +1,56 @@
+@model IEnumerable<zentoraHRMS.Models.LeaveApplicationModel>
+@{
+    ViewBag.Title = "Leave Balances";
+}
+
+<div class="container-fluid">
+    <div class="row justify-content-center py-5">
+        <div class="col-xxl-5 col-xl-7 text-center">
+            <a href="@Url.Action("Index","Home")" class="badge badge-default fw-normal shadow px-2 py-1 mb-2 fst-italic fs-xxs">
+                <i data-lucide="square-check" class="fs-sm me-1"></i> DashBoard
+            </a>
+            <h3 class="fw-bold">Leave Consumed Balances</h3>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-xxl-12">
+            <div class="card rounded-2">
+                <div class="card-header justify-content-between">
+                    <h5 class="card-title">Approved Leaves Audit</h5>
+                </div>
+
+                <div class="card-body">
+                    <table id="checkbox-select-data" class="table table-striped dt-responsive checkbox-select-datatable align-middle mb-0">
+                        <thead class="thead-sm text-uppercase fs-xxs">
+                            <tr>
+                                <th class="fs-sm" style="width: 1%;"></th>
+                                <th>Employee</th>
+                                <th>Leave Category</th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                                <th>Days Taken</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var c in Model)
+                            {
+                                var days = (c.EndDate - c.StartDate).Days + 1;
+                                <tr>
+                                    <td class="fs-sm" style="width: 1%;"></td>
+                                    <td>@c.EmployeeName</td>
+                                    <td>@c.LeaveCategoryName</td>
+                                    <td>@c.StartDate.ToString("yyyy-MM-dd")</td>
+                                    <td>@c.EndDate.ToString("yyyy-MM-dd")</td>
+                                    <td class="fw-bold text-success">@days Days</td>
+                                    <td><span class="badge bg-success">Approved</span></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

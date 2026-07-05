@@ -1,0 +1,254 @@
+@model IEnumerable<zentoraHRMS.Models.AttendanceRecordModel>
+@{
+    ViewBag.Title = "Attendance Logs";
+}
+
+<div class="container-fluid">
+    <div class="row justify-content-center py-5">
+        <div class="col-xxl-5 col-xl-7 text-center">
+            <a href="@Url.Action("Index","Home")" class="badge badge-default fw-normal shadow px-2 py-1 mb-2 fst-italic fs-xxs">
+                <i data-lucide="square-check" class="fs-sm me-1"></i> DashBoard
+            </a>
+            <h3 class="fw-bold">Attendance Records</h3>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-xxl-12">
+            <div class="card rounded-2">
+                <div class="card-header justify-content-between">
+                    <h5 class="card-title">Daily Attendance Logs</h5>
+                    <button type="button" class="btn btn-sm btn-soft-primary" data-bs-toggle="modal" data-bs-target="#AddAtt">
+                        <i class="me-1" data-lucide="plus"></i> Add Attendance Log
+                    </button>
+                </div>
+
+                <div class="card-body">
+                    <table id="checkbox-select-data" class="table table-striped dt-responsive checkbox-select-datatable align-middle mb-0">
+                        <thead class="thead-sm text-uppercase fs-xxs">
+                            <tr>
+                                <th class="fs-sm" style="width: 1%;"></th>
+                                <th>Employee</th>
+                                <th>Date</th>
+                                <th>Clock In</th>
+                                <th>Clock Out</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var c in Model)
+                            {
+                                <tr>
+                                    <td class="fs-sm" style="width: 1%;"></td>
+                                    <td>@c.EmployeeName</td>
+                                    <td>@c.AttendanceDate.ToString("yyyy-MM-dd")</td>
+                                    <td>@c.ClockIn.ToString(@"hh\:mm")</td>
+                                    <td>@(c.ClockOut.HasValue ? c.ClockOut.Value.ToString(@"hh\:mm") : "Working")</td>
+                                    <td>
+                                        @if (c.Status == "Present") { <span class="badge bg-success">Present</span> }
+                                        else if (c.Status == "Late") { <span class="badge bg-warning text-dark">Late</span> }
+                                        else { <span class="badge bg-danger">@c.Status</span> }
+                                    </td>
+                                    <td>
+                                        <a onclick="UpdateAtt(@c.AttendanceId)" class="btn btn-sm btn-soft-info mt-1" title="Update"><i data-lucide="square-pen"></i></a>
+                                        <a onclick="DeleteAtt(@c.AttendanceId)" class="btn btn-sm btn-soft-danger mt-1" title="Delete"><i data-lucide="trash-2"></i></a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AddAtt Modal -->
+    <div id="AddAtt" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form id="AttForm" class="needs-validation" novalidate method="post">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Add Attendance Log</h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="EmployeeId" class="form-label">Employee <span class="text-danger">*</span></label>
+                            <select id="EmployeeId" class="form-select" required></select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="AttendanceDate" class="form-label">Date <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" id="AttendanceDate" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="ClockIn" class="form-label">Clock In Time <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="ClockIn" placeholder="hh:mm e.g. 09:00" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="ClockOut" class="form-label">Clock Out Time</label>
+                            <input type="text" class="form-control" id="ClockOut" placeholder="hh:mm e.g. 18:00">
+                        </div>
+                        <div class="mb-3">
+                            <label for="Status" class="form-label">Status <span class="text-danger">*</span></label>
+                            <select id="Status" class="form-select" required>
+                                <option value="Present" selected>Present</option>
+                                <option value="Late">Late</option>
+                                <option value="Absent">Absent</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-soft-primary">Save changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- UpdateAtt Modal -->
+    <div id="UpdateAttModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form id="UpdateAttForm" class="needs-validation" novalidate method="post">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Update Attendance Log</h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="update_id" />
+                        <div class="mb-3">
+                            <label for="uEmployeeId" class="form-label">Employee <span class="text-danger">*</span></label>
+                            <select id="uEmployeeId" class="form-select" required></select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="uAttendanceDate" class="form-label">Date <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" id="uAttendanceDate" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="uClockIn" class="form-label">Clock In Time <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="uClockIn" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="uClockOut" class="form-label">Clock Out Time</label>
+                            <input type="text" class="form-control" id="uClockOut">
+                        </div>
+                        <div class="mb-3">
+                            <label for="uStatus" class="form-label">Status <span class="text-danger">*</span></label>
+                            <select id="uStatus" class="form-select" required>
+                                <option value="Present">Present</option>
+                                <option value="Late">Late</option>
+                                <option value="Absent">Absent</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-soft-primary">Save changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $.ajax({
+            url: '/Staff/GetEmployeeList',
+            type: 'GET',
+            success: function (data) {
+                var s = '<option value="" selected disabled>Select Employee</option>';
+                for (var i = 0; i < data.length; i++) {
+                    s += '<option value="' + data[i].Id + '">' + data[i].FirstName + ' ' + data[i].LastName + '</option>';
+                }
+                $("#EmployeeId").html(s);
+                $("#uEmployeeId").html(s);
+            }
+        });
+
+        $("#AttForm").on("submit", function (e) {
+            e.preventDefault();
+            var formData = {
+                employeeId: $("#EmployeeId").val(),
+                status: $("#Status").val(),
+                clockInStr: $("#ClockIn").val(),
+                clockOutStr: $("#ClockOut").val(),
+                dateStr: $("#AttendanceDate").val()
+            };
+            $.ajax({
+                url: '/Attendance/SaveAttendance',
+                type: "POST",
+                data: formData,
+                success: function (res) {
+                    if (res.success) {
+                        location.reload();
+                    } else {
+                        alert("Error: " + res.message);
+                    }
+                }
+            });
+        });
+
+        $("#UpdateAttForm").on("submit", function (e) {
+            e.preventDefault();
+            var formData = {
+                attendanceId: $("#update_id").val(),
+                employeeId: $("#uEmployeeId").val(),
+                status: $("#uStatus").val(),
+                clockInStr: $("#uClockIn").val(),
+                clockOutStr: $("#uClockOut").val(),
+                dateStr: $("#uAttendanceDate").val()
+            };
+            $.ajax({
+                url: '/Attendance/UpdateAttendance',
+                type: "POST",
+                data: formData,
+                success: function (res) {
+                    if (res.success) {
+                        location.reload();
+                    } else {
+                        alert("Error: " + res.message);
+                    }
+                }
+            });
+        });
+    });
+
+    function UpdateAtt(id) {
+        $.ajax({
+            url: '/Attendance/GetAttendanceById',
+            type: 'GET',
+            data: { id: id },
+            success: function (data) {
+                if (data) {
+                    $("#update_id").val(data.AttendanceId);
+                    $("#uEmployeeId").val(data.EmployeeId);
+                    $("#uAttendanceDate").val(data.AttendanceDate);
+                    $("#uClockIn").val(data.ClockIn);
+                    $("#uClockOut").val(data.ClockOut);
+                    $("#uStatus").val(data.Status);
+                    $("#UpdateAttModal").modal("show");
+                }
+            }
+        });
+    }
+
+    function DeleteAtt(id) {
+        if (confirm("Are you sure you want to delete this log?")) {
+            $.ajax({
+                url: '/Attendance/DeleteAttendance',
+                type: "POST",
+                data: { id: id },
+                success: function (res) {
+                    if (res.success) {
+                        location.reload();
+                    } else {
+                        alert("Error: " + res.message);
+                    }
+                }
+            });
+        }
+    }
+</script>

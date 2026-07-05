@@ -1,0 +1,207 @@
+@model IEnumerable<zentoraHRMS.Models.LeaveCategoryModel>
+@{
+    ViewBag.Title = "Leave Category";
+}
+
+<div class="container-fluid">
+    <div class="row justify-content-center py-5">
+        <div class="col-xxl-5 col-xl-7 text-center">
+            <a href="@Url.Action("Index","Home")" class="badge badge-default fw-normal shadow px-2 py-1 mb-2 fst-italic fs-xxs">
+                <i data-lucide="square-check" class="fs-sm me-1"></i> DashBoard
+            </a>
+            <h3 class="fw-bold">Leave Category</h3>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-xxl-12">
+            <div class="card rounded-2">
+                <div class="card-header justify-content-between">
+                    <h5 class="card-title">Leave Category Details</h5>
+                    <button type="button" class="btn btn-sm btn-soft-primary" data-bs-toggle="modal" data-bs-target="#AddLeaveCategory">
+                        <i class="me-1" data-lucide="plus"></i> Add Leave Category
+                    </button>
+                </div>
+
+                <div class="card-body">
+                    <table id="checkbox-select-data" class="table table-striped dt-responsive checkbox-select-datatable align-middle mb-0">
+                        <thead class="thead-sm text-uppercase fs-xxs">
+                            <tr>
+                                <th class="fs-sm" style="width: 1%;"></th>
+                                <th>Category Name</th>
+                                <th>Total Days</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var c in Model)
+                            {
+                                <tr>
+                                    <td class="fs-sm" style="width: 1%;"></td>
+                                    <td>@c.CategoryName</td>
+                                    <td>@c.TotalDays</td>
+                                    <td>
+                                        @if (c.IsActive)
+                                        {
+                                            <span class="badge badge-label badge-soft-success">Active</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-label badge-soft-secondary">Inactive</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <a onclick="UpdateLeaveCategory(@c.LeaveCategoryId)" class="btn btn-sm btn-soft-info mt-1" title="Update"><i data-lucide="square-pen"></i></a>
+                                        <a onclick="DeleteLeaveCategory(@c.LeaveCategoryId)" class="btn btn-sm btn-soft-danger mt-1" title="Delete"><i data-lucide="trash-2"></i></a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AddLeaveCategory Modal -->
+    <div id="AddLeaveCategory" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form id="LeaveCategoryForm" class="needs-validation" novalidate method="post">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Add Leave Category</h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="CategoryName" class="form-label">Category Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="CategoryName" required>
+                            <div class="invalid-feedback">Please provide a valid Category Name.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="TotalDays" class="form-label">Total Days <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="TotalDays" required>
+                            <div class="invalid-feedback">Please provide a valid number of days.</div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-soft-primary">Save changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- UpdateLeaveCategory Modal -->
+    <div id="UpdateLeaveCategoryModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form id="UpdateLeaveCategoryForm" class="needs-validation" novalidate method="post">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Update Leave Category</h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="update_id" />
+                        <div class="mb-3">
+                            <label for="uCategoryName" class="form-label">Category Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="uCategoryName" required>
+                            <div class="invalid-feedback">Please provide a valid Category Name.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="uTotalDays" class="form-label">Total Days <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="uTotalDays" required>
+                            <div class="invalid-feedback">Please provide a valid number of days.</div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-soft-primary">Save changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#LeaveCategoryForm").on("submit", function (e) {
+            e.preventDefault();
+            var formData = {
+                CategoryName: $("#CategoryName").val(),
+                TotalDays: $("#TotalDays").val()
+            };
+            $.ajax({
+                url: '/CompanyInfo/SaveLeaveCategory',
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(formData),
+                success: function (res) {
+                    if (res.success) {
+                        location.reload();
+                    } else {
+                        alert("Error: " + res.message);
+                    }
+                }
+            });
+        });
+
+        $("#UpdateLeaveCategoryForm").on("submit", function (e) {
+            e.preventDefault();
+            var formData = {
+                LeaveCategoryId: $("#update_id").val(),
+                CategoryName: $("#uCategoryName").val(),
+                TotalDays: $("#uTotalDays").val()
+            };
+            $.ajax({
+                url: '/CompanyInfo/UpdateLeaveCategory',
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(formData),
+                success: function (res) {
+                    if (res.success) {
+                        location.reload();
+                    } else {
+                        alert("Error: " + res.message);
+                    }
+                }
+            });
+        });
+    });
+
+    function UpdateLeaveCategory(id) {
+        $.ajax({
+            url: '/CompanyInfo/GetLeaveCategoryById',
+            type: 'GET',
+            data: { id: id },
+            success: function (data) {
+                if (data) {
+                    $("#update_id").val(data.LeaveCategoryId);
+                    $("#uCategoryName").val(data.CategoryName);
+                    $("#uTotalDays").val(data.TotalDays);
+                    $("#UpdateLeaveCategoryModal").modal("show");
+                }
+            }
+        });
+    }
+
+    function DeleteLeaveCategory(id) {
+        if (confirm("Are you sure you want to delete this leave category?")) {
+            $.ajax({
+                url: '/CompanyInfo/DeleteLeaveCategory',
+                type: "POST",
+                data: { id: id },
+                success: function (res) {
+                    if (res.success) {
+                        location.reload();
+                    } else {
+                        alert("Error: " + res.message);
+                    }
+                }
+            });
+        }
+    }
+</script>

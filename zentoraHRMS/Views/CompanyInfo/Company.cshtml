@@ -1,0 +1,820 @@
+@model IEnumerable<zentoraHRMS.Models.CompanyModel>
+@{
+    ViewBag.Title = "Company";
+}
+
+<div class="container-fluid">
+
+    <div class="row justify-content-center py-5">
+        <div class="col-xxl-5 col-xl-7 text-center">
+            <a href="@Url.Action("Index","Home")" class="badge badge-default fw-normal shadow px-2 py-1 mb-2 fst-italic fs-xxs">
+                <i data-lucide="square-check" class="fs-sm me-1"></i> DashBoard
+            </a>
+            <h3 class="fw-bold">
+                Company
+            </h3>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-xxl-12">
+            <div class="card rounded-1">
+                <div class="card-header justify-content-between">
+                    <h5 class="card-title"> Company Details </h5>
+                    <button type="button" class="btn btn-sm btn-soft-primary rounded-1" data-bs-toggle="modal" data-bs-target="#AddCompany"><i class="me-1" data-lucide="plus"></i> Add Company </button>
+                </div>
+
+                <div class="card-body">
+                    <table id="checkbox-select-data" class="table table-striped dt-responsive checkbox-select-datatable align-middle mb-0">
+                        <thead class="thead-sm text-uppercase fs-xxs">
+                            <tr>
+                                <th class="fs-sm" style="width: 1%;"></th>
+                                <th>Company Name</th>
+                                <th>Company Code</th>
+                                <th>Company Type</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Industry Type</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var c in Model)
+                            {
+                                <tr>
+                                    <td class="fs-sm" style="width: 1%;"></td>
+                                    <td>@c.CompanyName</td>
+                                    <td>@c.CompanyCode</td>
+                                    <td>@c.CompanyType</td>
+                                    <td>@c.PrimaryEmail</td>
+                                    <td>@c.PrimaryPhone</td>
+                                    <td>@c.IndustryType</td>
+                                    <td><span class="badge badge-label badge-soft-success">Active</span></td>
+                                    <td>
+                                        <a onclick="UpdateCompany(@c.CompanyId)" data-bs-toggle="modal" data-bs-target="#UpdateCompany" class="btn btn-sm btn-soft-info" title="Update"><i data-lucide="square-pen"></i></a>
+                                        <a onclick="DeleteCompany(@c.CompanyId)" class="btn btn-sm btn-soft-danger" title="Delete"><i data-lucide="trash-2"></i></a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AddCompany Start -->
+    <div id="AddCompany" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="AddCompany" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <form id="companyForm" class="needs-validation" novalidate method="post">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="fullWidthModalLabel">Add Company Details</h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Button-style Tabs -->
+                        <ul class="nav nav-pills mb-3 justify-content-center" id="companyTab" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="btn btn-sm btn-soft-secondary me-1 mb-1 rounded-1 active" id="general-tab" data-bs-toggle="tab" data-bs-target="#general" type="button" role="tab"> General Info </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="btn btn-sm btn-soft-secondary me-1 mb-1 rounded-1" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact" type="button" role="tab"> Contact Info </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="btn btn-sm btn-soft-secondary me-1 mb-1 rounded-1" id="hr-tab" data-bs-toggle="tab" data-bs-target="#hr" type="button" role="tab"> HR Info </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="btn btn-sm btn-soft-secondary me-1 mb-1 rounded-1" id="finance-tab" data-bs-toggle="tab" data-bs-target="#finance" type="button" role="tab"> Finance Info </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="btn btn-sm btn-soft-secondary me-1 mb-1 rounded-1" id="branding-tab" data-bs-toggle="tab" data-bs-target="#branding" type="button" role="tab"> Branding & Media </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="btn btn-sm btn-soft-secondary me-1 mb-1 rounded-1" id="other-tab" data-bs-toggle="tab" data-bs-target="#other" type="button" role="tab"> Other Info </button>
+                            </li>
+                        </ul>
+                        <div class="tab-content mt-3" id="companyTabContent">
+                            <!-- General Info -->
+                            <div class="tab-pane fade show active" id="general" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-md-4 mt-3">
+                                        <label for="cn" class="form-label">Company Name <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="cn" required>
+                                        <div class="invalid-feedback">Please provide a valid Company Name.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="cc" class="form-label">Company Code <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="cc" required>
+                                        <div class="invalid-feedback">Please provide a valid Company Code.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="rn" class="form-label">Registration Number <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="rn" required>
+                                        <div class="invalid-feedback">Please provide a valid Registration Number.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="ct" class="form-label">Company Type <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="ct" required>
+                                        <div class="invalid-feedback">Please provide a valid Company Type.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="it" class="form-label">Industry Type <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="it" required>
+                                        <div class="invalid-feedback">Please provide a valid Industry Type.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="ti" class="form-label">Tax Id <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="ti" required>
+                                        <div class="invalid-feedback">Please provide a valid Tax Id.</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Contact Info -->
+                            <div class="tab-pane fade" id="contact" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-md-4 mt-3">
+                                        <label for="pe" class="form-label">Primary Email <span class="text-danger">*</span></label>
+                                        <input type="email" class="form-control" id="pe" required>
+                                        <div class="invalid-feedback">Please provide a valid Primary Email.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="pp" class="form-label">Primary Phone <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="pp" required>
+                                        <div class="invalid-feedback">Please provide a valid Primary Phone.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="sp" class="form-label">Secondary Phone <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="sp" required>
+                                        <div class="invalid-feedback">Please provide a valid Secondary Phone.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="al1" class="form-label">Address Line1 <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="al1" required>
+                                        <div class="invalid-feedback">Please provide a valid Address Line1.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="al2" class="form-label">Address Line2 <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="al2" required>
+                                        <div class="invalid-feedback">Please provide a valid Address Line2.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="cy" class="form-label">City <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="cy" required>
+                                        <div class="invalid-feedback">Please provide a valid City.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="st" class="form-label">State <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="st" required>
+                                        <div class="invalid-feedback">Please provide a valid State.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="cty" class="form-label">Country <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="cty" required>
+                                        <div class="invalid-feedback">Please provide a valid Country.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="zc" class="form-label">Zip Code <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="zc" required>
+                                        <div class="invalid-feedback">Please provide a valid Zip Code.</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- HR Info -->
+                            <div class="tab-pane fade" id="hr" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-md-4 mt-3">
+                                        <label for="wdpw" class="form-label">Working Days Per Week <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="wdpw" required>
+                                        <div class="invalid-feedback">Please provide a valid Working Days Per Week.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="phrcn" class="form-label">Primary HR Contact Name <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="phrcn" required>
+                                        <div class="invalid-feedback">Please provide a valid Primary HR Contact Name.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="phrce" class="form-label">Primary HR Contact Email <span class="text-danger">*</span></label>
+                                        <input type="email" class="form-control" id="phrce" required>
+                                        <div class="invalid-feedback">Please provide a valid Primary HR Contact Email.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="phrcp" class="form-label">Primary HR Contact Phone <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="phrcp" required>
+                                        <div class="invalid-feedback">Please provide a valid Primary HR Contact Phone.</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Finance Info -->
+                            <div class="tab-pane fade" id="finance" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-md-4 mt-3">
+                                        <label for="dc" class="form-label">Default Currency <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="dc" required>
+                                        <div class="invalid-feedback">Please provide a valid Default Currency.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="dtz" class="form-label">Default TimeZone <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="dtz" required>
+                                        <div class="invalid-feedback">Please provide a valid Default TimeZone.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="fys" class="form-label">Financial Year Start <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="fys" required>
+                                        <div class="invalid-feedback">Please provide a valid Financial Year Start.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="fye" class="form-label">Financial Year End <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="fye" required>
+                                        <div class="invalid-feedback">Please provide a valid Financial Year End.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="pc" class="form-label">Payroll Cycle <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="pc" required>
+                                        <div class="invalid-feedback">Please provide a valid Payroll Cycle.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="dlp" class="form-label">Default Leave Policy <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="dlp" required>
+                                        <div class="invalid-feedback">Please provide a valid Default Leave Policy.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="shift" class="form-label">Shift Timings <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="shift" required>
+                                        <div class="invalid-feedback">Please provide valid Shift Timings.</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Branding & Media -->
+                            <div class="tab-pane fade" id="branding" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-md-4 mt-3">
+                                        <label for="lu" class="form-label">Logo Url <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="lu" required>
+                                        <div class="invalid-feedback">Please provide a valid Logo Url.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="tl" class="form-label">TagLine <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="tl" required>
+                                        <div class="invalid-feedback">Please provide a valid TagLine.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="bc" class="form-label">Branding Color <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="bc" required>
+                                        <div class="invalid-feedback">Please provide a valid Branding Color.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="ws" class="form-label">Website <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="ws" required>
+                                        <div class="invalid-feedback">Please provide a valid Website.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="ln" class="form-label">LinkedIn Url <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="ln" required>
+                                        <div class="invalid-feedback">Please provide a valid LinkedIn Url.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="tw" class="form-label">Twitter Url <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="tw" required>
+                                        <div class="invalid-feedback">Please provide a valid Twitter Url.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="fb" class="form-label">Facebook Url <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="fb" required>
+                                        <div class="invalid-feedback">Please provide a valid Facebook Url.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="ig" class="form-label">Instagram Url <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="ig" required>
+                                        <div class="invalid-feedback">Please provide a valid Instagram Url.</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Other Info -->
+                            <div class="tab-pane fade" id="other" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-md-4 mt-3">
+                                        <label for="pci" class="form-label">Parent CompanyId <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="pci" required>
+                                        <div class="invalid-feedback">Please provide a valid Parent CompanyId.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="noe" class="form-label">Number of Employees <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="noe" required>
+                                        <div class="invalid-feedback">Please provide a valid Number of Employees.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="cert" class="form-label">Certifications <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="cert" required>
+                                        <div class="invalid-feedback">Please provide valid Certifications.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="id" class="form-label">Insurance Details <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="id" required>
+                                        <div class="invalid-feedback">Please provide valid Insurance Details.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="note" class="form-label">Note <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="note" required>
+                                        <div class="invalid-feedback">Please provide a valid Note.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-soft-primary">Save changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- AddCompany End -->
+    
+    <!-- UpdateCompany Start -->
+    <div id="UpdateCompany" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="UpdateCompany" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <form id="UpdatecompanyForm" class="needs-validation" novalidate method="post">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="UpdateCompany">Update Company Details</h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Button-style Tabs -->
+                        <ul class="nav nav-pills mb-3 justify-content-center" id="UpdatecompanyTab" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="btn btn-sm btn-soft-secondary me-1 mb-1 rounded-1 active" id="Update-general-tab" data-bs-toggle="tab" data-bs-target="#Update-general" type="button" role="tab"> General Info </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="btn btn-sm btn-soft-secondary me-1 mb-1 rounded-1" id="Update-contact-tab" data-bs-toggle="tab" data-bs-target="#Update-contact" type="button" role="tab"> Contact Info </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="btn btn-sm btn-soft-secondary me-1 mb-1 rounded-1" id="Update-hr-tab" data-bs-toggle="tab" data-bs-target="#Update-hr" type="button" role="tab"> HR Info </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="btn btn-sm btn-soft-secondary me-1 mb-1 rounded-1" id="Update-finance-tab" data-bs-toggle="tab" data-bs-target="#Update-finance" type="button" role="tab"> Finance Info </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="btn btn-sm btn-soft-secondary me-1 mb-1 rounded-1" id="Update-branding-tab" data-bs-toggle="tab" data-bs-target="#Update-branding" type="button" role="tab"> Branding & Media </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="btn btn-sm btn-soft-secondary me-1 mb-1 rounded-1" id="Update-other-tab" data-bs-toggle="tab" data-bs-target="#Update-other" type="button" role="tab"> Other Info </button>
+                            </li>
+                        </ul>
+                        <div class="tab-content mt-3" id="companyTabContent">
+                            <!-- General Info -->
+                            <div class="tab-pane fade show active" id="Update-general" role="tabpanel">
+                                <div class="row">
+                                    <input type="hidden" id="companyId" name="CompanyId" />
+                                    <div class="col-md-4 mt-3">
+                                        <label for="cn" class="form-label">Company Name <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="ucn" required>
+                                        <div class="invalid-feedback">Please provide a valid Company Name.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="cc" class="form-label">Company Code <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="ucc" required>
+                                        <div class="invalid-feedback">Please provide a valid Company Code.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="rn" class="form-label">Registration Number <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="urn" required>
+                                        <div class="invalid-feedback">Please provide a valid Registration Number.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="ct" class="form-label">Company Type <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="uct" required>
+                                        <div class="invalid-feedback">Please provide a valid Company Type.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="it" class="form-label">Industry Type <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="uit" required>
+                                        <div class="invalid-feedback">Please provide a valid Industry Type.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="ti" class="form-label">Tax Id <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="uti" required>
+                                        <div class="invalid-feedback">Please provide a valid Tax Id.</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Contact Info -->
+                            <div class="tab-pane fade" id="Update-contact" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-md-4 mt-3">
+                                        <label for="pe" class="form-label">Primary Email <span class="text-danger">*</span></label>
+                                        <input type="email" class="form-control" id="upe" required>
+                                        <div class="invalid-feedback">Please provide a valid Primary Email.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="pp" class="form-label">Primary Phone <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="upp" required>
+                                        <div class="invalid-feedback">Please provide a valid Primary Phone.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="sp" class="form-label">Secondary Phone <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="usp" required>
+                                        <div class="invalid-feedback">Please provide a valid Secondary Phone.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="al1" class="form-label">Address Line1 <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="ual1" required>
+                                        <div class="invalid-feedback">Please provide a valid Address Line1.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="al2" class="form-label">Address Line2 <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="ual2" required>
+                                        <div class="invalid-feedback">Please provide a valid Address Line2.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="cy" class="form-label">City <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="ucy" required>
+                                        <div class="invalid-feedback">Please provide a valid City.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="st" class="form-label">State <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="ustate" required>
+                                        <div class="invalid-feedback">Please provide a valid State.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="cty" class="form-label">Country <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="ucty" required>
+                                        <div class="invalid-feedback">Please provide a valid Country.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="zc" class="form-label">Zip Code <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="uzc" required>
+                                        <div class="invalid-feedback">Please provide a valid Zip Code.</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- HR Info -->
+                            <div class="tab-pane fade" id="Update-hr" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-md-4 mt-3">
+                                        <label for="wdpw" class="form-label">Working Days Per Week <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="uwdpw" required>
+                                        <div class="invalid-feedback">Please provide a valid Working Days Per Week.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="phrcn" class="form-label">Primary HR Contact Name <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="uphrcn" required>
+                                        <div class="invalid-feedback">Please provide a valid Primary HR Contact Name.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="phrce" class="form-label">Primary HR Contact Email <span class="text-danger">*</span></label>
+                                        <input type="email" class="form-control" id="uphrce" required>
+                                        <div class="invalid-feedback">Please provide a valid Primary HR Contact Email.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="phrcp" class="form-label">Primary HR Contact Phone <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="uphrcp" required>
+                                        <div class="invalid-feedback">Please provide a valid Primary HR Contact Phone.</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Finance Info -->
+                            <div class="tab-pane fade" id="Update-finance" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-md-4 mt-3">
+                                        <label for="dc" class="form-label">Default Currency <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="udc" required>
+                                        <div class="invalid-feedback">Please provide a valid Default Currency.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="dtz" class="form-label">Default TimeZone <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="udtz" required>
+                                        <div class="invalid-feedback">Please provide a valid Default TimeZone.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="fys" class="form-label">Financial Year Start <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="ufys" required>
+                                        <div class="invalid-feedback">Please provide a valid Financial Year Start.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="fye" class="form-label">Financial Year End <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="ufye" required>
+                                        <div class="invalid-feedback">Please provide a valid Financial Year End.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="pc" class="form-label">Payroll Cycle <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="upc" required>
+                                        <div class="invalid-feedback">Please provide a valid Payroll Cycle.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="dlp" class="form-label">Default Leave Policy <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="udlp" required>
+                                        <div class="invalid-feedback">Please provide a valid Default Leave Policy.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="shift" class="form-label">Shift Timings <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="ushift" required>
+                                        <div class="invalid-feedback">Please provide valid Shift Timings.</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Branding & Media -->
+                            <div class="tab-pane fade" id="Update-branding" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-md-4 mt-3">
+                                        <label for="lu" class="form-label">Logo Url <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="ulu" required>
+                                        <div class="invalid-feedback">Please provide a valid Logo Url.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="tl" class="form-label">TagLine <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="utl" required>
+                                        <div class="invalid-feedback">Please provide a valid TagLine.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="bc" class="form-label">Branding Color <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="ubc" required>
+                                        <div class="invalid-feedback">Please provide a valid Branding Color.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="ws" class="form-label">Website <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="uws" required>
+                                        <div class="invalid-feedback">Please provide a valid Website.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="ln" class="form-label">LinkedIn Url <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="uln" required>
+                                        <div class="invalid-feedback">Please provide a valid LinkedIn Url.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="tw" class="form-label">Twitter Url <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="utw" required>
+                                        <div class="invalid-feedback">Please provide a valid Twitter Url.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="fb" class="form-label">Facebook Url <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="ufb" required>
+                                        <div class="invalid-feedback">Please provide a valid Facebook Url.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="ig" class="form-label">Instagram Url <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="uig" required>
+                                        <div class="invalid-feedback">Please provide a valid Instagram Url.</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Other Info -->
+                            <div class="tab-pane fade" id="Update-other" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-md-4 mt-3">
+                                        <label for="pci" class="form-label">Parent CompanyId <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="upci" required>
+                                        <div class="invalid-feedback">Please provide a valid Parent CompanyId.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="noe" class="form-label">Number of Employees <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="unoe" required>
+                                        <div class="invalid-feedback">Please provide a valid Number of Employees.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="cert" class="form-label">Certifications <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="ucert" required>
+                                        <div class="invalid-feedback">Please provide valid Certifications.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="id" class="form-label">Insurance Details <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="uid" required>
+                                        <div class="invalid-feedback">Please provide valid Insurance Details.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="note" class="form-label">Note <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="unote" required>
+                                        <div class="invalid-feedback">Please provide a valid Note.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-soft-primary">Save changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- UpdateCompany End -->
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#companyForm").on("submit", function (e) {
+            e.preventDefault();
+
+            var form = this;
+
+            if (!form.checkValidity()) {
+                e.stopPropagation();
+                $(form).addClass("was-validated");
+                return;
+            }
+
+            var formData = {
+                CompanyName: $("#cn").val(),
+                CompanyCode: $("#cc").val(),
+                RegistrationNumber: $("#rn").val(),
+                CompanyType: $("#ct").val(),
+                IndustryType: $("#it").val(),
+                TaxId: $("#ti").val(),
+                PrimaryEmail: $("#pe").val(),
+                PrimaryPhone: $("#pp").val(),
+                SecondaryPhone: $("#sp").val(),
+                AddressLine1: $("#al1").val(),
+                AddressLine2: $("#al2").val(),
+                City: $("#cy").val(),
+                State: $("#st").val(),
+                Country: $("#cty").val(),
+                ZipCode: $("#zc").val(),
+                WorkingDaysPerWeek: $("#wdpw").val(),
+                PrimaryHRName: $("#phrcn").val(),
+                PrimaryHREmail: $("#phrce").val(),
+                PrimaryHRPhone: $("#phrcp").val(),
+                DefaultCurrency: $("#dc").val(),
+                DefaultTimeZone: $("#dtz").val(),
+                FinancialYearStart: $("#fys").val(),
+                FinancialYearEnd: $("#fye").val(),
+                PayrollCycle: $("#pc").val(),
+                DefaultLeavePolicy: $("#dlp").val(),
+                ShiftTimings: $("#shift").val(),
+                LogoUrl: $("#lu").val(),
+                TagLine: $("#tl").val(),
+                BrandingColor: $("#bc").val(),
+                Website: $("#ws").val(),
+                LinkedInUrl: $("#ln").val(),
+                TwitterUrl: $("#tw").val(),
+                FacebookUrl: $("#fb").val(),
+                InstagramUrl: $("#ig").val(),
+                ParentCompanyId: $("#pci").val(),
+                NumberOfEmployees: $("#noe").val(),
+                Certifications: $("#cert").val(),
+                InsuranceDetails: $("#id").val(),
+                Note: $("#note").val()
+            };
+
+            $.ajax({
+                url: '@Url.Action("SaveCompany", "CompanyInfo")',
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(formData),
+                success: function () {
+                    location.reload();
+                },
+                error: function () {
+                    alert("Error saving company details.");
+                }
+            });
+        });
+
+        $("#UpdatecompanyForm").on("submit", function (e) {
+            e.preventDefault();
+
+            var form = this;
+            if (!form.checkValidity()) {
+                e.stopPropagation();
+                $(form).addClass("was-validated");
+                return;
+            }
+
+            var formData = {
+                CompanyId: $("#companyId").val(),
+                CompanyName: $("#ucn").val(),
+                CompanyCode: $("#ucc").val(),
+                RegistrationNumber: $("#urn").val(),
+                CompanyType: $("#uct").val(),
+                IndustryType: $("#uit").val(),
+                TaxId: $("#uti").val(),
+                PrimaryEmail: $("#upe").val(),
+                PrimaryPhone: $("#upp").val(),
+                SecondaryPhone: $("#usp").val(),
+                AddressLine1: $("#ual1").val(),
+                AddressLine2: $("#ual2").val(),
+                City: $("#ucy").val(),
+                State: $("#ustate").val(),
+                Country: $("#ucty").val(),
+                ZipCode: $("#uzc").val(),
+                WorkingDaysPerWeek: $("#uwdpw").val(),
+                PrimaryHRName: $("#uphrcn").val(),
+                PrimaryHREmail: $("#uphrce").val(),
+                PrimaryHRPhone: $("#uphrcp").val(),
+                DefaultCurrency: $("#udc").val(),
+                DefaultTimeZone: $("#udtz").val(),
+                FinancialYearStart: $("#ufys").val(),
+                FinancialYearEnd: $("#ufye").val(),
+                PayrollCycle: $("#upc").val(),
+                DefaultLeavePolicy: $("#udlp").val(),
+                ShiftTimings: $("#ushift").val(),
+                LogoUrl: $("#ulu").val(),
+                TagLine: $("#utl").val(),
+                BrandingColor: $("#ubc").val(),
+                Website: $("#uws").val(),
+                LinkedInUrl: $("#uln").val(),
+                TwitterUrl: $("#utw").val(),
+                FacebookUrl: $("#ufb").val(),
+                InstagramUrl: $("#uig").val(),
+                ParentCompanyId: $("#upci").val(),
+                NumberOfEmployees: $("#unoe").val(),
+                Certifications: $("#ucert").val(),
+                InsuranceDetails: $("#uid").val(),
+                Note: $("#unote").val()
+            };
+            console.log(formData);
+            $.ajax({
+                url: '@Url.Action("UpdateCompany", "CompanyInfo")',
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(formData),
+                success: function () {
+                    location.reload();
+                },
+                error: function () {
+                    alert("Error updating company details.");
+                }
+            });
+        });
+    });
+
+    function UpdateCompany(id) {
+        $.ajax({
+            url: '@Url.Action("GetCompanyById", "CompanyInfo")',
+            type: "GET",
+            data: { id: id },
+            success: function (data) {
+                if (data) {
+                    // Fill modal fields
+                    $("#companyId").val(data.CompanyId);
+                    $("#ucn").val(data.CompanyName);
+                    $("#ucc").val(data.CompanyCode);
+                    $("#urn").val(data.RegistrationNumber);
+                    $("#uct").val(data.CompanyType);
+                    $("#uit").val(data.IndustryType);
+                    $("#uti").val(data.TaxId);
+                    $("#upe").val(data.PrimaryEmail);
+                    $("#upp").val(data.PrimaryPhone);
+                    $("#usp").val(data.SecondaryPhone);
+                    $("#ual1").val(data.AddressLine1);
+                    $("#ual2").val(data.AddressLine2);
+                    $("#ucy").val(data.City);
+                    $("#ustate").val(data.State);
+                    $("#ucty").val(data.Country);
+                    $("#uzc").val(data.ZipCode);
+                    $("#uwdpw").val(data.WorkingDaysPerWeek);
+                    $("#uphrcn").val(data.PrimaryHRName);
+                    $("#uphrce").val(data.PrimaryHREmail);
+                    $("#uphrcp").val(data.PrimaryHRPhone);
+                    $("#udc").val(data.DefaultCurrency);
+                    $("#udtz").val(data.DefaultTimeZone);
+                    $("#ufys").val(data.FinancialYearStart);
+                    $("#ufye").val(data.FinancialYearEnd);
+                    $("#upc").val(data.PayrollCycle);
+                    $("#udlp").val(data.DefaultLeavePolicy);
+                    $("#ushift").val(data.ShiftTimings);
+                    $("#ulu").val(data.LogoUrl);
+                    $("#utl").val(data.TagLine);
+                    $("#ubc").val(data.BrandingColor);
+                    $("#uws").val(data.Website);
+                    $("#uln").val(data.LinkedInUrl);
+                    $("#utw").val(data.TwitterUrl);
+                    $("#ufb").val(data.FacebookUrl);
+                    $("#uig").val(data.InstagramUrl);
+                    $("#upci").val(data.ParentCompanyId);
+                    $("#unoe").val(data.NumberOfEmployees);
+                    $("#ucert").val(data.Certifications);
+                    $("#uid").val(data.InsuranceDetails);
+                    $("#unote").val(data.Note);
+
+                    // Show modal
+                    $("#UpdateCompany").modal("show");
+                }
+            },
+            error: function () {
+                alert("Error fetching company details.");
+            }
+        });
+    }
+
+    function DeleteCompany(id) {
+        $.ajax({
+            url: '@Url.Action("DeleteCompany", "CompanyInfo")',
+            type: "POST",
+            data: { companyId: id },
+            success: function (response) {
+                if (response.success) {
+                    location.reload();
+                } else {
+                    alert.error("Error: " + response.message);
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error("AJAX Error:", xhr.responseText);
+                alert.error("AJAX Error: " + error);
+            }
+        });
+    }
+
+</script>

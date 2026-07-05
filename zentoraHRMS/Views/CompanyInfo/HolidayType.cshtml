@@ -1,0 +1,192 @@
+@model IEnumerable<zentoraHRMS.Models.HolidayTypeModel>
+@{
+    ViewBag.Title = "Holiday Type";
+}
+
+<div class="container-fluid">
+    <div class="row justify-content-center py-5">
+        <div class="col-xxl-5 col-xl-7 text-center">
+            <a href="@Url.Action("Index","Home")" class="badge badge-default fw-normal shadow px-2 py-1 mb-2 fst-italic fs-xxs">
+                <i data-lucide="square-check" class="fs-sm me-1"></i> DashBoard
+            </a>
+            <h3 class="fw-bold">Holiday Type</h3>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-xxl-12">
+            <div class="card rounded-2">
+                <div class="card-header justify-content-between">
+                    <h5 class="card-title">Holiday Type Details</h5>
+                    <button type="button" class="btn btn-sm btn-soft-primary" data-bs-toggle="modal" data-bs-target="#AddHolidayType">
+                        <i class="me-1" data-lucide="plus"></i> Add Holiday Type
+                    </button>
+                </div>
+
+                <div class="card-body">
+                    <table id="checkbox-select-data" class="table table-striped dt-responsive checkbox-select-datatable align-middle mb-0">
+                        <thead class="thead-sm text-uppercase fs-xxs">
+                            <tr>
+                                <th class="fs-sm" style="width: 1%;"></th>
+                                <th>Type Name</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var c in Model)
+                            {
+                                <tr>
+                                    <td class="fs-sm" style="width: 1%;"></td>
+                                    <td>@c.TypeName</td>
+                                    <td>
+                                        @if (c.IsActive)
+                                        {
+                                            <span class="badge badge-label badge-soft-success">Active</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-label badge-soft-secondary">Inactive</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <a onclick="UpdateHolidayType(@c.HolidayTypeId)" class="btn btn-sm btn-soft-info mt-1" title="Update"><i data-lucide="square-pen"></i></a>
+                                        <a onclick="DeleteHolidayType(@c.HolidayTypeId)" class="btn btn-sm btn-soft-danger mt-1" title="Delete"><i data-lucide="trash-2"></i></a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AddHolidayType Modal -->
+    <div id="AddHolidayType" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form id="HolidayTypeForm" class="needs-validation" novalidate method="post">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Add Holiday Type</h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="TypeName" class="form-label">Type Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="TypeName" required>
+                            <div class="invalid-feedback">Please provide a valid Type Name.</div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-soft-primary">Save changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- UpdateHolidayType Modal -->
+    <div id="UpdateHolidayTypeModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form id="UpdateHolidayTypeForm" class="needs-validation" novalidate method="post">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Update Holiday Type</h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="update_id" />
+                        <div class="mb-3">
+                            <label for="uTypeName" class="form-label">Type Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="uTypeName" required>
+                            <div class="invalid-feedback">Please provide a valid Type Name.</div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-soft-primary">Save changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#HolidayTypeForm").on("submit", function (e) {
+            e.preventDefault();
+            var formData = {
+                TypeName: $("#TypeName").val()
+            };
+            $.ajax({
+                url: '/CompanyInfo/SaveHolidayType',
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(formData),
+                success: function (res) {
+                    if (res.success) {
+                        location.reload();
+                    } else {
+                        alert("Error: " + res.message);
+                    }
+                }
+            });
+        });
+
+        $("#UpdateHolidayTypeForm").on("submit", function (e) {
+            e.preventDefault();
+            var formData = {
+                HolidayTypeId: $("#update_id").val(),
+                TypeName: $("#uTypeName").val()
+            };
+            $.ajax({
+                url: '/CompanyInfo/UpdateHolidayType',
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(formData),
+                success: function (res) {
+                    if (res.success) {
+                        location.reload();
+                    } else {
+                        alert("Error: " + res.message);
+                    }
+                }
+            });
+        });
+    });
+
+    function UpdateHolidayType(id) {
+        $.ajax({
+            url: '/CompanyInfo/GetHolidayTypeById',
+            type: 'GET',
+            data: { id: id },
+            success: function (data) {
+                if (data) {
+                    $("#update_id").val(data.HolidayTypeId);
+                    $("#uTypeName").val(data.TypeName);
+                    $("#UpdateHolidayTypeModal").modal("show");
+                }
+            }
+        });
+    }
+
+    function DeleteHolidayType(id) {
+        if (confirm("Are you sure you want to delete this holiday type?")) {
+            $.ajax({
+                url: '/CompanyInfo/DeleteHolidayType',
+                type: "POST",
+                data: { id: id },
+                success: function (res) {
+                    if (res.success) {
+                        location.reload();
+                    } else {
+                        alert("Error: " + res.message);
+                    }
+                }
+            });
+        }
+    }
+</script>

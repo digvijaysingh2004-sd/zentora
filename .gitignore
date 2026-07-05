@@ -1,0 +1,72 @@
+## Ignore Visual Studio Temporary Files and Build Outputs
+# User-specific files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# User-specific files (MonoDevelop/Xamarin Studio)
+*.userprefs
+
+# Mono auto generated files
+mono_crash.*
+
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Re]leases/
+x64/
+x86/
+[Aa]rm/
+[Aa]rm64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Log]s/
+[Tt]est[Rr]esults/
+
+# Visual Studio 2015/2017/2019/2022 cache directory
+.vs/
+zentoraHRMS/.vs/
+
+# MSTest test Results
+[Tt]est[Rr]esult*/
+[Bb]uild[Cc]onfig.temp
+
+# SQL Server local database files (so you don't commit your local db files)
+*.mdf
+*.ldf
+*.ndf
+
+# Packages directory (NuGet)
+**/packages/*
+# Enable restoring of packages/repositories.config
+!**/packages/repositories.config
+
+# NuGet package restore write lock files
+project.lock.json
+project.assets.json
+
+# Backup and restore files created by templates
+_Chutzpah*
+
+# Log files
+*.log
+log.txt
+
+# Local / Secret Configuration Files (CRITICAL for public repo safety)
+# Any configuration file containing local paths, secrets, API keys, or connection strings
+*.local.config
+*.secrets.config
+secrets.config
+appSettings.config
+connectionStrings.config
+*.publishsettings
+
+# OS-specific files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store

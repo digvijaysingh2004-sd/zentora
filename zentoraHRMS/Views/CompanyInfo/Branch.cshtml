@@ -1,0 +1,469 @@
+﻿@model IEnumerable<zentoraHRMS.Models.BranchModel>
+@{
+    ViewBag.Title = "Branch";
+}
+
+<div class="container-fluid">
+
+
+    <div class="row justify-content-center py-5">
+        <div class="col-xxl-5 col-xl-7 text-center">
+            <a href="@Url.Action("Index","Home")" class="badge badge-default fw-normal shadow px-2 py-1 mb-2 fst-italic fs-xxs">
+                <i data-lucide="square-check" class="fs-sm me-1"></i> DashBoard
+            </a>
+            <h3 class="fw-bold">
+                Branch
+            </h3>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-xxl-12">
+            <div class="card rounded-2">
+                <div class="card-header justify-content-between">
+                    <h5 class="card-title"> Branch Details </h5>
+                    <button type="button" class="btn btn-sm btn-soft-primary" data-bs-toggle="modal" data-bs-target="#AddBranch"><i class="me-1" data-lucide="plus"></i> Add Branch </button>
+                </div>
+
+                <div class="card-body">
+                    <table id="checkbox-select-data" class="table table-striped dt-responsive checkbox-select-datatable align-middle mb-0">
+                        <thead class="thead-sm text-uppercase fs-xxs">
+                            <tr>
+                                <th class="fs-sm" style="width: 1%;"></th>
+                                <th>Company</th>
+                                <th>Branch Name</th>
+                                <th>Branch Code</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var b in Model)
+                            {
+                                <tr>
+                                    <td class="fs-sm" style="width: 1%;"></td>
+                                    <td>@b.CompanyName</td>
+                                    <td>@b.BranchName</td>
+                                    <td>@b.BranchCode</td>
+                                    <td>@b.Email</td>
+                                    <td>@b.Phone</td>
+                                    <td><span class="badge badge-label badge-soft-success">Active</span></td>
+                                    <td>
+                                        <a onclick="UpdateBranch(@b.BranchId)" data-bs-toggle="modal" data-bs-target="#UpdateBranch" class="btn btn-sm btn-soft-info" title="Update"><i data-lucide="square-pen"></i></a>
+                                        <a onclick="DeleteBranch(@b.BranchId)" class="btn btn-sm btn-soft-danger" title="Delete"><i data-lucide="trash-2"></i></a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- AddBranch Start -->
+    <div id="AddBranch" class="modal fade" tabindex="-1" role="dialog"
+         aria-labelledby="fullWidthModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <form id="BranchForm" class="needs-validation" novalidate method="post">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="fullWidthModalLabel"> Add Branch Details </h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Button-style Tabs -->
+                        <ul class="nav nav-pills mb-3 justify-content-center" id="branchTab" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="btn btn-sm btn-soft-secondary me-1 mb-1 rounded-1 active" id="branch-tab" data-bs-toggle="tab" data-bs-target="#branch" type="button" role="tab"> Branch Info </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="btn btn-sm btn-soft-secondary me-1 mb-1 rounded-1" id="address-tab" data-bs-toggle="tab" data-bs-target="#address" type="button" role="tab"> Address Info </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="btn btn-sm btn-soft-secondary me-1 mb-1 rounded-1" id="optional-tab" data-bs-toggle="tab" data-bs-target="#optional" type="button" role="tab"> Optional </button>
+                            </li>
+                        </ul>
+                        <div class="tab-content mt-3" id="branchTabContent">
+                            <!-- Branch Info -->
+                            <div class="tab-pane fade show active" id="branch" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-md-4 mt-3">
+                                        <label for="company" class="form-label"> Company <span class="text-danger">*</span></label>
+                                        <select id="company" data-choices class="form-select"></select>
+                                        <div class="invalid-feedback">Please select a Company.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="branch_name" class="form-label">Branch Name <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="branch_name" required>
+                                        <div class="invalid-feedback">Please provide a valid Branch Name.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="branch_code" class="form-label">Branch Code <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="branch_code" required>
+                                        <div class="invalid-feedback">Please provide a valid Branch Code.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="email" class="form-label"> Email <span class="text-danger">*</span></label>
+                                        <input type="email" class="form-control" id="email" required>
+                                        <div class="invalid-feedback">Please provide a valid Email.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="phone" class="form-label"> Phone <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="phone" required>
+                                        <div class="invalid-feedback">Please provide a valid Phone.</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Address Info -->
+                            <div class="tab-pane fade" id="address" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-md-4 mt-3">
+                                        <label for="address_line1" class="form-label">Address Line1 <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="address_line1" required>
+                                        <div class="invalid-feedback">Please provide a valid Address Line1.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="address_line2" class="form-label">Address Line2 <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="address_line2" required>
+                                        <div class="invalid-feedback">Please provide a valid Address Line2.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="city" class="form-label">City <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="city" required>
+                                        <div class="invalid-feedback">Please provide a valid City.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="state" class="form-label">State <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="state" required>
+                                        <div class="invalid-feedback">Please provide a valid State.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="country" class="form-label">Country <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="country" required>
+                                        <div class="invalid-feedback">Please provide a valid Country.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="zip_code" class="form-label">Zip Code <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="zip_code" required>
+                                        <div class="invalid-feedback">Please provide a valid Zip Code.</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Optional Info -->
+                            <div class="tab-pane fade" id="optional" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-md-4 mt-3">
+                                        <label for="fax_number" class="form-label">Fax Number <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="fax_number" required>
+                                        <div class="invalid-feedback">Please provide a valid Fax Number.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="website" class="form-label">Website <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="website" required>
+                                        <div class="invalid-feedback">Please provide a valid Website.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="reset" class="btn btn-soft-warning"> Reset </button>
+                        <button type="submit" class="btn btn-soft-primary"> Save changes </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- AddBranch End -->
+
+    <!-- UpdateBranch Start -->
+    <div id="UpdateBranch" class="modal fade" tabindex="-1" role="dialog"
+         aria-labelledby="fullWidthModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <form id="UpdateBranchForm" class="needs-validation" novalidate method="post">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="fullWidthModalLabel"> Update Branch Details </h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Button-style Tabs -->
+                        <ul class="nav nav-pills mb-3 justify-content-center" id="branchTab" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="btn btn-sm btn-soft-secondary me-1 mb-1 rounded-1 active" id="Update-branch-tab" data-bs-toggle="tab" data-bs-target="#Update-branch" type="button" role="tab"> Branch Info </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="btn btn-sm btn-soft-secondary me-1 mb-1 rounded-1" id="Update-address-tab" data-bs-toggle="tab" data-bs-target="#Update-address" type="button" role="tab"> Address Info </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="btn btn-sm btn-soft-secondary me-1 mb-1 rounded-1" id="Update-optional-tab" data-bs-toggle="tab" data-bs-target="#Update-optional" type="button" role="tab"> Optional </button>
+                            </li>
+                        </ul>
+                        <div class="tab-content mt-3" id="branchTabContent">
+                            <!-- Branch Info -->
+                            <div class="tab-pane fade show active" id="Update-branch" role="tabpanel">
+                                <div class="row">
+                                    <input type="hidden" id="branch_id" name="branch_id" />
+                                    <div class="col-md-4 mt-3">
+                                        <label for="Ucompany" class="form-label"> Company <span class="text-danger">*</span></label>
+                                        <select id="Ucompany" data-choices class="form-select"></select>
+                                        <div class="invalid-feedback">Please select a Company.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="Ubranch_name" class="form-label">Branch Name <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="Ubranch_name" required>
+                                        <div class="invalid-feedback">Please provide a valid Branch Name.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="Ubranch_code" class="form-label">Branch Code <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="Ubranch_code" required>
+                                        <div class="invalid-feedback">Please provide a valid Branch Code.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="Uemail" class="form-label"> Email <span class="text-danger">*</span></label>
+                                        <input type="email" class="form-control" id="Uemail" required>
+                                        <div class="invalid-feedback">Please provide a valid Email.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="Uphone" class="form-label"> Phone <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="Uphone" required>
+                                        <div class="invalid-feedback">Please provide a valid Phone.</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Address Info -->
+                            <div class="tab-pane fade" id="Update-address" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-md-4 mt-3">
+                                        <label for="Uaddress_line1" class="form-label">Address Line1 <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="Uaddress_line1" required>
+                                        <div class="invalid-feedback">Please provide a valid Address Line1.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="Uaddress_line2" class="form-label">Address Line2 <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="Uaddress_line2" required>
+                                        <div class="invalid-feedback">Please provide a valid Address Line2.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="Ucity" class="form-label">City <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="Ucity" required>
+                                        <div class="invalid-feedback">Please provide a valid City.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="Ustate" class="form-label">State <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="Ustate" required>
+                                        <div class="invalid-feedback">Please provide a valid State.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="Ucountry" class="form-label">Country <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="Ucountry" required>
+                                        <div class="invalid-feedback">Please provide a valid Country.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="Uzip_code" class="form-label">UZip Code <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="Uzip_code" required>
+                                        <div class="invalid-feedback">Please provide a valid Zip Code.</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Optional Info -->
+                            <div class="tab-pane fade" id="Update-optional" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-md-4 mt-3">
+                                        <label for="Ufax_number" class="form-label">Fax Number <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="Ufax_number" required>
+                                        <div class="invalid-feedback">Please provide a valid Fax Number.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="Uwebsite" class="form-label">Website <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="Uwebsite" required>
+                                        <div class="invalid-feedback">Please provide a valid Website.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="reset" class="btn btn-soft-warning"> Reset </button>
+                        <button type="submit" class="btn btn-soft-primary"> Save changes </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- UpdateBranch End -->
+</div>
+
+<script>
+    $.ajax({
+        type: "GET",
+        url: '/CompanyInfo/GetCompany',
+        dataType: "json",
+        success: function (data) {
+            var s = '<option value="" selected disabled>Select Company</option>';
+            for (var i = 0; i < data.length; i++) {
+                s += '<option value="' + data[i].CompanyId + '">' + data[i].CompanyName + '</option>';
+            }
+            $("#company").html(s);
+        },
+        error: function (xhr, status, error) {
+            console.log("Error: " + error);
+        }
+    });
+
+    $.ajax({
+        type: "GET",
+        url: '/CompanyInfo/GetCompany',
+        dataType: "json",
+        success: function (data) {
+            var s = '<option value="" selected disabled>Select Company</option>';
+            for (var i = 0; i < data.length; i++) {
+                s += '<option value="' + data[i].CompanyId + '">' + data[i].CompanyName + '</option>';
+            }
+            $("#Ucompany").html(s);
+        },
+        error: function (xhr, status, error) {
+            console.log("Error: " + error);
+        }
+    });
+
+    $(document).ready(function () {
+        // Add Branch Start
+        
+         $("#BranchForm").on("submit", function (e) {
+            e.preventDefault();
+
+            var form = this;
+
+            // ✅ Bootstrap validation
+            if (!form.checkValidity()) {
+                e.stopPropagation();
+                $(form).addClass("was-validated");
+                return;
+            }
+
+            // ✅ Collect form data
+            var formData = {
+                CompanyId: $("#company").val(),
+                BranchName: $("#branch_name").val(),
+                BranchCode: $("#branch_code").val(),
+                Email: $("#email").val(),
+                Phone: $("#phone").val(),
+                AddressLine1: $("#address_line1").val(),
+                AddressLine2: $("#address_line2").val(),
+                City: $("#city").val(),
+                State: $("#state").val(),
+                Country: $("#country").val(),
+                ZipCode: $("#zip_code").val(),
+                FaxNumber: $("#fax_number").val(),
+                Website: $("#website").val()
+            };
+
+            // ✅ Ajax request
+            $.ajax({
+                url: '@Url.Action("SaveBranch", "CompanyInfo")',
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(formData),
+                success: function () {
+                    location.reload();
+                },
+                error: function () {
+                    alert("Error saving branch details.");
+                }
+            });
+        });
+        // Add Branch End
+
+        // Update Branch Start
+
+        $("#UpdateBranchForm").on("submit", function (e) {
+            e.preventDefault();
+
+            var formData = {
+                BranchId: $("#branch_id").val(),
+                CompanyId: $("#Ucompany").val(),
+                BranchName: $("#Ubranch_name").val(),
+                BranchCode: $("#Ubranch_code").val(),
+                Email: $("#Uemail").val(),
+                Phone: $("#Uphone").val(),
+                AddressLine1: $("#Uaddress_line1").val(),
+                AddressLine2: $("#Uaddress_line2").val(),
+                City: $("#Ucity").val(),
+                State: $("#Ustate").val(),
+                Country: $("#Ucountry").val(),
+                ZipCode: $("#Uzip_code").val(),
+                FaxNumber: $("#Ufax_number").val(),
+                Website: $("#Uwebsite").val()
+            };
+
+            $.ajax({
+                url: '/CompanyInfo/UpdateBranch',
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(formData),
+                success: function (res) {
+                    if (res.success) {
+                        location.reload();
+                    } else {
+                        alert("Error: " + res.message);
+                    }
+                }
+            });
+        });
+
+        // Update Branch End
+    });
+
+    function UpdateBranch(id) {
+        $.ajax({
+            url: '/CompanyInfo/GetBranchById',
+            type: 'GET',
+            data: { id: id },
+            success: function (data) {
+                if (data) {
+                    $("#branch_id").val(data.BranchId);
+                    $("#Ucompany").val(data.CompanyId);
+                    $("#Ubranch_name").val(data.BranchName);
+                    $("#Ubranch_code").val(data.BranchCode);
+                    $("#Uemail").val(data.Email);
+                    $("#Uphone").val(data.Phone);
+                    $("#Uaddress_line1").val(data.AddressLine1);
+                    $("#Uaddress_line2").val(data.AddressLine2);
+                    $("#Ucity").val(data.City);
+                    $("#Ustate").val(data.State);
+                    $("#Ucountry").val(data.Country);
+                    $("#Uzip_code").val(data.ZipCode);
+                    $("#Ufax_number").val(data.FaxNumber);
+                    $("#Uwebsite").val(data.Website);
+
+                    $("#UpdateBranch").modal("show");
+                }
+            },
+            error: function () {
+                alert("Error loading branch details.");
+            }
+        });
+    }
+
+    function DeleteBranch(id) {
+        $.ajax({
+            url: '@Url.Action("DeleteBranch", "CompanyInfo")',
+            type: "POST",
+            data: { branchId: id },
+            success: function (response) {
+                if (response.success) {
+                    location.reload();
+                } else {
+                    alert.error("Error: " + response.message);
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error("AJAX Error:", xhr.responseText);
+                alert.error("AJAX Error: " + error);
+            }
+        });
+    }
+</script>

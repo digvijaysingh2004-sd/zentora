@@ -1,0 +1,267 @@
+@model IEnumerable<zentoraHRMS.Models.UserModel>
+@{
+    ViewBag.Title = "User Management";
+}
+
+<div class="container-fluid">
+    <div class="row justify-content-center py-5">
+        <div class="col-xxl-5 col-xl-7 text-center">
+            <a href="@Url.Action("Index","Home")" class="badge badge-default fw-normal shadow px-2 py-1 mb-2 fst-italic fs-xxs">
+                <i data-lucide="square-check" class="fs-sm me-1"></i> DashBoard
+            </a>
+            <h3 class="fw-bold">Users List</h3>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-xxl-12">
+            <div class="card rounded-2">
+                <div class="card-header justify-content-between">
+                    <h5 class="card-title">User Account Configurations</h5>
+                    <button type="button" class="btn btn-sm btn-soft-primary" data-bs-toggle="modal" data-bs-target="#AddUserModal">
+                        <i class="me-1" data-lucide="plus"></i> Create User Account
+                    </button>
+                </div>
+
+                <div class="card-body">
+                    <table id="checkbox-select-data" class="table table-striped dt-responsive checkbox-select-datatable align-middle mb-0">
+                        <thead class="thead-sm text-uppercase fs-xxs">
+                            <tr>
+                                <th class="fs-sm" style="width: 1%;"></th>
+                                <th>Emp ID</th>
+                                <th>Full Name</th>
+                                <th>Username</th>
+                                <th>Role Type</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var c in Model)
+                            {
+                                <tr>
+                                    <td class="fs-sm" style="width: 1%;"></td>
+                                    <td>@c.EmpId</td>
+                                    <td>@c.FullName</td>
+                                    <td>@c.Username</td>
+                                    <td>
+                                        @if (c.RoleType == "1") { <span class="badge bg-danger">Superadmin</span> }
+                                        else if (c.RoleType == "2") { <span class="badge bg-warning">Admin</span> }
+                                        else if (c.RoleType == "3") { <span class="badge bg-primary">Manager</span> }
+                                        else if (c.RoleType == "4") { <span class="badge bg-info">HR</span> }
+                                        else { <span class="badge bg-secondary">Employee</span> }
+                                    </td>
+                                    <td>
+                                        @if (c.IsActive) { <span class="badge bg-success-subtle text-success">Active</span> }
+                                        else { <span class="badge bg-danger-subtle text-danger">Inactive</span> }
+                                    </td>
+                                    <td>
+                                        <a onclick="UpdateUser(@c.Id)" class="btn btn-sm btn-soft-info mt-1" title="Update"><i data-lucide="square-pen"></i></a>
+                                        <a onclick="DeleteUser(@c.Id)" class="btn btn-sm btn-soft-danger mt-1" title="Delete"><i data-lucide="trash-2"></i></a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AddUser Modal -->
+    <div id="AddUserModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form id="UserForm" class="needs-validation" novalidate method="post">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Create User Account</h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="EmpId" class="form-label">Employee <span class="text-danger">*</span></label>
+                            <select id="EmpId" class="form-select" required></select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="FullName" class="form-label">Full Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="FullName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="Username" class="form-label">Username <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="Username" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="Password" class="form-label">Password <span class="text-danger">*</span></label>
+                            <input type="password" class="form-control" id="Password" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="RoleType" class="form-label">Role Type <span class="text-danger">*</span></label>
+                            <select id="RoleType" class="form-select" required>
+                                <option value="" selected disabled>Select Role</option>
+                                <option value="1">Superadmin</option>
+                                <option value="2">Admin</option>
+                                <option value="3">Manager</option>
+                                <option value="4">HR</option>
+                                <option value="6">Employee</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-soft-primary">Save changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- UpdateUser Modal -->
+    <div id="UpdateUserModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form id="UpdateUserForm" class="needs-validation" novalidate method="post">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Update User Account</h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="update_id" />
+                        <div class="mb-3">
+                            <label for="uEmpId" class="form-label">Employee <span class="text-danger">*</span></label>
+                            <select id="uEmpId" class="form-select" required></select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="uFullName" class="form-label">Full Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="uFullName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="uUsername" class="form-label">Username <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="uUsername" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="uPassword" class="form-label">Password <span class="text-danger">*</span></label>
+                            <input type="password" class="form-control" id="uPassword" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="uRoleType" class="form-label">Role Type <span class="text-danger">*</span></label>
+                            <select id="uRoleType" class="form-select" required>
+                                <option value="1">Superadmin</option>
+                                <option value="2">Admin</option>
+                                <option value="3">Manager</option>
+                                <option value="4">HR</option>
+                                <option value="6">Employee</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-soft-primary">Save changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        // Load employee dropdowns
+        $.ajax({
+            url: '/Staff/GetEmployeeList',
+            type: 'GET',
+            success: function (data) {
+                var s = '<option value="" selected disabled>Select Employee</option>';
+                for (var i = 0; i < data.length; i++) {
+                    s += '<option value="' + data[i].Id + '">' + data[i].FirstName + ' ' + data[i].LastName + '</option>';
+                }
+                $("#EmpId").html(s);
+                $("#uEmpId").html(s);
+            }
+        });
+
+        $("#UserForm").on("submit", function (e) {
+            e.preventDefault();
+            var formData = {
+                EmpId: $("#EmpId").val(),
+                FullName: $("#FullName").val(),
+                Username: $("#Username").val(),
+                Password: $("#Password").val(),
+                RoleType: $("#RoleType").val()
+            };
+            $.ajax({
+                url: '/Staff/SaveUser',
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(formData),
+                success: function (res) {
+                    if (res.success) {
+                        location.reload();
+                    } else {
+                        alert("Error: " + res.message);
+                    }
+                }
+            });
+        });
+
+        $("#UpdateUserForm").on("submit", function (e) {
+            e.preventDefault();
+            var formData = {
+                Id: $("#update_id").val(),
+                EmpId: $("#uEmpId").val(),
+                FullName: $("#uFullName").val(),
+                Username: $("#uUsername").val(),
+                Password: $("#uPassword").val(),
+                RoleType: $("#uRoleType").val()
+            };
+            $.ajax({
+                url: '/Staff/UpdateUser',
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(formData),
+                success: function (res) {
+                    if (res.success) {
+                        location.reload();
+                    } else {
+                        alert("Error: " + res.message);
+                    }
+                }
+            });
+        });
+    });
+
+    function UpdateUser(id) {
+        $.ajax({
+            url: '/Staff/GetUserById',
+            type: 'GET',
+            data: { id: id },
+            success: function (data) {
+                if (data) {
+                    $("#update_id").val(data.Id);
+                    $("#uEmpId").val(data.EmpId);
+                    $("#uFullName").val(data.FullName);
+                    $("#uUsername").val(data.Username);
+                    $("#uPassword").val(data.Password);
+                    $("#uRoleType").val(data.RoleType);
+                    $("#UpdateUserModal").modal("show");
+                }
+            }
+        });
+    }
+
+    function DeleteUser(id) {
+        if (confirm("Are you sure you want to delete this user account?")) {
+            $.ajax({
+                url: '/Staff/DeleteUser',
+                type: "POST",
+                data: { id: id },
+                success: function (res) {
+                    if (res.success) {
+                        location.reload();
+                    } else {
+                        alert("Error: " + res.message);
+                    }
+                }
+            });
+        }
+    }
+</script>

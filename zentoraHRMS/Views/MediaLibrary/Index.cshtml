@@ -1,0 +1,130 @@
+@{
+    ViewBag.Title = "Media Library";
+}
+
+<div class="container-fluid">
+    <div class="row justify-content-center py-5">
+        <div class="col-xxl-5 col-xl-7 text-center">
+            <a href="@Url.Action("Index","Home")" class="badge badge-default fw-normal shadow px-2 py-1 mb-2 fst-italic fs-xxs">
+                <i data-lucide="square-check" class="fs-sm me-1"></i> DashBoard
+            </a>
+            <h3 class="fw-bold">Media Library</h3>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xl-3 col-lg-4 mb-4">
+            <!-- Storage details card -->
+            <div class="card border-0 shadow-sm rounded-3 mb-4">
+                <div class="card-body">
+                    <h6 class="text-uppercase text-muted fw-bold fs-xxs mb-3">Storage Overview</h6>
+                    <div class="progress mb-2" style="height: 8px;">
+                        <div class="progress-bar bg-primary" role="progressbar" style="width: 70%;" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    <div class="d-flex justify-content-between fs-xxs text-muted mb-4">
+                        <span>140.5 GB Used</span>
+                        <span>200 GB Total</span>
+                    </div>
+
+                    <button class="btn btn-primary w-100 py-2 rounded-2 shadow-sm d-flex align-items-center justify-content-center"><i data-lucide="upload" class="me-2"></i> Upload Files</button>
+                </div>
+            </div>
+
+            <!-- Categories -->
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-body">
+                    <h6 class="text-uppercase text-muted fw-bold fs-xxs mb-3">Categories</h6>
+                    <div class="list-group list-group-flush">
+                        <a href="#" class="list-group-item px-0 border-0 d-flex justify-content-between align-items-center text-dark"><span class="d-flex align-items-center"><i data-lucide="image" class="text-info me-2"></i> Images</span> <span class="badge bg-light text-dark">452</span></a>
+                        <a href="#" class="list-group-item px-0 border-0 d-flex justify-content-between align-items-center text-dark"><span class="d-flex align-items-center"><i data-lucide="file-text" class="text-primary me-2"></i> Documents</span> <span class="badge bg-light text-dark">128</span></a>
+                        <a href="#" class="list-group-item px-0 border-0 d-flex justify-content-between align-items-center text-dark"><span class="d-flex align-items-center"><i data-lucide="video" class="text-danger me-2"></i> Videos</span> <span class="badge bg-light text-dark">14</span></a>
+                        <a href="#" class="list-group-item px-0 border-0 d-flex justify-content-between align-items-center text-dark"><span class="d-flex align-items-center"><i data-lucide="archive" class="text-warning me-2"></i> Archives</span> <span class="badge bg-light text-dark">33</span></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-9 col-lg-8 mb-4">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0 fw-semibold text-dark"><i data-lucide="folder" class="text-primary me-2 align-middle"></i>All Files</h5>
+                    <input type="text" class="form-control form-control-sm w-25" placeholder="Search files...">
+                </div>
+                <div class="card-body">
+                    <!-- Folders Section -->
+                    <h6 class="text-muted fw-bold fs-xxs mb-3">Folders</h6>
+                    <div class="row mb-4">
+                        <div class="col-md-4 col-sm-6 mb-3">
+                            <div class="p-3 border border-light rounded-3 bg-light d-flex align-items-center">
+                                <i data-lucide="folder" class="text-warning me-3 fs-3" style="width:32px;height:32px;"></i>
+                                <div>
+                                    <h6 class="mb-0 fw-semibold text-dark">Company Policies</h6>
+                                    <small class="text-muted">45 Files</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-sm-6 mb-3">
+                            <div class="p-3 border border-light rounded-3 bg-light d-flex align-items-center">
+                                <i data-lucide="folder" class="text-warning me-3 fs-3" style="width:32px;height:32px;"></i>
+                                <div>
+                                    <h6 class="mb-0 fw-semibold text-dark">Onboarding Docs</h6>
+                                    <small class="text-muted">12 Files</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-sm-6 mb-3">
+                            <div class="p-3 border border-light rounded-3 bg-light d-flex align-items-center">
+                                <i data-lucide="folder" class="text-warning me-3 fs-3" style="width:32px;height:32px;"></i>
+                                <div>
+                                    <h6 class="mb-0 fw-semibold text-dark">Marketing Assets</h6>
+                                    <small class="text-muted">89 Files</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Files Grid -->
+                    <h6 class="text-muted fw-bold fs-xxs mb-3">Recent Files</h6>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <div class="card border border-light h-100 rounded-3 shadow-none">
+                                <div class="card-body text-center p-3">
+                                    <i data-lucide="file-text" class="text-primary mb-3" style="width:40px;height:40px;"></i>
+                                    <h6 class="mb-1 text-truncate fw-semibold text-dark">Employee_Handbook.pdf</h6>
+                                    <span class="text-muted fs-xxs">2.4 MB</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <div class="card border border-light h-100 rounded-3 shadow-none">
+                                <div class="card-body text-center p-3">
+                                    <i data-lucide="image" class="text-info mb-3" style="width:40px;height:40px;"></i>
+                                    <h6 class="mb-1 text-truncate fw-semibold text-dark">Office_Banner.png</h6>
+                                    <span class="text-muted fs-xxs">5.1 MB</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <div class="card border border-light h-100 rounded-3 shadow-none">
+                                <div class="card-body text-center p-3">
+                                    <i data-lucide="file-spreadsheet" class="text-success mb-3" style="width:40px;height:40px;"></i>
+                                    <h6 class="mb-1 text-truncate fw-semibold text-dark">Payroll_July2026.xlsx</h6>
+                                    <span class="text-muted fs-xxs">845 KB</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <div class="card border border-light h-100 rounded-3 shadow-none">
+                                <div class="card-body text-center p-3">
+                                    <i data-lucide="file" class="text-secondary mb-3" style="width:40px;height:40px;"></i>
+                                    <h6 class="mb-1 text-truncate fw-semibold text-dark">Template_Agreement.docx</h6>
+                                    <span class="text-muted fs-xxs">1.2 MB</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

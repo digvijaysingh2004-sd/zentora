@@ -1,0 +1,153 @@
+@{
+    ViewBag.Title = "Biometric Attendance";
+}
+
+<div class="container-fluid">
+    <div class="row justify-content-center py-5">
+        <div class="col-xxl-5 col-xl-7 text-center">
+            <a href="@Url.Action("Index","Home")" class="badge badge-default fw-normal shadow px-2 py-1 mb-2 fst-italic fs-xxs">
+                <i data-lucide="square-check" class="fs-sm me-1"></i> DashBoard
+            </a>
+            <h3 class="fw-bold">Biometric Attendance</h3>
+        </div>
+    </div>
+
+    <!-- Machine Overview cards -->
+    <div class="row mb-4">
+        <div class="col-md-4 mb-3">
+            <div class="card border-0 shadow-sm rounded-3 bg-white">
+                <div class="card-body d-flex align-items-center justify-content-between">
+                    <div>
+                        <h6 class="text-muted fw-normal mb-1">Active Devices</h6>
+                        <h4 class="mb-0 fw-bold text-dark">4 / 5</h4>
+                    </div>
+                    <div class="p-3 bg-soft-success text-success rounded-circle" style="background-color: rgba(40, 167, 69, 0.1);">
+                        <i data-lucide="cpu" class="align-middle"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card border-0 shadow-sm rounded-3 bg-white">
+                <div class="card-body d-flex align-items-center justify-content-between">
+                    <div>
+                        <h6 class="text-muted fw-normal mb-1">Last Sync</h6>
+                        <h4 class="mb-0 fw-bold text-dark">10 mins ago</h4>
+                    </div>
+                    <div class="p-3 bg-soft-primary text-primary rounded-circle" style="background-color: rgba(0, 123, 255, 0.1);">
+                        <i data-lucide="refresh-cw" class="align-middle"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card border-0 shadow-sm rounded-3 bg-white">
+                <div class="card-body d-flex align-items-center justify-content-between">
+                    <div>
+                        <h6 class="text-muted fw-normal mb-1">Total Logs Today</h6>
+                        <h4 class="mb-0 fw-bold text-dark">1,245</h4>
+                    </div>
+                    <div class="p-3 bg-soft-info text-info rounded-circle" style="background-color: rgba(23, 162, 184, 0.1);">
+                        <i data-lucide="list" class="align-middle"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active devices and sync panel -->
+    <div class="row">
+        <div class="col-xl-4 mb-4">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="card-title mb-0 fw-semibold text-dark"><i data-lucide="database" class="text-primary me-2 align-middle"></i>Device Status</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex flex-column gap-3">
+                        <div class="p-3 border border-light rounded-3 bg-light d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-0 fw-semibold text-dark">Main Lobby Device</h6>
+                                <small class="text-muted">IP: 192.168.1.100</small>
+                            </div>
+                            <span class="badge bg-success">Online</span>
+                        </div>
+                        <div class="p-3 border border-light rounded-3 bg-light d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-0 fw-semibold text-dark">Server Room Device</h6>
+                                <small class="text-muted">IP: 192.168.1.101</small>
+                            </div>
+                            <span class="badge bg-success">Online</span>
+                        </div>
+                        <div class="p-3 border border-light rounded-3 bg-light d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-0 fw-semibold text-dark">Warehouse Device</h6>
+                                <small class="text-muted">IP: 192.168.1.105</small>
+                            </div>
+                            <span class="badge bg-danger">Offline</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary w-100 py-2 rounded-2 mt-4 shadow-sm d-flex align-items-center justify-content-center"><i data-lucide="refresh-cw" class="me-2"></i> Sync All Devices</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-8 mb-4">
+            <div class="card border-0 shadow-sm rounded-3 h-100">
+                <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0 fw-semibold text-dark"><i data-lucide="history" class="text-primary me-2 align-middle"></i>Recent Raw Logs</h5>
+                    <button class="btn btn-sm btn-outline-secondary">Export Logs</button>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Log ID</th>
+                                    <th>Employee ID</th>
+                                    <th>Name</th>
+                                    <th>Device Name</th>
+                                    <th>Direction</th>
+                                    <th>Timestamp</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>#95821</td>
+                                    <td>E-1025</td>
+                                    <td>John Doe</td>
+                                    <td>Main Lobby Device</td>
+                                    <td><span class="badge bg-soft-success text-success">Check In</span></td>
+                                    <td>2026-07-04 09:02:14 AM</td>
+                                </tr>
+                                <tr>
+                                    <td>#95820</td>
+                                    <td>E-1082</td>
+                                    <td>Sarah Smith</td>
+                                    <td>Main Lobby Device</td>
+                                    <td><span class="badge bg-soft-success text-success">Check In</span></td>
+                                    <td>2026-07-04 09:05:45 AM</td>
+                                </tr>
+                                <tr>
+                                    <td>#95819</td>
+                                    <td>E-1044</td>
+                                    <td>Michael Brown</td>
+                                    <td>Server Room Device</td>
+                                    <td><span class="badge bg-soft-success text-success">Check In</span></td>
+                                    <td>2026-07-04 09:12:00 AM</td>
+                                </tr>
+                                <tr>
+                                    <td>#95818</td>
+                                    <td>E-1025</td>
+                                    <td>John Doe</td>
+                                    <td>Server Room Device</td>
+                                    <td><span class="badge bg-soft-danger text-danger">Check Out</span></td>
+                                    <td>2026-07-04 10:14:32 AM</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

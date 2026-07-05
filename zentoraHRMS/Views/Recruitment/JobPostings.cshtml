@@ -1,0 +1,276 @@
+@model IEnumerable<zentoraHRMS.Models.JobPostingModel>
+@{
+    ViewBag.Title = "Job Openings";
+}
+
+<div class="container-fluid">
+    <div class="row justify-content-center py-5">
+        <div class="col-xxl-5 col-xl-7 text-center">
+            <a href="@Url.Action("Index","Home")" class="badge badge-default fw-normal shadow px-2 py-1 mb-2 fst-italic fs-xxs">
+                <i data-lucide="square-check" class="fs-sm me-1"></i> DashBoard
+            </a>
+            <h3 class="fw-bold">Job Postings</h3>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-xxl-12">
+            <div class="card rounded-2">
+                <div class="card-header justify-content-between">
+                    <h5 class="card-title">Job Openings Directory</h5>
+                    <button type="button" class="btn btn-sm btn-soft-primary" data-bs-toggle="modal" data-bs-target="#AddJob">
+                        <i class="me-1" data-lucide="plus"></i> Add Job Posting
+                    </button>
+                </div>
+
+                <div class="card-body">
+                    <table id="checkbox-select-data" class="table table-striped dt-responsive checkbox-select-datatable align-middle mb-0">
+                        <thead class="thead-sm text-uppercase fs-xxs">
+                            <tr>
+                                <th class="fs-sm" style="width: 1%;"></th>
+                                <th>Job ID</th>
+                                <th>Job Title</th>
+                                <th>Job Type</th>
+                                <th>Location</th>
+                                <th>Vacancies</th>
+                                <th>Experience</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var c in Model)
+                            {
+                                <tr>
+                                    <td class="fs-sm" style="width: 1%;"></td>
+                                    <td>@c.JobId</td>
+                                    <td class="fw-bold text-primary">@c.Title</td>
+                                    <td>@c.JobType</td>
+                                    <td>@c.Location</td>
+                                    <td>@c.NoOfVacancies</td>
+                                    <td>@c.ExperienceRequired</td>
+                                    <td>
+                                        @if (c.Status == "Active") { <span class="badge bg-success-subtle text-success">Active</span> }
+                                        else { <span class="badge bg-danger-subtle text-danger">Closed</span> }
+                                    </td>
+                                    <td>
+                                        <a onclick="UpdateJob(@c.JobId)" class="btn btn-sm btn-soft-info mt-1" title="Update"><i data-lucide="square-pen"></i></a>
+                                        <a onclick="DeleteJob(@c.JobId)" class="btn btn-sm btn-soft-danger mt-1" title="Delete"><i data-lucide="trash-2"></i></a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AddJob Modal -->
+    <div id="AddJob" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form id="JobForm" class="needs-validation" novalidate method="post">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Add Job Posting</h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="Title" class="form-label">Job Title <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="Title" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="JobType" class="form-label">Job Type <span class="text-danger">*</span></label>
+                            <select id="JobType" class="form-select" required>
+                                <option value="Full-Time" selected>Full-Time</option>
+                                <option value="Part-Time">Part-Time</option>
+                                <option value="Contract">Contract</option>
+                                <option value="Intern">Intern</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="Location" class="form-label">Location <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="Location" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="NoOfVacancies" class="form-label">Vacancies</label>
+                            <input type="number" class="form-control" id="NoOfVacancies" value="1" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="ExperienceRequired" class="form-label">Experience Required <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="ExperienceRequired" placeholder="e.g. 3-5 Years" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="Description" class="form-label">Description</label>
+                            <textarea class="form-control" id="Description" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="Status" class="form-label">Status <span class="text-danger">*</span></label>
+                            <select id="Status" class="form-select" required>
+                                <option value="Active" selected>Active</option>
+                                <option value="Closed">Closed</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-soft-primary">Save changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- UpdateJob Modal -->
+    <div id="UpdateJobModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form id="UpdateJobForm" class="needs-validation" novalidate method="post">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Update Job Posting</h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="update_id" />
+                        <div class="mb-3">
+                            <label for="uTitle" class="form-label">Job Title <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="uTitle" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="uJobType" class="form-label">Job Type <span class="text-danger">*</span></label>
+                            <select id="uJobType" class="form-select" required>
+                                <option value="Full-Time">Full-Time</option>
+                                <option value="Part-Time">Part-Time</option>
+                                <option value="Contract">Contract</option>
+                                <option value="Intern">Intern</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="uLocation" class="form-label">Location <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="uLocation" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="uNoOfVacancies" class="form-label">Vacancies</label>
+                            <input type="number" class="form-control" id="uNoOfVacancies" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="uExperienceRequired" class="form-label">Experience Required <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="uExperienceRequired" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="uDescription" class="form-label">Description</label>
+                            <textarea class="form-control" id="uDescription" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="uStatus" class="form-label">Status <span class="text-danger">*</span></label>
+                            <select id="uStatus" class="form-select" required>
+                                <option value="Active">Active</option>
+                                <option value="Closed">Closed</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-soft-primary">Save changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#JobForm").on("submit", function (e) {
+            e.preventDefault();
+            var formData = {
+                Title: $("#Title").val(),
+                JobType: $("#JobType").val(),
+                Location: $("#Location").val(),
+                NoOfVacancies: $("#NoOfVacancies").val(),
+                ExperienceRequired: $("#ExperienceRequired").val(),
+                Description: $("#Description").val(),
+                Status: $("#Status").val()
+            };
+            $.ajax({
+                url: '/Recruitment/SaveJob',
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(formData),
+                success: function (res) {
+                    if (res.success) {
+                        location.reload();
+                    } else {
+                        alert("Error: " + res.message);
+                    }
+                }
+            });
+        });
+
+        $("#UpdateJobForm").on("submit", function (e) {
+            e.preventDefault();
+            var formData = {
+                JobId: $("#update_id").val(),
+                Title: $("#uTitle").val(),
+                JobType: $("#uJobType").val(),
+                Location: $("#uLocation").val(),
+                NoOfVacancies: $("#uNoOfVacancies").val(),
+                ExperienceRequired: $("#uExperienceRequired").val(),
+                Description: $("#uDescription").val(),
+                Status: $("#uStatus").val()
+            };
+            $.ajax({
+                url: '/Recruitment/UpdateJob',
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(formData),
+                success: function (res) {
+                    if (res.success) {
+                        location.reload();
+                    } else {
+                        alert("Error: " + res.message);
+                    }
+                }
+            });
+        });
+    });
+
+    function UpdateJob(id) {
+        $.ajax({
+            url: '/Recruitment/GetJobById',
+            type: 'GET',
+            data: { id: id },
+            success: function (data) {
+                if (data) {
+                    $("#update_id").val(data.JobId);
+                    $("#uTitle").val(data.Title);
+                    $("#uJobType").val(data.JobType);
+                    $("#uLocation").val(data.Location);
+                    $("#uNoOfVacancies").val(data.NoOfVacancies);
+                    $("#uExperienceRequired").val(data.ExperienceRequired);
+                    $("#uDescription").val(data.Description);
+                    $("#uStatus").val(data.Status);
+                    $("#UpdateJobModal").modal("show");
+                }
+            }
+        });
+    }
+
+    function DeleteJob(id) {
+        if (confirm("Are you sure you want to delete this job posting?")) {
+            $.ajax({
+                url: '/Recruitment/DeleteJob',
+                type: "POST",
+                data: { id: id },
+                success: function (res) {
+                    if (res.success) {
+                        location.reload();
+                    } else {
+                        alert("Error: " + res.message);
+                    }
+                }
+            });
+        }
+    }
+</script>

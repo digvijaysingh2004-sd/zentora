@@ -1,0 +1,313 @@
+@model IEnumerable<zentoraHRMS.Models.EmployeeModel>
+@{
+    ViewBag.Title = "Employee Directory";
+}
+
+<div class="container-fluid">
+    <div class="row justify-content-center py-5">
+        <div class="col-xxl-5 col-xl-7 text-center">
+            <a href="@Url.Action("Index","Home")" class="badge badge-default fw-normal shadow px-2 py-1 mb-2 fst-italic fs-xxs">
+                <i data-lucide="square-check" class="fs-sm me-1"></i> DashBoard
+            </a>
+            <h3 class="fw-bold">Employee Directory</h3>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-xxl-12">
+            <div class="card rounded-2">
+                <div class="card-header justify-content-between">
+                    <h5 class="card-title">Employee Details</h5>
+                    <button type="button" class="btn btn-sm btn-soft-primary" data-bs-toggle="modal" data-bs-target="#AddEmpModal">
+                        <i class="me-1" data-lucide="plus"></i> Add Employee
+                    </button>
+                </div>
+
+                <div class="card-body">
+                    <table id="checkbox-select-data" class="table table-striped dt-responsive checkbox-select-datatable align-middle mb-0">
+                        <thead class="thead-sm text-uppercase fs-xxs">
+                            <tr>
+                                <th class="fs-sm" style="width: 1%;"></th>
+                                <th>Emp Code</th>
+                                <th>Name</th>
+                                <th>Phone</th>
+                                <th>Email</th>
+                                <th>Designation</th>
+                                <th>Department</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var c in Model)
+                            {
+                                <tr>
+                                    <td class="fs-sm" style="width: 1%;"></td>
+                                    <td>@c.EmpCode</td>
+                                    <td>@c.FirstName @c.LastName</td>
+                                    <td>@c.Phone</td>
+                                    <td>@c.Email</td>
+                                    <td>@c.Designation</td>
+                                    <td>@c.Department</td>
+                                    <td>
+                                        @if (c.IsActive) { <span class="badge bg-success-subtle text-success">Active</span> }
+                                        else { <span class="badge bg-danger-subtle text-danger">Inactive</span> }
+                                    </td>
+                                    <td>
+                                        <a onclick="UpdateEmp(@c.Id)" class="btn btn-sm btn-soft-info mt-1" title="Update"><i data-lucide="square-pen"></i></a>
+                                        <a onclick="DeleteEmp(@c.Id)" class="btn btn-sm btn-soft-danger mt-1" title="Delete"><i data-lucide="trash-2"></i></a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AddEmp Modal -->
+    <div id="AddEmpModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <form id="EmpForm" class="needs-validation" novalidate method="post">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Add New Employee</h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="EmpCode" class="form-label">Employee Code <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="EmpCode" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="Username" class="form-label">Username <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="Username" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="FirstName" class="form-label">First Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="FirstName" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="LastName" class="form-label">LastName <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="LastName" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="Phone" class="form-label">Phone <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="Phone" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="Email" class="form-label">Email <span class="text-danger">*</span></label>
+                                <input type="email" class="form-control" id="Email" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="Designation" class="form-label">Designation <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="Designation" placeholder="e.g. Software Developer" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="Department" class="form-label">Department <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="Department" placeholder="e.g. Technology" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="Company" class="form-label">Company <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="Company" placeholder="e.g. Zentora Corporate" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="Branch" class="form-label">Branch <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="Branch" placeholder="e.g. Noida Office" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-soft-primary">Save changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- UpdateEmp Modal -->
+    <div id="UpdateEmpModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <form id="UpdateEmpForm" class="needs-validation" novalidate method="post">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Update Employee Details</h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="update_id" />
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="uEmpCode" class="form-label">Employee Code <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="uEmpCode" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="uUsername" class="form-label">Username <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="uUsername" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="uFirstName" class="form-label">First Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="uFirstName" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="uLastName" class="form-label">LastName <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="uLastName" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="uPhone" class="form-label">Phone <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="uPhone" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="uEmail" class="form-label">Email <span class="text-danger">*</span></label>
+                                <input type="email" class="form-control" id="uEmail" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="uDesignation" class="form-label">Designation <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="uDesignation" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="uDepartment" class="form-label">Department <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="uDepartment" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="uCompany" class="form-label">Company <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="uCompany" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="uBranch" class="form-label">Branch <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="uBranch" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-soft-primary">Save changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#EmpForm").on("submit", function (e) {
+            e.preventDefault();
+            var formData = {
+                EmpCode: $("#EmpCode").val(),
+                Username: $("#Username").val(),
+                FirstName: $("#FirstName").val(),
+                LastName: $("#LastName").val(),
+                Phone: $("#Phone").val(),
+                Email: $("#Email").val(),
+                Designation: $("#Designation").val(),
+                Department: $("#Department").val(),
+                Company: $("#Company").val(),
+                Branch: $("#Branch").val()
+            };
+            $.ajax({
+                url: '/Staff/SaveEmployee',
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(formData),
+                success: function (res) {
+                    if (res.success) {
+                        location.reload();
+                    } else {
+                        alert("Error: " + res.message);
+                    }
+                }
+            });
+        });
+
+        $("#UpdateEmpForm").on("submit", function (e) {
+            e.preventDefault();
+            var formData = {
+                Id: $("#update_id").val(),
+                EmpCode: $("#uEmpCode").val(),
+                Username: $("#uUsername").val(),
+                FirstName: $("#uFirstName").val(),
+                LastName: $("#uLastName").val(),
+                Phone: $("#uPhone").val(),
+                Email: $("#uEmail").val(),
+                Designation: $("#uDesignation").val(),
+                Department: $("#uDepartment").val(),
+                Company: $("#uCompany").val(),
+                Branch: $("#uBranch").val()
+            };
+            $.ajax({
+                url: '/Staff/UpdateEmployee',
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(formData),
+                success: function (res) {
+                    if (res.success) {
+                        location.reload();
+                    } else {
+                        alert("Error: " + res.message);
+                    }
+                }
+            });
+        });
+    });
+
+    function UpdateEmp(id) {
+        $.ajax({
+            url: '/Staff/GetEmployeeById',
+            type: 'GET',
+            data: { id: id },
+            success: function (data) {
+                if (data) {
+                    $("#update_id").val(data.Id);
+                    $("#uEmpCode").val(data.EmpCode);
+                    $("#uUsername").val(data.Username);
+                    $("#uFirstName").val(data.FirstName);
+                    $("#uLastName").val(data.LastName);
+                    $("#uPhone").val(data.Phone);
+                    $("#uEmail").val(data.Email);
+                    $("#uDesignation").val(data.Designation);
+                    $("#uDepartment").val(data.Department);
+                    $("#uCompany").val(data.Company);
+                    $("#uBranch").val(data.Branch);
+                    $("#UpdateEmpModal").modal("show");
+                }
+            }
+        });
+    }
+
+    function DeleteEmp(id) {
+        if (confirm("Are you sure you want to delete this employee?")) {
+            $.ajax({
+                url: '/Staff/DeleteEmployee',
+                type: "POST",
+                data: { id: id },
+                success: function (res) {
+                    if (res.success) {
+                        location.reload();
+                    } else {
+                        alert("Error: " + res.message);
+                    }
+                }
+            });
+        }
+    }
+</script>

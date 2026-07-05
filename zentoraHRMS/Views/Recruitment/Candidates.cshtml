@@ -1,0 +1,277 @@
+@model IEnumerable<zentoraHRMS.Models.CandidateModel>
+@{
+    ViewBag.Title = "Candidates";
+}
+
+<div class="container-fluid">
+    <div class="row justify-content-center py-5">
+        <div class="col-xxl-5 col-xl-7 text-center">
+            <a href="@Url.Action("Index","Home")" class="badge badge-default fw-normal shadow px-2 py-1 mb-2 fst-italic fs-xxs">
+                <i data-lucide="square-check" class="fs-sm me-1"></i> DashBoard
+            </a>
+            <h3 class="fw-bold">Candidates Applications</h3>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-xxl-12">
+            <div class="card rounded-2">
+                <div class="card-header justify-content-between">
+                    <h5 class="card-title">Candidate Directory</h5>
+                    <button type="button" class="btn btn-sm btn-soft-primary" data-bs-toggle="modal" data-bs-target="#AddCandidate">
+                        <i class="me-1" data-lucide="plus"></i> Add Candidate
+                    </button>
+                </div>
+
+                <div class="card-body">
+                    <table id="checkbox-select-data" class="table table-striped dt-responsive checkbox-select-datatable align-middle mb-0">
+                        <thead class="thead-sm text-uppercase fs-xxs">
+                            <tr>
+                                <th class="fs-sm" style="width: 1%;"></th>
+                                <th>Candidate Name</th>
+                                <th>Applied For</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Resume</th>
+                                <th>Status</th>
+                                <th>Applied Date</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var c in Model)
+                            {
+                                <tr>
+                                    <td class="fs-sm" style="width: 1%;"></td>
+                                    <td>@c.FullName</td>
+                                    <td>@c.JobTitle</td>
+                                    <td>@c.Email</td>
+                                    <td>@c.Phone</td>
+                                    <td><a href="@c.ResumeUrl" target="_blank" class="text-info"><i data-lucide="file-text"></i> View Resume</a></td>
+                                    <td>
+                                        @if (c.ApplicationStatus == "Offered") { <span class="badge bg-success">Offered</span> }
+                                        else if (c.ApplicationStatus == "Shortlisted") { <span class="badge bg-primary text-white">Shortlisted</span> }
+                                        else if (c.ApplicationStatus == "Interviewing") { <span class="badge bg-warning text-dark">Interviewing</span> }
+                                        else if (c.ApplicationStatus == "Rejected") { <span class="badge bg-danger">Rejected</span> }
+                                        else { <span class="badge bg-secondary text-white">@c.ApplicationStatus</span> }
+                                    </td>
+                                    <td>@c.AppliedDate.ToString("yyyy-MM-dd")</td>
+                                    <td>
+                                        <a onclick="UpdateCandidate(@c.CandidateId)" class="btn btn-sm btn-soft-info mt-1" title="Update"><i data-lucide="square-pen"></i></a>
+                                        <a onclick="DeleteCandidate(@c.CandidateId)" class="btn btn-sm btn-soft-danger mt-1" title="Delete"><i data-lucide="trash-2"></i></a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AddCandidate Modal -->
+    <div id="AddCandidate" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form id="CandidateForm" class="needs-validation" novalidate method="post">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Add Candidate</h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="JobId" class="form-label">Job Opening <span class="text-danger">*</span></label>
+                            <select id="JobId" class="form-select" required></select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="FullName" class="form-label">Full Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="FullName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="Email" class="form-label">Email <span class="text-danger">*</span></label>
+                            <input type="email" class="form-control" id="Email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="Phone" class="form-label">Phone</label>
+                            <input type="text" class="form-control" id="Phone">
+                        </div>
+                        <div class="mb-3">
+                            <label for="ResumeUrl" class="form-label">Resume URL/Path</label>
+                            <input type="text" class="form-control" id="ResumeUrl" placeholder="/resumes/file_name.pdf">
+                        </div>
+                        <div class="mb-3">
+                            <label for="ApplicationStatus" class="form-label">Status <span class="text-danger">*</span></label>
+                            <select id="ApplicationStatus" class="form-select" required>
+                                <option value="Applied" selected>Applied</option>
+                                <option value="Shortlisted">Shortlisted</option>
+                                <option value="Interviewing">Interviewing</option>
+                                <option value="Offered">Offered</option>
+                                <option value="Rejected">Rejected</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-soft-primary">Save changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- UpdateCandidate Modal -->
+    <div id="UpdateCandidateModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form id="UpdateCandidateForm" class="needs-validation" novalidate method="post">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Update Candidate Application</h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="update_id" />
+                        <div class="mb-3">
+                            <label for="uJobId" class="form-label">Job Opening <span class="text-danger">*</span></label>
+                            <select id="uJobId" class="form-select" required></select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="uFullName" class="form-label">Full Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="uFullName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="uEmail" class="form-label">Email <span class="text-danger">*</span></label>
+                            <input type="email" class="form-control" id="uEmail" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="uPhone" class="form-label">Phone</label>
+                            <input type="text" class="form-control" id="uPhone">
+                        </div>
+                        <div class="mb-3">
+                            <label for="uResumeUrl" class="form-label">Resume URL/Path</label>
+                            <input type="text" class="form-control" id="uResumeUrl">
+                        </div>
+                        <div class="mb-3">
+                            <label for="uApplicationStatus" class="form-label">Status <span class="text-danger">*</span></label>
+                            <select id="uApplicationStatus" class="form-select" required>
+                                <option value="Applied">Applied</option>
+                                <option value="Shortlisted">Shortlisted</option>
+                                <option value="Interviewing">Interviewing</option>
+                                <option value="Offered">Offered</option>
+                                <option value="Rejected">Rejected</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-soft-primary">Save changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $.ajax({
+            url: '/Recruitment/GetJobsList',
+            type: 'GET',
+            success: function (data) {
+                var s = '<option value="" selected disabled>Select Job</option>';
+                for (var i = 0; i < data.length; i++) {
+                    s += '<option value="' + data[i].JobId + '">' + data[i].Title + '</option>';
+                }
+                $("#JobId").html(s);
+                $("#uJobId").html(s);
+            }
+        });
+
+        $("#CandidateForm").on("submit", function (e) {
+            e.preventDefault();
+            var formData = {
+                JobId: $("#JobId").val(),
+                FullName: $("#FullName").val(),
+                Email: $("#Email").val(),
+                Phone: $("#Phone").val(),
+                ResumeUrl: $("#ResumeUrl").val(),
+                ApplicationStatus: $("#ApplicationStatus").val()
+            };
+            $.ajax({
+                url: '/Recruitment/SaveCandidate',
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(formData),
+                success: function (res) {
+                    if (res.success) {
+                        location.reload();
+                    } else {
+                        alert("Error: " + res.message);
+                    }
+                }
+            });
+        });
+
+        $("#UpdateCandidateForm").on("submit", function (e) {
+            e.preventDefault();
+            var formData = {
+                CandidateId: $("#update_id").val(),
+                JobId: $("#uJobId").val(),
+                FullName: $("#uFullName").val(),
+                Email: $("#uEmail").val(),
+                Phone: $("#uPhone").val(),
+                ResumeUrl: $("#uResumeUrl").val(),
+                ApplicationStatus: $("#uApplicationStatus").val()
+            };
+            $.ajax({
+                url: '/Recruitment/UpdateCandidate',
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(formData),
+                success: function (res) {
+                    if (res.success) {
+                        location.reload();
+                    } else {
+                        alert("Error: " + res.message);
+                    }
+                }
+            });
+        });
+    });
+
+    function UpdateCandidate(id) {
+        $.ajax({
+            url: '/Recruitment/GetCandidateById',
+            type: 'GET',
+            data: { id: id },
+            success: function (data) {
+                if (data) {
+                    $("#update_id").val(data.CandidateId);
+                    $("#uJobId").val(data.JobId);
+                    $("#uFullName").val(data.FullName);
+                    $("#uEmail").val(data.Email);
+                    $("#uPhone").val(data.Phone);
+                    $("#uResumeUrl").val(data.ResumeUrl);
+                    $("#uApplicationStatus").val(data.ApplicationStatus);
+                    $("#UpdateCandidateModal").modal("show");
+                }
+            }
+        });
+    }
+
+    function DeleteCandidate(id) {
+        if (confirm("Are you sure you want to delete this candidate?")) {
+            $.ajax({
+                url: '/Recruitment/DeleteCandidate',
+                type: "POST",
+                data: { id: id },
+                success: function (res) {
+                    if (res.success) {
+                        location.reload();
+                    } else {
+                        alert("Error: " + res.message);
+                    }
+                }
+            });
+        }
+    }
+</script>

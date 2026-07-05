@@ -1,0 +1,131 @@
+@{
+    ViewBag.Title = "Currency Management";
+}
+
+<div class="container-fluid">
+    <div class="row justify-content-center py-5">
+        <div class="col-xxl-5 col-xl-7 text-center">
+            <a href="@Url.Action("Index","Home")" class="badge badge-default fw-normal shadow px-2 py-1 mb-2 fst-italic fs-xxs">
+                <i data-lucide="square-check" class="fs-sm me-1"></i> DashBoard
+            </a>
+            <h3 class="fw-bold">Currency Settings</h3>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xl-4 col-lg-5 mb-4">
+            <!-- Base Currency Card -->
+            <div class="card border-0 shadow-sm rounded-3 bg-white mb-4">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="card-title mb-0 fw-semibold text-dark"><i data-lucide="wallet" class="text-primary me-2 align-middle"></i>Base Currency</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between p-3 border border-light rounded-3 bg-light">
+                        <div class="d-flex align-items-center">
+                            <h3 class="mb-0 fw-bold text-dark me-2">USD</h3>
+                            <span class="text-muted">United States Dollar ($)</span>
+                        </div>
+                        <span class="badge bg-soft-success text-success">Base</span>
+                    </div>
+
+                    <p class="text-muted fs-xxs mt-3">All payroll runs, financial records, and calculations inside Zentora are recorded in this base currency.</p>
+                </div>
+            </div>
+
+            <!-- Currency Settings Quick Form -->
+            <div class="card border-0 shadow-sm rounded-3 bg-white">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="card-title mb-0 fw-semibold text-dark"><i data-lucide="settings-2" class="text-primary me-2 align-middle"></i>Add New Currency</h5>
+                </div>
+                <div class="card-body">
+                    <form>
+                        <div class="mb-3">
+                            <label class="form-label fs-xxs text-muted">Currency Code</label>
+                            <input type="text" class="form-control" placeholder="e.g. EUR, GBP, INR">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fs-xxs text-muted">Currency Name</label>
+                            <input type="text" class="form-control" placeholder="e.g. Euro">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fs-xxs text-muted">Symbol</label>
+                            <input type="text" class="form-control" placeholder="e.g. €, £, ₹">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fs-xxs text-muted">Exchange Rate (vs USD)</label>
+                            <input type="number" class="form-control" step="0.0001" placeholder="e.g. 0.92">
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 py-2 rounded-2 mt-2 shadow-sm d-flex align-items-center justify-content-center"><i data-lucide="plus" class="me-2"></i> Save Currency</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-8 col-lg-7 mb-4">
+            <div class="card border-0 shadow-sm rounded-3 h-100">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="card-title mb-0 fw-semibold text-dark"><i data-lucide="dollar-sign" class="text-primary me-2 align-middle"></i>Supported Currencies</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Currency</th>
+                                    <th>Code</th>
+                                    <th>Symbol</th>
+                                    <th>Exchange Rate</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>United States Dollar</td>
+                                    <td>USD</td>
+                                    <td>$</td>
+                                    <td>1.0000</td>
+                                    <td><span class="badge bg-success">Active</span></td>
+                                    <td>-</td>
+                                </tr>
+                                <tr>
+                                    <td>Euro</td>
+                                    <td>EUR</td>
+                                    <td>€</td>
+                                    <td>0.9241</td>
+                                    <td><span class="badge bg-success">Active</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-soft-info" title="Edit"><i data-lucide="square-pen" style="width:14px;height:14px;"></i></button>
+                                        <button class="btn btn-sm btn-soft-danger" title="Delete"><i data-lucide="trash-2" style="width:14px;height:14px;"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Indian Rupee</td>
+                                    <td>INR</td>
+                                    <td>₹</td>
+                                    <td>83.5024</td>
+                                    <td><span class="badge bg-success">Active</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-soft-info" title="Edit"><i data-lucide="square-pen" style="width:14px;height:14px;"></i></button>
+                                        <button class="btn btn-sm btn-soft-danger" title="Delete"><i data-lucide="trash-2" style="width:14px;height:14px;"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>British Pound</td>
+                                    <td>GBP</td>
+                                    <td>£</td>
+                                    <td>0.7854</td>
+                                    <td><span class="badge bg-success">Active</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-soft-info" title="Edit"><i data-lucide="square-pen" style="width:14px;height:14px;"></i></button>
+                                        <button class="btn btn-sm btn-soft-danger" title="Delete"><i data-lucide="trash-2" style="width:14px;height:14px;"></i></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

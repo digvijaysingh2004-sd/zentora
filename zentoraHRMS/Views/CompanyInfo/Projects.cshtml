@@ -1,0 +1,272 @@
+@model IEnumerable<zentoraHRMS.Models.ProjectModel>
+@{
+    ViewBag.Title = "Projects";
+}
+
+<div class="container-fluid">
+    <div class="row justify-content-center py-5">
+        <div class="col-xxl-5 col-xl-7 text-center">
+            <a href="@Url.Action("Index","Home")" class="badge badge-default fw-normal shadow px-2 py-1 mb-2 fst-italic fs-xxs">
+                <i data-lucide="square-check" class="fs-sm me-1"></i> DashBoard
+            </a>
+            <h3 class="fw-bold">Projects</h3>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-xxl-12">
+            <div class="card rounded-2">
+                <div class="card-header justify-content-between">
+                    <h5 class="card-title">Project Details</h5>
+                    <button type="button" class="btn btn-sm btn-soft-primary" data-bs-toggle="modal" data-bs-target="#AddProject">
+                        <i class="me-1" data-lucide="plus"></i> Add Project
+                    </button>
+                </div>
+
+                <div class="card-body">
+                    <table id="checkbox-select-data" class="table table-striped dt-responsive checkbox-select-datatable align-middle mb-0">
+                        <thead class="thead-sm text-uppercase fs-xxs">
+                            <tr>
+                                <th class="fs-sm" style="width: 1%;"></th>
+                                <th>Project Name</th>
+                                <th>Project Code</th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var c in Model)
+                            {
+                                <tr>
+                                    <td class="fs-sm" style="width: 1%;"></td>
+                                    <td>@c.ProjectName</td>
+                                    <td>@c.ProjectCode</td>
+                                    <td>@(c.StartDate.HasValue ? c.StartDate.Value.ToString("yyyy-MM-dd") : "")</td>
+                                    <td>@(c.EndDate.HasValue ? c.EndDate.Value.ToString("yyyy-MM-dd") : "")</td>
+                                    <td><span class="badge badge-label badge-soft-info">@c.Status</span></td>
+                                    <td>
+                                        <a onclick="UpdateProject(@c.ProjectId)" class="btn btn-sm btn-soft-info mt-1" title="Update"><i data-lucide="square-pen"></i></a>
+                                        <a onclick="DeleteProject(@c.ProjectId)" class="btn btn-sm btn-soft-danger mt-1" title="Delete"><i data-lucide="trash-2"></i></a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AddProject Modal -->
+    <div id="AddProject" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form id="ProjectForm" class="needs-validation" novalidate method="post">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Add Project</h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="ProjectName" class="form-label">Project Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="ProjectName" required>
+                            <div class="invalid-feedback">Please provide a valid Project Name.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="ProjectCode" class="form-label">Project Code <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="ProjectCode" required>
+                            <div class="invalid-feedback">Please provide a valid Project Code.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="Description" class="form-label">Description</label>
+                            <textarea class="form-control" id="Description" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="StartDate" class="form-label">Start Date</label>
+                            <input type="date" class="form-control" id="StartDate">
+                        </div>
+                        <div class="mb-3">
+                            <label for="EndDate" class="form-label">End Date</label>
+                            <input type="date" class="form-control" id="EndDate">
+                        </div>
+                        <div class="mb-3">
+                            <label for="Status" class="form-label">Status</label>
+                            <select class="form-select" id="Status">
+                                <option value="In Progress">In Progress</option>
+                                <option value="On Hold">On Hold</option>
+                                <option value="Completed">Completed</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-soft-primary">Save changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- UpdateProject Modal -->
+    <div id="UpdateProjectModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form id="UpdateProjectForm" class="needs-validation" novalidate method="post">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Update Project</h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="update_id" />
+                        <div class="mb-3">
+                            <label for="uProjectName" class="form-label">Project Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="uProjectName" required>
+                            <div class="invalid-feedback">Please provide a valid Project Name.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="uProjectCode" class="form-label">Project Code <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="uProjectCode" required>
+                            <div class="invalid-feedback">Please provide a valid Project Code.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="uDescription" class="form-label">Description</label>
+                            <textarea class="form-control" id="uDescription" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="uStartDate" class="form-label">Start Date</label>
+                            <input type="date" class="form-control" id="uStartDate">
+                        </div>
+                        <div class="mb-3">
+                            <label for="uEndDate" class="form-label">End Date</label>
+                            <input type="date" class="form-control" id="uEndDate">
+                        </div>
+                        <div class="mb-3">
+                            <label for="uStatus" class="form-label">Status</label>
+                            <select class="form-select" id="uStatus">
+                                <option value="In Progress">In Progress</option>
+                                <option value="On Hold">On Hold</option>
+                                <option value="Completed">Completed</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-soft-primary">Save changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#ProjectForm").on("submit", function (e) {
+            e.preventDefault();
+            var formData = {
+                ProjectName: $("#ProjectName").val(),
+                ProjectCode: $("#ProjectCode").val(),
+                Description: $("#Description").val(),
+                StartDate: $("#StartDate").val() ? $("#StartDate").val() : null,
+                EndDate: $("#EndDate").val() ? $("#EndDate").val() : null,
+                Status: $("#Status").val()
+            };
+            $.ajax({
+                url: '/CompanyInfo/SaveProject',
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(formData),
+                success: function (res) {
+                    if (res.success) {
+                        location.reload();
+                    } else {
+                        alert("Error: " + res.message);
+                    }
+                }
+            });
+        });
+
+        $("#UpdateProjectForm").on("submit", function (e) {
+            e.preventDefault();
+            var formData = {
+                ProjectId: $("#update_id").val(),
+                ProjectName: $("#uProjectName").val(),
+                ProjectCode: $("#uProjectCode").val(),
+                Description: $("#uDescription").val(),
+                StartDate: $("#uStartDate").val() ? $("#uStartDate").val() : null,
+                EndDate: $("#uEndDate").val() ? $("#uEndDate").val() : null,
+                Status: $("#uStatus").val()
+            };
+            $.ajax({
+                url: '/CompanyInfo/UpdateProject',
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(formData),
+                success: function (res) {
+                    if (res.success) {
+                        location.reload();
+                    } else {
+                        alert("Error: " + res.message);
+                    }
+                }
+            });
+        });
+    });
+
+    function formatDate(dateString) {
+        if (!dateString) return "";
+        if (dateString.indexOf("/Date(") !== -1) {
+            var milli = dateString.replace(/\/Date\((-?\d+)\)\//, '$1');
+            var d = new Date(parseInt(milli));
+            var month = '' + (d.getMonth() + 1),
+                day = '' + d.getDate(),
+                year = d.getFullYear();
+
+            if (month.length < 2) month = '0' + month;
+            if (day.length < 2) day = '0' + day;
+
+            return [year, month, day].join('-');
+        }
+        return dateString.substring(0, 10);
+    }
+
+    function UpdateProject(id) {
+        $.ajax({
+            url: '/CompanyInfo/GetProjectById',
+            type: 'GET',
+            data: { id: id },
+            success: function (data) {
+                if (data) {
+                    $("#update_id").val(data.ProjectId);
+                    $("#uProjectName").val(data.ProjectName);
+                    $("#uProjectCode").val(data.ProjectCode);
+                    $("#uDescription").val(data.Description);
+                    $("#uStartDate").val(formatDate(data.StartDate));
+                    $("#uEndDate").val(formatDate(data.EndDate));
+                    $("#uStatus").val(data.Status);
+                    $("#UpdateProjectModal").modal("show");
+                }
+            }
+        });
+    }
+
+    // Delete project
+    function DeleteProject(id) {
+        if (confirm("Are you sure you want to delete this project?")) {
+            $.ajax({
+                url: '/CompanyInfo/DeleteProject',
+                type: "POST",
+                data: { id: id },
+                success: function (res) {
+                    if (res.success) {
+                        location.reload();
+                    } else {
+                        alert("Error: " + res.message);
+                    }
+                }
+            });
+        }
+    }
+</script>

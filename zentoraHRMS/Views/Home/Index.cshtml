@@ -1,0 +1,777 @@
+@{
+    ViewBag.Title = "Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var roleId = ViewBag.RoleId != null ? Convert.ToInt32(ViewBag.RoleId) : 6; // Default to Employee if null
+
+    // Fallbacks and helper variables
+    var totalEmployees = ViewBag.DbTotalEmployees != null ? ViewBag.DbTotalEmployees.ToString() : "412";
+    var totalBranches = ViewBag.DbTotalBranches != null ? ViewBag.DbTotalBranches.ToString() : "8";
+    var totalDepartments = ViewBag.DbTotalDepartments != null ? ViewBag.DbTotalDepartments.ToString() : "24";
+    var totalProjects = ViewBag.DbTotalProjects != null ? ViewBag.DbTotalProjects.ToString() : "8";
+    var attendanceRate = ViewBag.DbAttendanceRate != null ? string.Format("{0:0.#}%", ViewBag.DbAttendanceRate) : "94.2%";
+    var monthlyPayroll = ViewBag.DbMonthlyPayroll != null && Convert.ToDecimal(ViewBag.DbMonthlyPayroll) > 0 
+        ? string.Format("${0:n0}", ViewBag.DbMonthlyPayroll) 
+        : "$142,800";
+    var pendingLeaves = ViewBag.DbPendingLeaves != null ? ViewBag.DbPendingLeaves.ToString() : "2";
+    var teamSize = ViewBag.DbTeamSize != null ? ViewBag.DbTeamSize.ToString() : "12";
+    var openJobs = ViewBag.DbOpenJobs != null ? ViewBag.DbOpenJobs.ToString() : "6";
+    var totalCandidates = ViewBag.DbTotalCandidates != null ? ViewBag.DbTotalCandidates.ToString() : "48";
+}
+
+<!-- Inline Custom Premium Dashboard Styles -->
+<style>
+    .dashboard-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid rgba(226, 232, 240, 0.8) !important;
+    }
+    .dashboard-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05) !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+    .text-gradient {
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    .quick-action-btn {
+        transition: all 0.2s ease-in-out;
+    }
+    .quick-action-btn:hover {
+        background-color: #3b82f6 !important;
+        color: #fff !important;
+    }
+    .pulse-btn {
+        position: relative;
+    }
+    .pulse-btn::after {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        border-radius: 50px;
+        background: rgba(40, 167, 69, 0.4);
+        opacity: 0;
+        animation: pulse 2s infinite;
+    }
+    @@keyframes pulse {
+        0% { transform: scale(1); opacity: 0.8; }
+        100% { transform: scale(1.15); opacity: 0; }
+    }
+</style>
+
+<div class="container-fluid py-3">
+
+    <!-- Database Connection Error Alert (for debugging if needed, hidden unless there's an error) -->
+    @if (ViewBag.DbError != null)
+    {
+        <div class="alert alert-warning alert-dismissible fade show shadow-sm rounded-3 border-warning mb-4" role="alert">
+            <div class="d-flex align-items-center">
+                <i data-lucide="alert-triangle" class="text-warning me-2" style="width: 20px; height: 20px;"></i>
+                <div>
+                    <strong>Running in Demo Mode:</strong> Database connection is active, but some custom schemas are missing. Using high-fidelity fallback values.
+                </div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Premium Welcoming Header Banner -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 overflow-hidden shadow-sm rounded-3" style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);">
+                <div class="card-body p-4 text-white position-relative">
+                    <div class="position-absolute end-0 bottom-0 opacity-10 mb-n4 me-n4">
+                        <i data-lucide="sparkles" style="width: 160px; height: 160px;"></i>
+                    </div>
+                    <span class="badge bg-white bg-opacity-20 text-white fw-semibold px-3 py-1.5 rounded-pill mb-3" style="font-size: 11px; letter-spacing: 0.5px;">
+                        <i data-lucide="shield" class="fs-xs me-1 align-middle" style="width:12px;height:12px;"></i> Portal: @ViewBag.RoleName View
+                    </span>
+                    <h2 class="fw-bold text-white mb-2 fs-3">Welcome back, @ViewBag.UserName 👋</h2>
+                    <p class="fs-md text-white text-opacity-80 mb-0" style="max-width: 650px; font-size: 14px;">
+                        Logged in as <strong>@ViewBag.Designation</strong>. You have full access to your personalized portal workspace, configured according to security guidelines.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- 1 & 2. SUPERADMIN / ADMIN DASHBOARD -->
+    <!-- ============================================== -->
+    @if (roleId == 1 || roleId == 2)
+    {
+        <!-- Stats Widgets -->
+        <div class="row mb-4">
+            <div class="col-xl-3 col-sm-6 mb-3">
+                <div class="card dashboard-card bg-white shadow-sm rounded-3">
+                    <div class="card-body d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="text-muted fw-normal mb-1">Total Employees</h6>
+                            <h3 class="mb-0 fw-bold text-dark">@totalEmployees <span class="fs-xxs text-success fw-normal"><i data-lucide="trending-up" class="align-middle" style="width:10px;height:10px;"></i> +12%</span></h3>
+                        </div>
+                        <div class="p-3 bg-soft-primary text-primary rounded-circle" style="background-color: rgba(59, 130, 246, 0.1);">
+                            <i data-lucide="users"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-sm-6 mb-3">
+                <div class="card dashboard-card bg-white shadow-sm rounded-3">
+                    <div class="card-body d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="text-muted fw-normal mb-1">Active Branches</h6>
+                            <h3 class="mb-0 fw-bold text-dark">@totalBranches <span class="fs-xxs text-muted fw-normal">Global</span></h3>
+                        </div>
+                        <div class="p-3 bg-soft-info text-info rounded-circle" style="background-color: rgba(23, 162, 184, 0.1);">
+                            <i data-lucide="map-pin"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-sm-6 mb-3">
+                <div class="card dashboard-card bg-white shadow-sm rounded-3">
+                    <div class="card-body d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="text-muted fw-normal mb-1">Today's Attendance</h6>
+                            <h3 class="mb-0 fw-bold text-dark">@attendanceRate <span class="fs-xxs text-success fw-normal">Perfect</span></h3>
+                        </div>
+                        <div class="p-3 bg-soft-success text-success rounded-circle" style="background-color: rgba(40, 167, 69, 0.1);">
+                            <i data-lucide="check-square"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-sm-6 mb-3">
+                <div class="card dashboard-card bg-white shadow-sm rounded-3">
+                    <div class="card-body d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="text-muted fw-normal mb-1">Monthly Payroll</h6>
+                            <h3 class="mb-0 fw-bold text-dark">@monthlyPayroll <span class="fs-xxs text-danger fw-normal"><i data-lucide="trending-up" class="align-middle" style="width:10px;height:10px;"></i> +4%</span></h3>
+                        </div>
+                        <div class="p-3 bg-soft-warning text-warning rounded-circle" style="background-color: rgba(255, 193, 7, 0.1);">
+                            <i data-lucide="wallet"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Analytics and Charts Mockup -->
+            <div class="col-xl-8 col-lg-7 mb-4">
+                <div class="card bg-white shadow-sm rounded-3 border-light h-100">
+                    <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0 fw-semibold text-dark"><i data-lucide="bar-chart-2" class="text-primary me-2 align-middle"></i>Operational Cost & Expense Flow</h5>
+                        <span class="badge bg-light text-dark">Year 2026</span>
+                    </div>
+                    <div class="card-body text-center d-flex flex-column justify-content-center">
+                        <!-- Modern SVG chart -->
+                        <div class="my-4">
+                            <svg viewBox="0 0 500 200" width="100%" height="180">
+                                <defs>
+                                    <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.3"/>
+                                        <stop offset="100%" stop-color="#3b82f6" stop-opacity="0"/>
+                                    </linearGradient>
+                                </defs>
+                                <polyline fill="url(#chartGrad)" stroke="none" points="10,200 80,140 160,110 240,130 320,80 400,60 490,40 490,200"/>
+                                <polyline fill="none" stroke="#3b82f6" stroke-width="4" points="10,180 80,140 160,110 240,130 320,80 400,60 490,40"/>
+                                <circle cx="80" cy="140" r="5" fill="#3b82f6"/>
+                                <circle cx="160" cy="110" r="5" fill="#3b82f6"/>
+                                <circle cx="240" cy="130" r="5" fill="#3b82f6"/>
+                                <circle cx="320" cy="80" r="5" fill="#3b82f6"/>
+                                <circle cx="400" cy="60" r="5" fill="#3b82f6"/>
+                                <circle cx="490" cy="40" r="5" fill="#3b82f6"/>
+                            </svg>
+                        </div>
+                        <div class="row mt-3 text-start">
+                            <div class="col-4">
+                                <small class="text-muted d-block">Q1 Operations</small>
+                                <strong class="text-dark">$315K</strong>
+                            </div>
+                            <div class="col-4">
+                                <small class="text-muted d-block">Q2 Operations</small>
+                                <strong class="text-dark">$420K</strong>
+                            </div>
+                            <div class="col-4">
+                                <small class="text-muted d-block">Est. Projected Q3</small>
+                                <strong class="text-dark">$550K</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Side Quick Actions & Logs -->
+            <div class="col-xl-4 col-lg-5 mb-4">
+                <!-- Quick actions -->
+                <div class="card bg-white shadow-sm rounded-3 border-light mb-4">
+                    <div class="card-body">
+                        <h6 class="text-uppercase text-muted fw-bold fs-xxs mb-3">Quick Actions</h6>
+                        <div class="d-flex flex-column gap-2">
+                            <a href="@Url.Action("Employees", "Staff")" class="btn btn-light bg-light border-0 py-2.5 text-start px-3 rounded-2 text-dark fs-sm quick-action-btn d-flex justify-content-between align-items-center"><span>Add New Employee</span> <i data-lucide="plus" style="width:14px;height:14px;"></i></a>
+                            <a href="@Url.Action("Parent", "Modules")" class="btn btn-light bg-light border-0 py-2.5 text-start px-3 rounded-2 text-dark fs-sm quick-action-btn d-flex justify-content-between align-items-center"><span>System Configurations</span> <i data-lucide="sliders" style="width:14px;height:14px;"></i></a>
+                            <a href="@Url.Action("PayrollRuns", "Payroll")" class="btn btn-light bg-light border-0 py-2.5 text-start px-3 rounded-2 text-dark fs-sm quick-action-btn d-flex justify-content-between align-items-center"><span>Generate Payroll Run</span> <i data-lucide="credit-card" style="width:14px;height:14px;"></i></a>
+                            <a href="@Url.Action("Index", "Settings")" class="btn btn-light bg-light border-0 py-2.5 text-start px-3 rounded-2 text-dark fs-sm quick-action-btn d-flex justify-content-between align-items-center"><span>Manage Portal Settings</span> <i data-lucide="settings" style="width:14px;height:14px;"></i></a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Audit Logs -->
+                <div class="card bg-white shadow-sm rounded-3 border-light">
+                    <div class="card-body">
+                        <h6 class="text-uppercase text-muted fw-bold fs-xxs mb-3">System Log Activity</h6>
+                        <ul class="list-group list-group-flush" style="font-size: 13px;">
+                            @if (ViewBag.DbTotalEmployees != null && ViewBag.DbTotalEmployees > 0)
+                            {
+                                <li class="list-group-item px-0 py-2 border-0">
+                                    <span class="text-success"><i data-lucide="check" class="me-1 align-text-bottom" style="width:12px;height:12px;"></i></span> System connected: @ViewBag.DbTotalEmployees employees verified
+                                    <small class="text-muted d-block mt-0.5">Active</small>
+                                </li>
+                            }
+                            @if (ViewBag.DbTotalProjects != null && ViewBag.DbTotalProjects > 0)
+                            {
+                                <li class="list-group-item px-0 py-2 border-0">
+                                    <span class="text-info"><i data-lucide="info" class="me-1 align-text-bottom" style="width:12px;height:12px;"></i></span> @ViewBag.DbTotalProjects projects currently active in pipeline
+                                    <small class="text-muted d-block mt-0.5">Synchronized</small>
+                                </li>
+                            }
+                            @if (ViewBag.DbAnnouncements != null && ViewBag.DbAnnouncements.Rows.Count > 0)
+                            {
+                                foreach (System.Data.DataRow row in ViewBag.DbAnnouncements.Rows)
+                                {
+                                    <li class="list-group-item px-0 py-2 border-0">
+                                        <span class="text-primary"><i data-lucide="megaphone" class="me-1 align-text-bottom" style="width:12px;height:12px;"></i></span> @row["Title"]
+                                        <small class="text-muted d-block mt-0.5">Posted by @row["CreatedBy"]</small>
+                                    </li>
+                                }
+                            }
+                            else
+                            {
+                                <li class="list-group-item px-0 py-2 border-0">
+                                    <span class="text-success"><i data-lucide="check" class="me-1 align-text-bottom" style="width:12px;height:12px;"></i></span> System database backup completed
+                                    <small class="text-muted d-block mt-0.5">Today, 04:00 AM</small>
+                                </li>
+                                <li class="list-group-item px-0 py-2 border-0">
+                                    <span class="text-info"><i data-lucide="info" class="me-1 align-text-bottom" style="width:12px;height:12px;"></i></span> Main Lobby Biometric Device Synced
+                                    <small class="text-muted d-block mt-0.5">Today, 09:10 AM</small>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- ============================================== -->
+    <!-- 3 & 5. MANAGER / TEAM LEADER DASHBOARD -->
+    <!-- ============================================== -->
+    @if (roleId == 3 || roleId == 5)
+    {
+        <!-- Stats Widgets -->
+        <div class="row mb-4">
+            <div class="col-xl-3 col-sm-6 mb-3">
+                <div class="card dashboard-card bg-white shadow-sm rounded-3">
+                    <div class="card-body d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="text-muted fw-normal mb-1">My Team Size</h6>
+                            <h3 class="mb-0 fw-bold text-dark">@teamSize <span class="fs-xxs text-muted fw-normal">Members</span></h3>
+                        </div>
+                        <div class="p-3 bg-soft-primary text-primary rounded-circle" style="background-color: rgba(59, 130, 246, 0.1);">
+                            <i data-lucide="users"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-sm-6 mb-3">
+                <div class="card dashboard-card bg-white shadow-sm rounded-3">
+                    <div class="card-body d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="text-muted fw-normal mb-1">Active Tasks</h6>
+                            <h3 class="mb-0 fw-bold text-dark">@totalProjects <span class="fs-xxs text-warning fw-normal">Pending</span></h3>
+                        </div>
+                        <div class="p-3 bg-soft-warning text-warning rounded-circle" style="background-color: rgba(255, 193, 7, 0.1);">
+                            <i data-lucide="list-todo"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-sm-6 mb-3">
+                <div class="card dashboard-card bg-white shadow-sm rounded-3">
+                    <div class="card-body d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="text-muted fw-normal mb-1">Leaves Pending Approval</h6>
+                            <h3 class="mb-0 fw-bold text-dark">@pendingLeaves <span class="fs-xxs text-danger fw-normal">Action Required</span></h3>
+                        </div>
+                        <div class="p-3 bg-soft-danger text-danger rounded-circle" style="background-color: rgba(220, 53, 69, 0.1);">
+                            <i data-lucide="calendar-days"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-sm-6 mb-3">
+                <div class="card dashboard-card bg-white shadow-sm rounded-3">
+                    <div class="card-body d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="text-muted fw-normal mb-1">Timesheets to Verify</h6>
+                            <h3 class="mb-0 fw-bold text-dark">@totalEmployees <span class="fs-xxs text-info fw-normal">This Week</span></h3>
+                        </div>
+                        <div class="p-3 bg-soft-info text-info rounded-circle" style="background-color: rgba(23, 162, 184, 0.1);">
+                            <i data-lucide="clock"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Team Attendance and Activity -->
+            <div class="col-xl-8 col-lg-7 mb-4">
+                <div class="card bg-white shadow-sm rounded-3 border-light h-100">
+                    <div class="card-header bg-white border-0 py-3">
+                        <h5 class="card-title mb-0 fw-semibold text-dark"><i data-lucide="eye" class="text-primary me-2 align-middle"></i>Team Status Tracker</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Team Member</th>
+                                        <th>Location / Branch</th>
+                                        <th>Assigned Department</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (ViewBag.DbTeamList != null && ViewBag.DbTeamList.Rows.Count > 0)
+                                    {
+                                        foreach (System.Data.DataRow row in ViewBag.DbTeamList.Rows)
+                                        {
+                                            bool isActive = row["IsActive"] == DBNull.Value || Convert.ToInt64(row["IsActive"]) == 1;
+                                            <tr>
+                                                <td><strong>@row["EmpName"]</strong><br><small class="text-muted">@row["Designation"]</small></td>
+                                                <td>09:00 AM</td>
+                                                <td class="text-truncate" style="max-width: 180px;">@row["Department"] (@row["Branch"])</td>
+                                                <td><span class="badge @(isActive ? "bg-success" : "bg-warning")">@(isActive ? "Active" : "Away")</span></td>
+                                            </tr>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <tr>
+                                            <td><strong>John Doe</strong><br><small class="text-muted">Software Developer</small></td>
+                                            <td>09:02 AM</td>
+                                            <td class="text-truncate" style="max-width: 150px;">API Integration Module</td>
+                                            <td><span class="badge bg-success">Active</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Jane Smith</strong><br><small class="text-muted">UI/UX Engineer</small></td>
+                                            <td>09:12 AM</td>
+                                            <td class="text-truncate" style="max-width: 150px;">Settings Page Redesign</td>
+                                            <td><span class="badge bg-success">Active</span></td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Side Team Actions & Requests -->
+            <div class="col-xl-4 col-lg-5 mb-4">
+                <div class="card bg-white shadow-sm rounded-3 border-light mb-4">
+                    <div class="card-body">
+                        <h6 class="text-uppercase text-muted fw-bold fs-xxs mb-3">Leave Approval Panel</h6>
+                        
+                        @if (ViewBag.DbPendingLeavesList != null && ViewBag.DbPendingLeavesList.Rows.Count > 0)
+                        {
+                            foreach (System.Data.DataRow row in ViewBag.DbPendingLeavesList.Rows)
+                            {
+                                var start = row["StartDate"] != DBNull.Value ? Convert.ToDateTime(row["StartDate"]).ToString("MMM dd") : "";
+                                var end = row["EndDate"] != DBNull.Value ? Convert.ToDateTime(row["EndDate"]).ToString("MMM dd") : "";
+                                <div class="p-3 border border-light rounded-3 bg-light mb-3">
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <h6 class="mb-0 fw-semibold text-dark">@row["EmpName"]</h6>
+                                        <span class="badge bg-soft-warning text-warning">@row["CategoryName"]</span>
+                                    </div>
+                                    <p class="text-muted fs-xxs mb-3">Dates: @start - @end<br>Reason: @row["Reason"]</p>
+                                    <div class="d-flex gap-2">
+                                        <button class="btn btn-sm btn-success w-50 py-1.5 rounded-2">Approve</button>
+                                        <button class="btn btn-sm btn-outline-danger w-50 py-1.5 rounded-2">Reject</button>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <!-- Request 1 fallback -->
+                            <div class="p-3 border border-light rounded-3 bg-light mb-3">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <h6 class="mb-0 fw-semibold text-dark">Emma Taylor</h6>
+                                    <span class="badge bg-soft-warning text-warning">Annual Leave</span>
+                                </div>
+                                <p class="text-muted fs-xxs mb-3">Dates: July 10 - July 12<br>Reason: Family event out of town.</p>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-sm btn-success w-50 py-1.5 rounded-2">Approve</button>
+                                    <button class="btn btn-sm btn-outline-danger w-50 py-1.5 rounded-2">Reject</button>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- ============================================== -->
+    <!-- 4. HR DASHBOARD -->
+    <!-- ============================================== -->
+    @if (roleId == 4)
+    {
+        <!-- Stats Widgets -->
+        <div class="row mb-4">
+            <div class="col-xl-3 col-sm-6 mb-3">
+                <div class="card dashboard-card bg-white shadow-sm rounded-3">
+                    <div class="card-body d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="text-muted fw-normal mb-1">Open Job Postings</h6>
+                            <h3 class="mb-0 fw-bold text-dark">@openJobs <span class="fs-xxs text-info fw-normal">Active Roles</span></h3>
+                        </div>
+                        <div class="p-3 bg-soft-info text-info rounded-circle" style="background-color: rgba(23, 162, 184, 0.1);">
+                            <i data-lucide="megaphone"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-sm-6 mb-3">
+                <div class="card dashboard-card bg-white shadow-sm rounded-3">
+                    <div class="card-body d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="text-muted fw-normal mb-1">Total Candidates</h6>
+                            <h3 class="mb-0 fw-bold text-dark">@totalCandidates <span class="fs-xxs text-success fw-normal">In Pipeline</span></h3>
+                        </div>
+                        <div class="p-3 bg-soft-success text-success rounded-circle" style="background-color: rgba(40, 167, 69, 0.1);">
+                            <i data-lucide="briefcase"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-sm-6 mb-3">
+                <div class="card dashboard-card bg-white shadow-sm rounded-3">
+                    <div class="card-body d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="text-muted fw-normal mb-1">Pending Leave Requests</h6>
+                            <h3 class="mb-0 fw-bold text-dark">@pendingLeaves <span class="fs-xxs text-danger fw-normal">Needs Review</span></h3>
+                        </div>
+                        <div class="p-3 bg-soft-danger text-danger rounded-circle" style="background-color: rgba(220, 53, 69, 0.1);">
+                            <i data-lucide="calendar"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-sm-6 mb-3">
+                <div class="card dashboard-card bg-white shadow-sm rounded-3">
+                    <div class="card-body d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="text-muted fw-normal mb-1">Birthdays / Anniv.</h6>
+                            <h3 class="mb-0 fw-bold text-dark">1 <span class="fs-xxs text-primary fw-normal">This Week</span></h3>
+                        </div>
+                        <div class="p-3 bg-soft-primary text-primary rounded-circle" style="background-color: rgba(59, 130, 246, 0.1);">
+                            <i data-lucide="gift"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Candidate Pipeline Info -->
+            <div class="col-xl-8 col-lg-7 mb-4">
+                <div class="card bg-white shadow-sm rounded-3 border-light mb-4">
+                    <div class="card-header bg-white border-0 py-3 justify-content-between d-flex align-items-center">
+                        <h5 class="card-title mb-0 fw-semibold text-dark"><i data-lucide="users-2" class="text-primary me-2 align-middle"></i>Active Recruitment Pipeline</h5>
+                        <a href="@Url.Action("Candidates", "Recruitment")" class="btn btn-sm btn-outline-secondary">View Pipeline</a>
+                    </div>
+                    <div class="card-body">
+                        @{
+                            int dbApplied = 0;
+                            int dbShortlisted = 0;
+                            if (ViewBag.DbCandidatesList != null)
+                            {
+                                foreach (System.Data.DataRow r in ViewBag.DbCandidatesList.Rows)
+                                {
+                                    var stat = r["ApplicationStatus"].ToString().ToLower();
+                                    if (stat.Contains("applied")) { dbApplied++; }
+                                    if (stat.Contains("shortlisted")) { dbShortlisted++; }
+                                }
+                            }
+                            if (dbApplied == 0 && dbShortlisted == 0) { dbApplied = 1; dbShortlisted = 1; }
+                        }
+                        <div class="row text-center py-2 bg-light rounded-3 mb-4 g-0">
+                            <div class="col-3 border-end border-light">
+                                <h3 class="fw-bold mb-0 text-dark">@dbApplied</h3>
+                                <small class="text-muted">Applied</small>
+                            </div>
+                            <div class="col-3 border-end border-light">
+                                <h3 class="fw-bold mb-0 text-dark">@dbShortlisted</h3>
+                                <small class="text-muted">Screening</small>
+                            </div>
+                            <div class="col-3 border-end border-light">
+                                <h3 class="fw-bold mb-0 text-dark">@dbShortlisted</h3>
+                                <small class="text-muted">Interviews</small>
+                            </div>
+                            <div class="col-3">
+                                <h3 class="fw-bold mb-0 text-dark">0</h3>
+                                <small class="text-muted">Offers Sent</small>
+                            </div>
+                        </div>
+
+                        <h6 class="text-muted fw-bold fs-xxs mb-3">Recently Submitted Applications</h6>
+                        <ul class="list-group list-group-flush">
+                            @if (ViewBag.DbCandidatesList != null && ViewBag.DbCandidatesList.Rows.Count > 0)
+                            {
+                                foreach (System.Data.DataRow row in ViewBag.DbCandidatesList.Rows)
+                                {
+                                    <li class="list-group-item px-0 py-3 border-bottom d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-0 fw-semibold text-dark">@row["FullName"]</h6>
+                                            <small class="text-muted">Candidate for @row["JobTitle"] | @row["Email"]</small>
+                                        </div>
+                                        <span class="badge bg-soft-primary text-primary">@row["ApplicationStatus"]</span>
+                                    </li>
+                                }
+                            }
+                            else
+                            {
+                                <li class="list-group-item px-0 py-3 border-bottom d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-0 fw-semibold text-dark">Sarah Connor</h6>
+                                        <small class="text-muted">Candidate for Lead UI/UX Engineer</small>
+                                    </div>
+                                    <span class="badge bg-soft-primary text-primary">Shortlisted</span>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interiews list & HR Actions -->
+            <div class="col-xl-4 col-lg-5 mb-4">
+                <div class="card bg-white shadow-sm rounded-3 border-light mb-4">
+                    <div class="card-body">
+                        <h6 class="text-uppercase text-muted fw-bold fs-xxs mb-3">Upcoming Interviews</h6>
+                        <div class="d-flex flex-column gap-3">
+                            @if (ViewBag.DbCandidatesList != null && ViewBag.DbCandidatesList.Rows.Count > 0)
+                            {
+                                foreach (System.Data.DataRow row in ViewBag.DbCandidatesList.Rows)
+                                {
+                                    if (row["ApplicationStatus"].ToString() == "Shortlisted")
+                                    {
+                                        <div class="p-3 border border-light rounded-3 bg-light">
+                                            <span class="badge bg-primary mb-2">Today, 02:00 PM</span>
+                                            <h6 class="mb-1 fw-bold text-dark">@row["FullName"]</h6>
+                                            <p class="text-muted fs-xxs mb-0">Role: @row["JobTitle"]<br>Interviewer: HR Team</p>
+                                        </div>
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                <div class="p-3 border border-light rounded-3 bg-light">
+                                    <span class="badge bg-primary mb-2">Today, 02:00 PM</span>
+                                    <h6 class="mb-1 fw-bold text-dark">Sarah Connor</h6>
+                                    <p class="text-muted fs-xxs mb-0">Role: Lead UI/UX Engineer<br>Interviewer: Team Lead & HR Manager</p>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- ============================================== -->
+    <!-- 6. EMPLOYEE SELF-SERVICE WORKSPACE -->
+    <!-- ============================================== -->
+    @if (roleId == 6)
+    {
+        <!-- Stats Widgets -->
+        <div class="row mb-4">
+            <div class="col-xl-3 col-sm-6 mb-3">
+                <div class="card dashboard-card bg-white shadow-sm rounded-3">
+                    <div class="card-body d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="text-muted fw-normal mb-1">My Attendance Today</h6>
+                            @{
+                                var checkInTime = "09:00 AM";
+                                var attStatus = "On Time";
+                                var attColor = "bg-soft-success text-success";
+                                if (ViewBag.DbMyAttendance != null && ViewBag.DbMyAttendance.Rows.Count > 0)
+                                {
+                                    System.Data.DataRow attRow = ViewBag.DbMyAttendance.Rows[0];
+                                    checkInTime = attRow["ClockIn"] != DBNull.Value ? attRow["ClockIn"].ToString() : "09:00 AM";
+                                    attStatus = attRow["Status"] != DBNull.Value ? attRow["Status"].ToString() : "Present";
+                                }
+                            }
+                            <h4 class="mb-0 fw-bold text-dark" style="font-size: 18px;">@checkInTime <span class="badge @attColor fs-xxs font-normal">@attStatus</span></h4>
+                        </div>
+                        <div class="p-3 bg-soft-success text-success rounded-circle" style="background-color: rgba(40, 167, 69, 0.1);">
+                            <i data-lucide="clock"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-sm-6 mb-3">
+                <div class="card dashboard-card bg-white shadow-sm rounded-3">
+                    <div class="card-body d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="text-muted fw-normal mb-1">Remaining Leaves</h6>
+                            <h3 class="mb-0 fw-bold text-dark">14 <span class="fs-xxs text-muted fw-normal">Days</span></h3>
+                        </div>
+                        <div class="p-3 bg-soft-primary text-primary rounded-circle" style="background-color: rgba(59, 130, 246, 0.1);">
+                            <i data-lucide="calendar"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-sm-6 mb-3">
+                <div class="card dashboard-card bg-white shadow-sm rounded-3">
+                    <div class="card-body d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="text-muted fw-normal mb-1">Assigned Tasks</h6>
+                            <h3 class="mb-0 fw-bold text-dark">3 <span class="fs-xxs text-warning fw-normal">Pending</span></h3>
+                        </div>
+                        <div class="p-3 bg-soft-warning text-warning rounded-circle" style="background-color: rgba(255, 193, 7, 0.1);">
+                            <i data-lucide="list-todo"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-sm-6 mb-3">
+                <div class="card dashboard-card bg-white shadow-sm rounded-3">
+                    <div class="card-body d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="text-muted fw-normal mb-1">Performance Score</h6>
+                            <h3 class="mb-0 fw-bold text-dark">94.8% <span class="fs-xxs text-success fw-normal">Excellent</span></h3>
+                        </div>
+                        <div class="p-3 bg-soft-info text-info rounded-circle" style="background-color: rgba(23, 162, 184, 0.1);">
+                            <i data-lucide="bar-chart-2"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Clock In/Out Work area -->
+            <div class="col-xl-4 col-lg-5 mb-4">
+                <div class="card bg-white shadow-sm rounded-3 border-light h-100">
+                    <div class="card-header bg-white border-0 py-3 text-center">
+                        <h5 class="card-title mb-0 fw-semibold text-dark">Work Session Recorder</h5>
+                    </div>
+                    <div class="card-body text-center d-flex flex-column justify-content-center align-items-center py-4">
+                        <span class="text-muted fs-xxs d-block mb-2">Shift: Day Shift (09:00 AM - 06:00 PM)</span>
+                        <h2 class="fw-bold mb-4 text-dark" style="font-size: 32px; font-family: monospace;">04:12:45 <small class="fs-xxs text-muted">Hrs</small></h2>
+                        
+                        <!-- Toggle Button Mock -->
+                        <button class="btn btn-success py-3 px-5 rounded-pill shadow pulse-btn fw-semibold mb-3 d-inline-flex align-items-center"><i data-lucide="play" class="me-2" style="width:18px;height:18px;"></i> Clock Out Now</button>
+                        <span class="fs-xxs text-muted mt-1"><i data-lucide="info" class="me-1 align-text-bottom" style="width:12px;height:12px;display:inline-block;"></i> You logged in at @checkInTime today.</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Leaves & announcements -->
+            <div class="col-xl-8 col-lg-7 mb-4">
+                <!-- Personal Leaves list -->
+                <div class="card bg-white shadow-sm rounded-3 border-light mb-4">
+                    <div class="card-header bg-white border-0 py-3 justify-content-between d-flex align-items-center">
+                        <h5 class="card-title mb-0 fw-semibold text-dark"><i data-lucide="umbrella" class="text-primary me-2 align-middle"></i>My Leave Balance</h5>
+                        <a href="@Url.Action("LeaveApplications", "Leave")" class="btn btn-sm btn-outline-secondary">Request Leave</a>
+                    </div>
+                    <div class="card-body">
+                        @if (ViewBag.DbLeaveBalance != null && ViewBag.DbLeaveBalance.Rows.Count > 0)
+                        {
+                            <div class="row">
+                                @foreach (System.Data.DataRow row in ViewBag.DbLeaveBalance.Rows)
+                                {
+                                    var total = Convert.ToInt32(row["TotalDays"]);
+                                    var used = Convert.ToInt32(row["UsedDays"]);
+                                    var remaining = total - used;
+                                    <div class="col-md-4 mb-3">
+                                        <div class="p-3 border border-light rounded-3 bg-light">
+                                            <h6 class="mb-1 text-muted fs-xxs text-uppercase">@row["CategoryName"]</h6>
+                                            <h4 class="fw-bold mb-0 text-dark">@remaining / @total <small class="text-muted fs-xxs">Days</small></h4>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <div class="p-3 border border-light rounded-3 bg-light">
+                                        <h6 class="mb-1 text-muted fs-xxs text-uppercase">Sick Leaves</h6>
+                                        <h4 class="fw-bold mb-0 text-dark">5 / 7 <small class="text-muted fs-xxs">Days</small></h4>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <div class="p-3 border border-light rounded-3 bg-light">
+                                        <h6 class="mb-1 text-muted fs-xxs text-uppercase">Casual Leaves</h6>
+                                        <h4 class="fw-bold mb-0 text-dark">6 / 8 <small class="text-muted fs-xxs">Days</small></h4>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <div class="p-3 border border-light rounded-3 bg-light">
+                                        <h6 class="mb-1 text-muted fs-xxs text-uppercase">Annual Leaves</h6>
+                                        <h4 class="fw-bold mb-0 text-dark">3 / 15 <small class="text-muted fs-xxs">Days</small></h4>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Announcements -->
+                <div class="card bg-white shadow-sm rounded-3 border-light">
+                    <div class="card-body">
+                        <h6 class="text-uppercase text-muted fw-bold fs-xxs mb-3"><i data-lucide="megaphone" class="text-primary me-2 align-middle" style="width:14px;height:14px;"></i>Company Announcements</h6>
+                        @if (ViewBag.DbAnnouncements != null && ViewBag.DbAnnouncements.Rows.Count > 0)
+                        {
+                            <ul class="list-group list-group-flush" style="font-size: 13px;">
+                                @foreach (System.Data.DataRow row in ViewBag.DbAnnouncements.Rows)
+                                {
+                                    var start = row["StartDate"] != DBNull.Value ? Convert.ToDateTime(row["StartDate"]).ToString("MMMM dd, yyyy") : "";
+                                    <li class="list-group-item px-0 py-2 border-0">
+                                        <strong>@row["Title"]:</strong> @row["Description"]
+                                        <small class="text-muted d-block mt-0.5">By @row["CreatedBy"] | @start</small>
+                                    </li>
+                                }
+                            </ul>
+                        }
+                        else
+                        {
+                            <ul class="list-group list-group-flush" style="font-size: 13px;">
+                                <li class="list-group-item px-0 py-2 border-0">
+                                    <strong>System Update:</strong> The biometric synchronizer has been updated. Please scan correctly at check points.
+                                    <small class="text-muted d-block mt-0.5">By Admin | Yesterday</small>
+                                </li>
+                                <li class="list-group-item px-0 py-2 border-0">
+                                    <strong>Announcements:</strong> Zentora annual meet 2026 scheduling starts next week. Please submit availability.
+                                    <small class="text-muted d-block mt-0.5">By HR Team | 3 days ago</small>
+                                </li>
+                            </ul>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+</div>

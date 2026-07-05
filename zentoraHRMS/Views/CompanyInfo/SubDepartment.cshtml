@@ -1,0 +1,387 @@
+﻿@model IEnumerable<zentoraHRMS.Models.SubDepartmentModel>
+@{
+    ViewBag.Title = "SubDepartment";
+}
+
+<div class="container-fluid">
+
+    <div class="row justify-content-center py-5">
+        <div class="col-xxl-5 col-xl-7 text-center">
+            <a href="@Url.Action("Index","Home")" class="badge badge-default fw-normal shadow px-2 py-1 mb-2 fst-italic fs-xxs">
+                <i data-lucide="square-check" class="fs-sm me-1"></i> DashBoard
+            </a>
+            <h3 class="fw-bold">
+                SubDepartment
+            </h3>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-xxl-12">
+            <div class="card rounded-2">
+                <div class="card-header justify-content-between">
+                    <h5 class="card-title"> SubDepartment Details </h5>
+                    <button type="button" class="btn btn-sm btn-soft-primary" data-bs-toggle="modal" data-bs-target="#AddSubDepartment"><i class="me-1" data-lucide="plus"></i> Add SubDepartment </button>
+                </div>
+
+                <div class="card-body">
+                    <table id="checkbox-select-data" class="table table-striped dt-responsive checkbox-select-datatable align-middle mb-0">
+                        <thead class="thead-sm text-uppercase fs-xxs">
+                            <tr>
+                                <th class="fs-sm" style="width: 1%;"></th>
+                                <th>SubDepartment Name</th>
+                                <th>SubDepartment Code</th>
+                                <th>Department</th>
+                                <th>Head Of SubDepartment</th>
+                                <th>Number Of Employees</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var sd in Model)
+                            {
+                                <tr>
+                                    <td class="fs-sm" style="width: 1%;"></td>
+                                    <td>@sd.SubDepartmentName</td>
+                                    <td>@sd.SubDepartmentCode</td>
+                                    <td>@sd.DepartmentName</td>
+                                    <td>@sd.HeadOfSubDepartment</td>
+                                    <td>@sd.NumberOfEmployees</td>
+                                    <td><span class="badge badge-label badge-soft-success">Active</span></td>
+                                    <td>
+                                        <a onclick="UpdateSubDepartment(@sd.SubDepartmentId)" data-bs-toggle="modal" data-bs-target="#UpdateSubDepartment" class="btn btn-sm btn-soft-info mt-1" title="Update"><i data-lucide="square-pen"></i></a>
+                                        <a onclick="DeleteSubDepartmentId(@sd.SubDepartmentId)" class="btn btn-sm btn-soft-danger mt-1" title="Delete"><i data-lucide="trash-2"></i></a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AddSubDepartment Start -->
+    <div id="AddSubDepartment" class="modal fade" tabindex="-1" role="dialog"
+         aria-labelledby="fullWidthModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <form id="SubDepartmentForm" class="needs-validation" novalidate method="post">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="fullWidthModalLabel"> Add SubDepartment Details </h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Button-style Tabs -->
+                        <ul class="nav nav-pills mb-3 justify-content-center" id="SubDepartmentTab" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="btn btn-sm btn-soft-secondary me-1 mb-1 rounded-1 active" id="SubDepartment-tab" data-bs-toggle="tab" data-bs-target="#SubDepartment" type="button" role="tab"> SubDepartment Info </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="btn btn-sm btn-soft-secondary me-1 mb-1 rounded-1" id="optional-tab" data-bs-toggle="tab" data-bs-target="#optional" type="button" role="tab"> Optional </button>
+                            </li>
+                        </ul>
+                        <div class="tab-content mt-3" id="SubDepartmentTabContent">
+                            <!-- SubDepartment Info -->
+                            <div class="tab-pane fade show active" id="SubDepartment" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-md-4 mt-3">
+                                        <label for="department" class="form-label"> Department <span class="text-danger">*</span></label>
+                                        <select id="department" data-choices class="form-select"></select>
+                                        <div class="invalid-feedback">Please select a Department.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="SubDepartment_name" class="form-label">SubDepartment Name <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="SubDepartment_name" required>
+                                        <div class="invalid-feedback">Please provide a valid SubDepartment Name.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="SubDepartment_code" class="form-label">SubDepartment Code <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="SubDepartment_code" required>
+                                        <div class="invalid-feedback">Please provide a valid SubDepartment Code.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="head_email" class="form-label"> HeadEmail <span class="text-danger">*</span></label>
+                                        <input type="email" class="form-control" id="head_email" required>
+                                        <div class="invalid-feedback">Please provide a valid HeadEmail.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="head_phone" class="form-label"> HeadPhone <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="head_phone" required>
+                                        <div class="invalid-feedback">Please provide a valid HeadPhone.</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Optional Info -->
+                            <div class="tab-pane fade" id="optional" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-md-4 mt-3">
+                                        <label for="description" class="form-label">Description <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="description" required>
+                                        <div class="invalid-feedback">Please provide a valid Description.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="HOSD" class="form-label">Head Of SubDepartment <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="HOSD" required>
+                                        <div class="invalid-feedback">Please provide a valid SubDepartment.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="NOE" class="form-label">Number Of Employees <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="NOE" required>
+                                        <div class="invalid-feedback">Please provide a valid Number Of Employees.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="notes" class="form-label">Notes <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="notes" required>
+                                        <div class="invalid-feedback">Please provide a valid Notes.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="reset" class="btn btn-soft-warning"> Reset </button>
+                        <button type="submit" class="btn btn-soft-primary"> Save changes </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- AddSubDepartment End -->
+
+    <!-- UpdateSubDepartmentStart -->
+    <div id="UpdateSubDepartment" class="modal fade" tabindex="-1" role="dialog"
+         aria-labelledby="fullWidthModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <form id="UpdateSubDepartmentForm" class="needs-validation" novalidate method="post">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="fullWidthModalLabel"> Update SubDepartment Details </h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Button-style Tabs -->
+                        <ul class="nav nav-pills mb-3 justify-content-center" id="SubDepartmentTab" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="btn btn-sm btn-soft-secondary me-1 mb-1 rounded-1 active" id="SubDepartment-tab" data-bs-toggle="tab" data-bs-target="#Update-SubDepartment" type="button" role="tab"> SubDepartment Info </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="btn btn-sm btn-soft-secondary me-1 mb-1 rounded-1" id="optional-tab" data-bs-toggle="tab" data-bs-target="#Update-optional" type="button" role="tab"> Optional </button>
+                            </li>
+                        </ul>
+                        <div class="tab-content mt-3" id="SubDepartmentTabContent">
+                            <!-- SubDepartment Info -->
+                            <div class="tab-pane fade show active" id="Update-SubDepartment" role="tabpanel">
+                                <div class="row">
+                                    <input type="hidden" id="subdepartment_id" name="subdepartment_id" />
+                                    <div class="col-md-4 mt-3">
+                                        <label for="udepartment" class="form-label"> Department <span class="text-danger">*</span></label>
+                                        <select id="udepartment" data-choices class="form-select"></select>
+                                        <div class="invalid-feedback">Please select a Department.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="SubDepartment_name" class="form-label">SubDepartment Name <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="usubdepartment_name" required>
+                                        <div class="invalid-feedback">Please provide a valid Department Name.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="SubDepartment_code" class="form-label">SubDepartment Code <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="usubdepartment_code" required>
+                                        <div class="invalid-feedback">Please provide a valid SubDepartment Code.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="email" class="form-label"> HeadEmail <span class="text-danger">*</span></label>
+                                        <input type="email" class="form-control" id="uhead_email" required>
+                                        <div class="invalid-feedback">Please provide a valid Email.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="phone" class="form-label"> HeadPhone <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="uhead_phone" required>
+                                        <div class="invalid-feedback">Please provide a valid Phone.</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Optional Info -->
+                            <div class="tab-pane fade" id="Update-optional" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-md-4 mt-3">
+                                        <label for="description" class="form-label">Description <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="udescription" required>
+                                        <div class="invalid-feedback">Please provide a valid Description.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="HOSD" class="form-label">Head Of SubDepartment <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="uHOSD" required>
+                                        <div class="invalid-feedback">Please provide a valid Head Of SubDepartment.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="NOE" class="form-label">Number Of Employees <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="uNOE" required>
+                                        <div class="invalid-feedback">Please provide a valid Number Of Employees.</div>
+                                    </div>
+                                    <div class="col-md-4 mt-3">
+                                        <label for="notes" class="form-label">Notes <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="unotes" required>
+                                        <div class="invalid-feedback">Please provide a valid Notes.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="reset" class="btn btn-soft-warning"> Reset </button>
+                        <button type="submit" class="btn btn-soft-primary"> Save changes </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- UpdateSubDepartment End -->
+</div>
+
+<script>
+    // Add SubDepartment Start
+    $.ajax({
+        type: "GET",
+        url: '/CompanyInfo/GetDepartment',
+        dataType: "json",
+        success: function (data) {
+            var s = '<option value="" selected disabled>Select Department</option>';
+            for (var i = 0; i < data.length; i++) {
+                s += '<option value="' + data[i].DepartmentId + '">' + data[i].DepartmentName + '</option>';
+            }
+            $("#department").html(s);
+        },
+        error: function (xhr, status, error) {
+            console.log("Error: " + error);
+        }
+    });
+    // Add SubDepartment End
+
+    // Update SubDepartment Start
+    $.ajax({
+        type: "GET",
+        url: '/CompanyInfo/GetDepartment',
+        dataType: "json",
+        success: function (data) {
+            var s = '<option value="" selected disabled>Select Department</option>';
+            for (var i = 0; i < data.length; i++) {
+                s += '<option value="' + data[i].DepartmentId + '">' + data[i].DepartmentName + '</option>';
+            }
+            $("#udepartment").html(s);
+        },
+        error: function (xhr, status, error) {
+            console.log("Error: " + error);
+        }
+    });
+    // Update SubDepartment End
+
+    $(document).ready(function () {
+        $("#SubDepartmentForm").on("submit", function (e) {
+            e.preventDefault();
+
+            var formData = {
+                SubDepartmentName: $("#SubDepartment_name").val(),
+                DepartmentId: $("#department").val(),
+                SubDepartmentCode: $("#SubDepartment_code").val(),
+                HeadEmail: $("#head_email").val(),
+                HeadPhone: $("#head_phone").val(),
+                Description: $("#description").val(),
+                HeadOfSubDepartment: $("#HOSD").val(),
+                NumberOfEmployees: $("#NOE").val(),
+                Notes: $("#notes").val()
+            };
+
+            $.ajax({
+                url: '@Url.Action("SaveSubDepartment", "CompanyInfo")',
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(formData),
+                success: function () {
+                    location.reload();
+                },
+                error: function () {
+                    alert("Error saving SubDepartment details.");
+                }
+            });
+        });
+
+        $("#UpdateSubDepartmentForm").on("submit", function (e) {
+            e.preventDefault();
+
+            var formData = {
+                SubDepartmentId: $("#subdepartment_id").val(),
+                SubDepartmentName: $("#usubdepartment_name").val(),
+                DepartmentId: $("#udepartment").val(),
+                SubDepartmentCode: $("#usubdepartment_code").val(),
+                HeadEmail: $("#uhead_email").val(),
+                HeadPhone: $("#uhead_phone").val(),
+                Description: $("#udescription").val(),
+                HeadOfSubDepartment: $("#uHOSD").val(),
+                NumberOfEmployees: $("#uNOE").val(),
+                Notes: $("#unotes").val()
+            };
+
+            $.ajax({
+                url: '/CompanyInfo/UpdateSubDepartment',
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(formData),
+                success: function (res) {
+                    if (res.success) {
+                        location.reload();
+                    } else {
+                        alert("Error: " + res.message);
+                    }
+                }
+            });
+        });
+    });
+
+    function UpdateSubDepartment(id) {
+        $.ajax({
+            url: '/CompanyInfo/GetSubDepartmentById',
+            type: 'GET',
+            data: { id: id },
+            success: function (data) {
+                if (data) {
+                    $("#subdepartment_id").val(data.SubDepartmentId);
+                    $("#udepartment").val(data.DepartmentId);
+                    $("#usubdepartment_name").val(data.SubDepartmentName);
+                    $("#usubdepartment_code").val(data.SubDepartmentCode);
+                    $("#uhead_email").val(data.HeadEmail);
+                    $("#uhead_phone").val(data.HeadPhone);
+                    $("#uHOSD").val(data.HeadOfSubDepartment);
+                    $("#uNOE").val(data.NumberOfEmployees);
+                    $("#udescription").val(data.Description);
+                    $("#unotes").val(data.Notes);
+
+                    $("#UpdateSubDepartment").modal("show");
+                }
+            },
+            error: function () {
+                alert("Error loading SubDepartment details.");
+            }
+        });
+    }
+
+    function DeleteSubDepartmentId(id) {
+        $.ajax({
+            url: '@Url.Action("DeleteSubDepartment", "CompanyInfo")',
+            type: "POST",
+            data: { subdepartmentId: id },
+            success: function (response) {
+                if (response.success) {
+                    location.reload();
+                } else {
+                    alert.error("Error: " + response.message);
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error("AJAX Error:", xhr.responseText);
+                alert.error("AJAX Error: " + error);
+            }
+        });
+    }
+</script>

@@ -1,0 +1,238 @@
+@model IEnumerable<zentoraHRMS.Models.ChildModuleVM>
+@{
+    ViewBag.Title = "Child Modules";
+    bool isSuperAdmin = Session["RoleName"] != null && Session["RoleName"].ToString().Equals("Superadmin", StringComparison.OrdinalIgnoreCase);
+}
+
+<div class="container-fluid">
+    <div class="row justify-content-center py-5">
+        <div class="col-xxl-5 col-xl-7 text-center">
+            <a href="@Url.Action("Index","Home")" class="badge badge-default fw-normal shadow px-2 py-1 mb-2 fst-italic fs-xxs">
+                <i data-lucide="square-check" class="fs-sm me-1"></i> DashBoard
+            </a>
+            <h3 class="fw-bold">Child Modules</h3>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-xxl-12">
+            <div class="card rounded-2">
+                <div class="card-header justify-content-between">
+                    <h5 class="card-title">Child Module Details</h5>
+                    <button type="button" class="btn btn-sm btn-soft-primary" data-bs-toggle="modal" data-bs-target="#AddChild">
+                        <i class="me-1" data-lucide="plus"></i> Add Child Module
+                    </button>
+                </div>
+
+                <div class="card-body">
+                    <table id="checkbox-select-data" class="table table-striped dt-responsive checkbox-select-datatable align-middle mb-0">
+                        <thead class="thead-sm text-uppercase fs-xxs">
+                            <tr>
+                                <th class="fs-sm" style="width: 1%;"></th>
+                                <th>Parent ID</th>
+                                <th>Module Name</th>
+                                <th>Route URL</th>
+                                <th>Sort Order</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var c in Model)
+                            {
+                                <tr>
+                                    <td class="fs-sm" style="width: 1%;"></td>
+                                    <td>@c.ParentModuleId</td>
+                                    <td>@c.ModuleName</td>
+                                    <td>@c.RouteUrl</td>
+                                    <td>@c.SortOrder</td>
+                                    <td>
+                                        <a onclick="UpdateChild(@c.ChildModuleId)" class="btn btn-sm btn-soft-info mt-1" title="Update"><i data-lucide="square-pen"></i></a>
+                                        <a onclick="DeleteChild(@c.ChildModuleId)" class="btn btn-sm btn-soft-danger mt-1" title="Delete"><i data-lucide="trash-2"></i></a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AddChild Modal -->
+    <div id="AddChild" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form id="ChildForm" class="needs-validation" novalidate method="post">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Add Child Module</h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="ParentModuleId" class="form-label">Parent Module <span class="text-danger">*</span></label>
+                            <select id="ParentModuleId" class="form-select" required></select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="ModuleName" class="form-label">Module Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="ModuleName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="RouteUrl" class="form-label">Route URL <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="RouteUrl" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="SortOrder" class="form-label">Sort Order</label>
+                            <input type="number" class="form-control" id="SortOrder" value="0" @(isSuperAdmin ? "" : "readonly")>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-soft-primary">Save changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- UpdateChild Modal -->
+    <div id="UpdateChildModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form id="UpdateChildForm" class="needs-validation" novalidate method="post">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Update Child Module</h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="update_id" />
+                        <div class="mb-3">
+                            <label for="uParentModuleId" class="form-label">Parent Module <span class="text-danger">*</span></label>
+                            <select id="uParentModuleId" class="form-select" required></select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="uModuleName" class="form-label">Module Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="uModuleName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="uRouteUrl" class="form-label">Route URL <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="uRouteUrl" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="uSortOrder" class="form-label">Sort Order</label>
+                            <input type="number" class="form-control" id="uSortOrder" @(isSuperAdmin ? "" : "readonly")>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-soft-primary">Save changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('#AddChild').on('show.bs.modal', function () {
+            $.get('/Modules/GetNextSortOrder', { type: 'child' }, function (res) {
+                $('#SortOrder').val(res.nextOrder);
+            });
+        });
+
+        $.ajax({
+            url: '/Modules/GetParentModules',
+            type: 'GET',
+            success: function (data) {
+                var s = '<option value="" selected disabled>Select Parent Module</option>';
+                for (var i = 0; i < data.length; i++) {
+                    s += '<option value="' + data[i].ParentModuleId + '">' + data[i].ModuleName + '</option>';
+                }
+                $("#ParentModuleId").html(s);
+                $("#uParentModuleId").html(s);
+            }
+        });
+
+        $("#ChildForm").on("submit", function (e) {
+            e.preventDefault();
+            var formData = {
+                ParentModuleId: $("#ParentModuleId").val(),
+                ModuleName: $("#ModuleName").val(),
+                RouteUrl: $("#RouteUrl").val(),
+                SortOrder: $("#SortOrder").val()
+            };
+            $.ajax({
+                url: '/Modules/SaveChildModule',
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(formData),
+                success: function (res) {
+                    if (res.success) {
+                        location.reload();
+                    } else {
+                        alert("Error: " + res.message);
+                    }
+                }
+            });
+        });
+
+        $("#UpdateChildForm").on("submit", function (e) {
+            e.preventDefault();
+            var formData = {
+                ChildModuleId: $("#update_id").val(),
+                ParentModuleId: $("#uParentModuleId").val(),
+                ModuleName: $("#uModuleName").val(),
+                RouteUrl: $("#uRouteUrl").val(),
+                SortOrder: $("#uSortOrder").val()
+            };
+            $.ajax({
+                url: '/Modules/UpdateChildModule',
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(formData),
+                success: function (res) {
+                    if (res.success) {
+                        location.reload();
+                    } else {
+                        alert("Error: " + res.message);
+                    }
+                }
+            });
+        });
+    });
+
+    function UpdateChild(id) {
+        $.ajax({
+            url: '/Modules/GetChildModuleById',
+            type: 'GET',
+            data: { id: id },
+            success: function (data) {
+                if (data) {
+                    $("#update_id").val(data.ChildModuleId);
+                    $("#uParentModuleId").val(data.ParentModuleId);
+                    $("#uModuleName").val(data.ModuleName);
+                    $("#uRouteUrl").val(data.RouteUrl);
+                    $("#uSortOrder").val(data.SortOrder);
+                    $("#UpdateChildModal").modal("show");
+                }
+            }
+        });
+    }
+
+    function DeleteChild(id) {
+        if (confirm("Are you sure you want to delete this child module?")) {
+            $.ajax({
+                url: '/Modules/DeleteChildModule',
+                type: "POST",
+                data: { id: id },
+                success: function (res) {
+                    if (res.success) {
+                        location.reload();
+                    } else {
+                        alert("Error: " + res.message);
+                    }
+                }
+            });
+        }
+    }
+</script>

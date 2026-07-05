@@ -1,0 +1,129 @@
+@{
+    ViewBag.Title = "Calendar";
+}
+
+<div class="container-fluid">
+    <div class="row justify-content-center py-5">
+        <div class="col-xxl-5 col-xl-7 text-center">
+            <a href="@Url.Action("Index","Home")" class="badge badge-default fw-normal shadow px-2 py-1 mb-2 fst-italic fs-xxs">
+                <i data-lucide="square-check" class="fs-sm me-1"></i> DashBoard
+            </a>
+            <h3 class="fw-bold">Calendar</h3>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Calendar Grid -->
+        <div class="col-xl-8 col-lg-7 mb-4">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0 fw-semibold text-dark"><i data-lucide="calendar" class="text-primary me-2 align-middle"></i>Event Scheduler</h5>
+                    <div class="btn-group">
+                        <button class="btn btn-sm btn-outline-secondary">Month</button>
+                        <button class="btn btn-sm btn-outline-secondary active">Week</button>
+                        <button class="btn btn-sm btn-outline-secondary">Day</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered text-center align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 12%;">Time</th>
+                                    <th>Mon</th>
+                                    <th>Tue</th>
+                                    <th>Wed</th>
+                                    <th>Thu</th>
+                                    <th>Fri</th>
+                                    <th>Sat</th>
+                                    <th>Sun</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="text-muted fs-xxs">09:00 AM</td>
+                                    <td><span class="badge bg-soft-primary text-primary w-100 py-2">Daily Standup</span></td>
+                                    <td></td>
+                                    <td><span class="badge bg-soft-primary text-primary w-100 py-2">Daily Standup</span></td>
+                                    <td></td>
+                                    <td><span class="badge bg-soft-primary text-primary w-100 py-2">Daily Standup</span></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted fs-xxs">11:00 AM</td>
+                                    <td></td>
+                                    <td><span class="badge bg-soft-success text-success w-100 py-2">Client Demo</span></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted fs-xxs">02:00 PM</td>
+                                    <td></td>
+                                    <td></td>
+                                    <td><span class="badge bg-soft-warning text-warning w-100 py-2">Sprint Planning</span></td>
+                                    <td></td>
+                                    <td><span class="badge bg-soft-info text-info w-100 py-2">Retrospective</span></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted fs-xxs">04:30 PM</td>
+                                    <td><span class="badge bg-soft-danger text-danger w-100 py-2">HR Sync</span></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td><span class="badge bg-soft-purple text-purple w-100 py-2" style="background-color: rgba(111, 66, 193, 0.1); color: #6f42c1;">Tech Refinement</span></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar Info -->
+        <div class="col-xl-4 col-lg-5 mb-4">
+            <div class="card border-0 shadow-sm rounded-3 mb-4">
+                <div class="card-body">
+                    <button class="btn btn-primary w-100 py-2 rounded-2 mb-3 shadow-sm d-flex align-items-center justify-content-center"><i data-lucide="plus" class="me-2"></i> Create New Event</button>
+                    
+                    <h6 class="text-uppercase text-muted fw-bold fs-xxs mb-3">Event Categories</h6>
+                    <div class="d-flex flex-column gap-2">
+                        <div class="d-flex align-items-center"><span class="badge rounded-circle p-1 bg-primary me-2">&nbsp;</span> Work Syncs</div>
+                        <div class="d-flex align-items-center"><span class="badge rounded-circle p-1 bg-success me-2">&nbsp;</span> Client Meetings</div>
+                        <div class="d-flex align-items-center"><span class="badge rounded-circle p-1 bg-warning me-2">&nbsp;</span> Sprint Operations</div>
+                        <div class="d-flex align-items-center"><span class="badge rounded-circle p-1 bg-danger me-2">&nbsp;</span> HR & Administration</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-body">
+                    <h6 class="text-uppercase text-muted fw-bold fs-xxs mb-3">Upcoming This Week</h6>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item px-0 border-0 d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="mb-0 fw-semibold text-dark">July 6 - Client Demo</h6>
+                                <p class="text-muted fs-xxs mb-0">11:00 AM - 12:00 PM</p>
+                            </div>
+                            <span class="badge bg-light text-dark">Mon</span>
+                        </li>
+                        <li class="list-group-item px-0 border-0 d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="mb-0 fw-semibold text-dark">July 7 - Sprint Planning</h6>
+                                <p class="text-muted fs-xxs mb-0">02:00 PM - 03:30 PM</p>
+                            </div>
+                            <span class="badge bg-light text-dark">Tue</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

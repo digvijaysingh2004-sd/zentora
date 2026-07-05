@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title | Zentora </title>
+
+    <!-- App favicon -->
+    <link rel="shortcut icon" href="~/assets/images/favicon.ico">
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Toastr CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet" />
+    <!-- Toastr JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+    <!-- Datatables css -->
+    <link href="~/assets/plugins/datatables/select.bootstrap5.min.css" rel="stylesheet" type="text/css">
+    <link href="~/assets/plugins/datatables/responsive.bootstrap5.min.css" rel="stylesheet" type="text/css">
+
+    <!-- Theme Config Js -->
+    <script src="~/assets/js/config.js"></script>
+
+    <!-- Vendor css -->
+    <link href="~/assets/css/vendors.min.css" rel="stylesheet" type="text/css">
+
+    <!-- App css -->
+    <link href="~/assets/css/app.min.css" rel="stylesheet" type="text/css">
+
+    <!-- Icon css -->
+    <script src="~/assets/plugins/lucide/lucide.min.js"></script>
+
+</head>
+<body>
+    <div class="wrapper">
+
+        <!-- Topbar Start -->
+        <header class="app-topbar">
+            @Html.Partial("Header")
+        </header>
+        <!-- Topbar End -->
+        <!-- Sidenav Menu Start -->
+        <div class="sidenav-menu">
+            @Html.Action("RenderSidebar", "Sidebar")
+        </div>
+        <!-- Sidenav Menu End -->
+
+        <div class="content-page">
+
+            @RenderBody()
+
+            <!-- Footer Start -->
+            <footer class="footer">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-md-6 text-center text-md-start">
+                            ©
+                            <script>document.write(new Date().getFullYear())</script> Zentora By <a href="https://github.com/digvijaysingh2004-sd" target="_blank" class="fw-semibold">digvijaysingh2004-sd</a>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="text-md-end d-none d-md-block">
+                                59.5GB of <span class="fw-bold">200GB</span> Free.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </footer>
+            <!-- end Footer -->
+        </div>
+    </div>
+
+    <!-- Vendor js -->
+    <script src="~/assets/js/vendors.min.js"></script>
+
+    <!-- App js -->
+    <script src="~/assets/js/app.js"></script>
+
+    <!-- Choises.js Plugin Js -->
+    <script src="~/assets/plugins/choices/choices.min.js"></script>
+
+    <!-- Choices Demo Js-->
+    <script src="~/assets/js/pages/form-choice.js"></script>
+
+    <!-- Dashboard Page js -->
+    <script src="~/assets/js/pages/dashboard.js"></script>
+
+    <!-- Datatables js -->
+    <script src="~/assets/plugins/datatables/dataTables.min.js"></script>
+    <script src="~/assets/plugins/datatables/dataTables.bootstrap5.min.js"></script>
+    <script src="~/assets/plugins/datatables/dataTables.responsive.min.js"></script>
+    <script src="~/assets/plugins/datatables/responsive.bootstrap5.min.js"></script>
+    <script src="~/assets/plugins/datatables/dataTables.select.min.js"></script>
+    <script src="~/assets/plugins/datatables/select.bootstrap5.min.js"></script>
+
+
+    <!-- Page js -->
+    <script src="~/assets/js/pages/datatables-checkbox-select.js"></script>
+    <script>
+        $(document).on("click", "#logoutBtn", function () {
+            $.ajax({
+                url: '/Auth/Logout',
+                type: 'POST',
+                success: function (response) {
+                    if (response.success) {
+                        // Force redirect to login
+                        window.location.href = '/';
+                    }
+                },
+                error: function () {
+                    alert("Logout failed. Please try again.");
+                }
+            });
+        });
+    </script>
+    <script>
+        if (!@Html.Raw(Json.Encode(Session["UserId"])) ) {
+            // if no session, always go to login
+            if (window.location.pathname.toLowerCase().indexOf("/") === -1) {
+                window.location.replace("/");
+            }
+        }
+    </script>
+
+    <script>
+        toastr.options = {
+            "closeButton": true,
+            "debug": false,
+            "newestOnTop": true,
+            "progressBar": true,
+            "positionClass": "toast-top-right",
+            "preventDuplicates": true,
+            "timeOut": "3000",
+            "extendedTimeOut": "1000",
+            "showDuration": "300",
+            "hideDuration": "1000",
+            "showEasing": "swing",
+            "hideEasing": "linear",
+            "showMethod": "fadeIn",
+            "hideMethod": "fadeOut"
+        };
+    </script>
+    <script>
+        $(document).ready(function () {
+            // 1. Sleek dynamic page header & breadcrumb transformation
+            var legacyTitleRow = $('.container-fluid > .row.justify-content-center.py-5');
+            if (legacyTitleRow.length > 0) {
+                var currentLoc = window.location.pathname.toLowerCase();
+                if (currentLoc !== '/' && currentLoc !== '/home/index' && currentLoc !== '/home') {
+                    var pageTitle = legacyTitleRow.find('h3').text().trim();
+                    var dashboardUrl = legacyTitleRow.find('.badge-default').attr('href') || '/Home/Index';
+                    
+                    legacyTitleRow.hide();
+                    
+                    // Match the active page in the sidebar hierarchy to get accurate breadcrumbs
+                    var currentPath = window.location.pathname.replace(/\/$/, "").toLowerCase();
+                    var activeLink = $();
+                    $('.side-nav a').each(function() {
+                        var href = $(this).attr('href');
+                        if (href && href !== '#') {
+                            var cleanHref = href.replace(/\/$/, "").toLowerCase();
+                            if (cleanHref === currentPath) {
+                                activeLink = $(this);
+                                return false; // break loop
+                            }
+                        }
+                    });
+
+                    var breadcrumbHtml = '';
+
+                    if (activeLink.length > 0) {
+                        var segments = [];
+                        
+                        // Add active item
+                        segments.push(activeLink.find('.menu-text').text().trim());
+
+                        // Walk up parent menus (collapses)
+                        var parentCollapse = activeLink.closest('.collapse');
+                        while (parentCollapse.length > 0) {
+                            var triggerLink = $('a[href="#' + parentCollapse.attr('id') + '"]');
+                            if (triggerLink.length > 0) {
+                                segments.push(triggerLink.find('.menu-text').text().trim());
+                            }
+                            parentCollapse = triggerLink.closest('.collapse');
+                        }
+
+                        segments.reverse();
+
+                        for (var i = 0; i < segments.length; i++) {
+                            if (i === segments.length - 1) {
+                                breadcrumbHtml += '<li class="breadcrumb-item active text-muted" aria-current="page">' + segments[i] + '</li>';
+                            } else {
+                                breadcrumbHtml += '<li class="breadcrumb-item text-secondary">' + segments[i] + '</li>';
+                            }
+                        }
+
+                        if (!pageTitle) {
+                            pageTitle = segments[segments.length - 1];
+                        }
+                    } else {
+                        // Fallback: parse URL path if page is not linked in sidebar
+                        var path = window.location.pathname.split('/').filter(function (el) { return el.length > 0; });
+                        for (var i = 0; i < path.length; i++) {
+                            var segment = path[i];
+                            var segmentName = segment.replace(/([A-Z])/g, ' $1').trim();
+                            segmentName = segmentName.split(' ').map(function(word) {
+                                return word.charAt(0).toUpperCase() + word.slice(1);
+                            }).join(' ');
+                            
+                            if (segmentName.toLowerCase() === 'index' && i === path.length - 1) {
+                                continue;
+                            }
+                            
+                            if (i === path.length - 1) {
+                                breadcrumbHtml += '<li class="breadcrumb-item active text-muted" aria-current="page">' + (pageTitle || segmentName) + '</li>';
+                            } else {
+                                breadcrumbHtml += '<li class="breadcrumb-item text-secondary">' + segmentName + '</li>';
+                            }
+                        }
+                    }
+                    
+                    var headerHtml = `
+                        <div class="row mb-4 mt-3">
+                            <div class="col-12">
+                                <div class="d-flex align-items-center justify-content-between p-3 bg-white rounded-3 shadow-sm border border-light">
+                                    <div>
+                                        <h4 class="mb-1 fw-bold text-dark fs-5">${pageTitle || "Page Title"}</h4>
+                                        <p class="text-muted mb-0 fs-xxs" style="font-size: 11px;">Configure and manage ${pageTitle || "settings"}</p>
+                                    </div>
+                                    <nav aria-label="breadcrumb">
+                                        <ol class="breadcrumb mb-0 bg-transparent p-0" style="font-size: 13px;">
+                                            ${breadcrumbHtml}
+                                        </ol>
+                                    </nav>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    $('.content-page .container-fluid').first().prepend(headerHtml);
+                    
+                    if (typeof lucide !== 'undefined') {
+                        lucide.createIcons();
+                    }
+                }
+            }
+
+            var userPerms = @Html.Raw(Json.Encode(ViewBag.CurrentPermissions ?? new List<string>()));
+            if (userPerms && userPerms.length > 0) {
+                // If the user does not have view permission, we might just hide the whole container, but usually view is base
+                if (!userPerms.includes("add")) { 
+                    $('.btn-add, .add-btn, [data-bs-target^="#Add"], [title="Add"]').hide(); 
+                }
+                if (!userPerms.includes("edit")) { 
+                    $('.btn-edit, .edit-btn, [onclick^="Update"], [title="Update"], [title="Edit"]').hide(); 
+                }
+                if (!userPerms.includes("delete")) { 
+                    $('.btn-delete, .delete-btn, [onclick^="Delete"], [title="Delete"]').hide(); 
+                }
+            }
+        });
+    </script>
+</body>
+</html>

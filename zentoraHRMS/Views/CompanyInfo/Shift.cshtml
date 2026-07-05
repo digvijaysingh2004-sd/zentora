@@ -1,0 +1,222 @@
+@model IEnumerable<zentoraHRMS.Models.ShiftModel>
+@{
+    ViewBag.Title = "Shift";
+}
+
+<div class="container-fluid">
+    <div class="row justify-content-center py-5">
+        <div class="col-xxl-5 col-xl-7 text-center">
+            <a href="@Url.Action("Index","Home")" class="badge badge-default fw-normal shadow px-2 py-1 mb-2 fst-italic fs-xxs">
+                <i data-lucide="square-check" class="fs-sm me-1"></i> DashBoard
+            </a>
+            <h3 class="fw-bold">Office Shifts</h3>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-xxl-12">
+            <div class="card rounded-2">
+                <div class="card-header justify-content-between">
+                    <h5 class="card-title">Shift Details</h5>
+                    <button type="button" class="btn btn-sm btn-soft-primary" data-bs-toggle="modal" data-bs-target="#AddShift">
+                        <i class="me-1" data-lucide="plus"></i> Add Shift
+                    </button>
+                </div>
+
+                <div class="card-body">
+                    <table id="checkbox-select-data" class="table table-striped dt-responsive checkbox-select-datatable align-middle mb-0">
+                        <thead class="thead-sm text-uppercase fs-xxs">
+                            <tr>
+                                <th class="fs-sm" style="width: 1%;"></th>
+                                <th>Shift Name</th>
+                                <th>Start Time</th>
+                                <th>End Time</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var c in Model)
+                            {
+                                <tr>
+                                    <td class="fs-sm" style="width: 1%;"></td>
+                                    <td>@c.ShiftName</td>
+                                    <td>@c.StartTime</td>
+                                    <td>@c.EndTime</td>
+                                    <td>
+                                        @if (c.IsActive)
+                                        {
+                                            <span class="badge badge-label badge-soft-success">Active</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-label badge-soft-secondary">Inactive</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <a onclick="UpdateShift(@c.ShiftId)" class="btn btn-sm btn-soft-info mt-1" title="Update"><i data-lucide="square-pen"></i></a>
+                                        <a onclick="DeleteShift(@c.ShiftId)" class="btn btn-sm btn-soft-danger mt-1" title="Delete"><i data-lucide="trash-2"></i></a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AddShift Modal -->
+    <div id="AddShift" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form id="ShiftForm" class="needs-validation" novalidate method="post">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Add Office Shift</h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="ShiftName" class="form-label">Shift Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="ShiftName" required>
+                            <div class="invalid-feedback">Please provide a valid Shift Name.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="StartTime" class="form-label">Start Time <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="StartTime" placeholder="e.g. 09:00 AM" required>
+                            <div class="invalid-feedback">Please provide a valid Start Time.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="EndTime" class="form-label">End Time <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="EndTime" placeholder="e.g. 06:00 PM" required>
+                            <div class="invalid-feedback">Please provide a valid End Time.</div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-soft-primary">Save changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- UpdateShift Modal -->
+    <div id="UpdateShiftModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form id="UpdateShiftForm" class="needs-validation" novalidate method="post">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Update Office Shift</h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="update_id" />
+                        <div class="mb-3">
+                            <label for="uShiftName" class="form-label">Shift Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="uShiftName" required>
+                            <div class="invalid-feedback">Please provide a valid Shift Name.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="uStartTime" class="form-label">Start Time <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="uStartTime" required>
+                            <div class="invalid-feedback">Please provide a valid Start Time.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="uEndTime" class="form-label">End Time <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="uEndTime" required>
+                            <div class="invalid-feedback">Please provide a valid End Time.</div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-soft-primary">Save changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#ShiftForm").on("submit", function (e) {
+            e.preventDefault();
+            var formData = {
+                ShiftName: $("#ShiftName").val(),
+                StartTime: $("#StartTime").val(),
+                EndTime: $("#EndTime").val()
+            };
+            $.ajax({
+                url: '/CompanyInfo/SaveShift',
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(formData),
+                success: function (res) {
+                    if (res.success) {
+                        location.reload();
+                    } else {
+                        alert("Error: " + res.message);
+                    }
+                }
+            });
+        });
+
+        $("#UpdateShiftForm").on("submit", function (e) {
+            e.preventDefault();
+            var formData = {
+                ShiftId: $("#update_id").val(),
+                ShiftName: $("#uShiftName").val(),
+                StartTime: $("#uStartTime").val(),
+                EndTime: $("#uEndTime").val()
+            };
+            $.ajax({
+                url: '/CompanyInfo/UpdateShift',
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(formData),
+                success: function (res) {
+                    if (res.success) {
+                        location.reload();
+                    } else {
+                        alert("Error: " + res.message);
+                    }
+                }
+            });
+        });
+    });
+
+    function UpdateShift(id) {
+        $.ajax({
+            url: '/CompanyInfo/GetShiftById',
+            type: 'GET',
+            data: { id: id },
+            success: function (data) {
+                if (data) {
+                    $("#update_id").val(data.ShiftId);
+                    $("#uShiftName").val(data.ShiftName);
+                    $("#uStartTime").val(data.StartTime);
+                    $("#uEndTime").val(data.EndTime);
+                    $("#UpdateShiftModal").modal("show");
+                }
+            }
+        });
+    }
+
+    function DeleteShift(id) {
+        if (confirm("Are you sure you want to delete this shift?")) {
+            $.ajax({
+                url: '/CompanyInfo/DeleteShift',
+                type: "POST",
+                data: { id: id },
+                success: function (res) {
+                    if (res.success) {
+                        location.reload();
+                    } else {
+                        alert("Error: " + res.message);
+                    }
+                }
+            });
+        }
+    }
+</script>

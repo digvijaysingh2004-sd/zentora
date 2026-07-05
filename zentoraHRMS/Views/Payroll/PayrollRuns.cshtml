@@ -1,0 +1,136 @@
+@model IEnumerable<zentoraHRMS.Models.PayrollRunModel>
+@{
+    ViewBag.Title = "Payroll Processing";
+}
+
+<div class="container-fluid">
+    <div class="row justify-content-center py-5">
+        <div class="col-xxl-5 col-xl-7 text-center">
+            <a href="@Url.Action("Index","Home")" class="badge badge-default fw-normal shadow px-2 py-1 mb-2 fst-italic fs-xxs">
+                <i data-lucide="square-check" class="fs-sm me-1"></i> DashBoard
+            </a>
+            <h3 class="fw-bold">Payroll Runs</h3>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-xxl-12">
+            <div class="card rounded-2">
+                <div class="card-header justify-content-between">
+                    <h5 class="card-title">Processed Payrolls</h5>
+                    <button type="button" class="btn btn-sm btn-soft-primary" data-bs-toggle="modal" data-bs-target="#AddPayroll">
+                        <i class="me-1" data-lucide="plus"></i> Process Monthly Payroll
+                    </button>
+                </div>
+
+                <div class="card-body">
+                    <table id="checkbox-select-data" class="table table-striped dt-responsive checkbox-select-datatable align-middle mb-0">
+                        <thead class="thead-sm text-uppercase fs-xxs">
+                            <tr>
+                                <th class="fs-sm" style="width: 1%;"></th>
+                                <th>Payroll Run ID</th>
+                                <th>Payroll Period (Month-Year)</th>
+                                <th>Processing Date</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var c in Model)
+                            {
+                                <tr>
+                                    <td class="fs-sm" style="width: 1%;"></td>
+                                    <td>@c.PayrollRunId</td>
+                                    <td class="fw-bold">@c.MonthYear</td>
+                                    <td>@c.ProcessedDate.ToString("yyyy-MM-dd")</td>
+                                    <td>
+                                        @if (c.Status == "Paid") { <span class="badge bg-success">Paid</span> }
+                                        else if (c.Status == "Approved") { <span class="badge bg-info text-white">Approved</span> }
+                                        else { <span class="badge bg-warning text-dark">@c.Status</span> }
+                                    </td>
+                                    <td>
+                                        <a onclick="DeletePayroll(@c.PayrollRunId)" class="btn btn-sm btn-soft-danger mt-1" title="Delete"><i data-lucide="trash-2"></i></a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AddPayroll Modal -->
+    <div id="AddPayroll" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form id="PayrollForm" class="needs-validation" novalidate method="post">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Process Monthly Payroll</h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="MonthYear" class="form-label">Period (MM-YYYY) <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="MonthYear" placeholder="e.g. 07-2026" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="Status" class="form-label">Status <span class="text-danger">*</span></label>
+                            <select id="Status" class="form-select" required>
+                                <option value="Paid" selected>Paid</option>
+                                <option value="Approved">Approved</option>
+                                <option value="Draft">Draft</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-soft-primary">Process Payroll</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#PayrollForm").on("submit", function (e) {
+            e.preventDefault();
+            var formData = {
+                MonthYear: $("#MonthYear").val(),
+                Status: $("#Status").val()
+            };
+            $.ajax({
+                url: '/Payroll/SavePayrollRun',
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(formData),
+                success: function (res) {
+                    if (res.success) {
+                        location.reload();
+                    } else {
+                        alert("Error: " + res.message);
+                    }
+                }
+            });
+        });
+    });
+
+    function DeletePayroll(id) {
+        if (confirm("Are you sure you want to delete this payroll run record?")) {
+            $.ajax({
+                url: '/Payroll/DeletePayrollRun',
+                type: "POST",
+                data: { id: id },
+                success: function (res) {
+                    if (res.success) {
+                        location.reload();
+                    } else {
+                        alert("Error: " + res.message);
+                    }
+                }
+            });
+        }
+    }
+</script>

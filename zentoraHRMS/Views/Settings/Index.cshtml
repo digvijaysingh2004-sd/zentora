@@ -1,0 +1,149 @@
+@{
+    ViewBag.Title = "System Settings";
+}
+
+<div class="container-fluid">
+    <div class="row justify-content-center py-5">
+        <div class="col-xxl-5 col-xl-7 text-center">
+            <a href="@Url.Action("Index","Home")" class="badge badge-default fw-normal shadow px-2 py-1 mb-2 fst-italic fs-xxs">
+                <i data-lucide="square-check" class="fs-sm me-1"></i> DashBoard
+            </a>
+            <h3 class="fw-bold">System Settings</h3>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Sidebar Navigation for Settings -->
+        <div class="col-xl-3 col-lg-4 mb-4">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-body">
+                    <ul class="nav flex-column nav-pills" id="settingsTab" role="tablist">
+                        <li class="nav-item mb-2" role="presentation">
+                            <button class="nav-link w-100 text-start active d-flex align-items-center" id="company-settings-tab" data-bs-toggle="pill" data-bs-target="#company-settings" type="button" role="tab"><i data-lucide="building" class="me-2 fs-5"></i> Company Profile</button>
+                        </li>
+                        <li class="nav-item mb-2" role="presentation">
+                            <button class="nav-link w-100 text-start d-flex align-items-center" id="system-settings-tab" data-bs-toggle="pill" data-bs-target="#system-settings" type="button" role="tab"><i data-lucide="settings" class="me-2 fs-5"></i> General Config</button>
+                        </li>
+                        <li class="nav-item mb-2" role="presentation">
+                            <button class="nav-link w-100 text-start d-flex align-items-center" id="email-settings-tab" data-bs-toggle="pill" data-bs-target="#email-settings" type="button" role="tab"><i data-lucide="mail" class="me-2 fs-5"></i> Email & SMTP</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link w-100 text-start d-flex align-items-center" id="security-settings-tab" data-bs-toggle="pill" data-bs-target="#security-settings" type="button" role="tab"><i data-lucide="shield-check" class="me-2 fs-5"></i> Security & Roles</button>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Panels Content -->
+        <div class="col-xl-9 col-lg-8 mb-4">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-body">
+                    <div class="tab-content" id="settingsTabContent">
+                        <!-- Company Profile Panel -->
+                        <div class="tab-pane fade show active" id="company-settings" role="tabpanel" aria-labelledby="company-settings-tab">
+                            <h5 class="fw-semibold mb-3 text-dark">Company Information</h5>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fs-xxs text-muted">Company Name</label>
+                                    <input type="text" class="form-control" value="Zentora HRMS Ltd">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fs-xxs text-muted">Contact Email</label>
+                                    <input type="email" class="form-control" value="contact@zentora.com">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fs-xxs text-muted">Phone Number</label>
+                                    <input type="text" class="form-control" value="+1 (555) 123-4567">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fs-xxs text-muted">Website</label>
+                                    <input type="url" class="form-control" value="https://www.zentora.com">
+                                </div>
+                                <div class="col-12 mb-3">
+                                    <label class="form-label fs-xxs text-muted">Address</label>
+                                    <textarea class="form-control" rows="2">100 Tech Venture Way, Suite 400, Silicon Valley, CA</textarea>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary px-4 py-2 mt-3 rounded-2 shadow-sm">Save Profile</button>
+                        </div>
+
+                        <!-- System Configuration Panel -->
+                        <div class="tab-pane fade" id="system-settings" role="tabpanel" aria-labelledby="system-settings-tab">
+                            <h5 class="fw-semibold mb-3 text-dark">General System Settings</h5>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fs-xxs text-muted">Default Timezone</label>
+                                    <select class="form-select">
+                                        <option selected>GMT+05:30 (India Standard Time)</option>
+                                        <option>GMT-05:00 (Eastern Standard Time)</option>
+                                        <option>GMT+00:00 (UTC)</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fs-xxs text-muted">Date Format</label>
+                                    <select class="form-select">
+                                        <option selected>YYYY-MM-DD</option>
+                                        <option>DD/MM/YYYY</option>
+                                        <option>MM/DD/YYYY</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fs-xxs text-muted">Default Language</label>
+                                    <select class="form-select">
+                                        <option selected>English</option>
+                                        <option>French</option>
+                                        <option>Spanish</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary px-4 py-2 mt-3 rounded-2 shadow-sm">Save Config</button>
+                        </div>
+
+                        <!-- Email Config Panel -->
+                        <div class="tab-pane fade" id="email-settings" role="tabpanel" aria-labelledby="email-settings-tab">
+                            <h5 class="fw-semibold mb-3 text-dark">SMTP Mail Configurations</h5>
+                            <div class="row">
+                                <div class="col-md-8 mb-3">
+                                    <label class="form-label fs-xxs text-muted">SMTP Server Address</label>
+                                    <input type="text" class="form-control" value="smtp.mailtrap.io">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label fs-xxs text-muted">SMTP Port</label>
+                                    <input type="number" class="form-control" value="2525">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fs-xxs text-muted">Username</label>
+                                    <input type="text" class="form-control" value="api-user-9182">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fs-xxs text-muted">Password</label>
+                                    <input type="password" class="form-control" value="********">
+                                </div>
+                            </div>
+                            <button class="btn btn-primary px-4 py-2 mt-3 rounded-2 shadow-sm">Save SMTP</button>
+                        </div>
+
+                        <!-- Security Panel -->
+                        <div class="tab-pane fade" id="security-settings" role="tabpanel" aria-labelledby="security-settings-tab">
+                            <h5 class="fw-semibold mb-3 text-dark">Security Settings</h5>
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" id="twoFA" checked>
+                                <label class="form-check-label fs-sm text-dark" for="twoFA">Enforce 2-Factor Authentication (2FA) for Admins</label>
+                            </div>
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" id="passExpiry">
+                                <label class="form-check-label fs-sm text-dark" for="passExpiry">Enable Password Expiration (90 Days)</label>
+                            </div>
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" id="auditLogs" checked>
+                                <label class="form-check-label fs-sm text-dark" for="auditLogs">Record System Audit Logs</label>
+                            </div>
+                            <button class="btn btn-primary px-4 py-2 mt-3 rounded-2 shadow-sm">Save Security</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

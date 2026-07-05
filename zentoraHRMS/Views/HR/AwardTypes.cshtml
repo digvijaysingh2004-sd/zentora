@@ -1,0 +1,108 @@
+@{
+    ViewBag.Title = "Award Types";
+}
+
+<div class="container-fluid">
+    <div class="row justify-content-center py-5">
+        <div class="col-xxl-5 col-xl-7 text-center">
+            <a href="@Url.Action("Index","Home")" class="badge badge-default fw-normal shadow px-2 py-1 mb-2 fst-italic fs-xxs">
+                <i data-lucide="square-check" class="fs-sm me-1"></i> DashBoard
+            </a>
+            <h3 class="fw-bold">Award Types</h3>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-xxl-12">
+            <div class="card rounded-2 border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3 justify-content-between d-flex align-items-center">
+                    <h5 class="card-title mb-0 fw-semibold text-dark"><i data-lucide="award" class="text-primary me-2 align-middle"></i>Award Categories</h5>
+                    <button type="button" class="btn btn-sm btn-soft-primary" data-bs-toggle="modal" data-bs-target="#AddAwardType">
+                        <i class="me-1" data-lucide="plus"></i> Add Award Type
+                    </button>
+                </div>
+
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped align-middle mb-0">
+                            <thead class="thead-sm text-uppercase fs-xxs">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Award Title</th>
+                                    <th>Points / Value</th>
+                                    <th>Description</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>1</td>
+                                    <td><strong>Employee of the Month</strong></td>
+                                    <td>$500 Cash + Certificate</td>
+                                    <td>Awarded to the top performer of the month across all departments.</td>
+                                    <td><span class="badge bg-soft-success text-success">Active</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-soft-info" title="Edit"><i data-lucide="square-pen" style="width:14px;height:14px;"></i></button>
+                                        <button class="btn btn-sm btn-soft-danger" title="Delete"><i data-lucide="trash-2" style="width:14px;height:14px;"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>2</td>
+                                    <td><strong>Best Innovation Award</strong></td>
+                                    <td>$1,000 Cash + Trophy</td>
+                                    <td>Awarded for implementing a creative solution that saves company time or cost.</td>
+                                    <td><span class="badge bg-soft-success text-success">Active</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-soft-info" title="Edit"><i data-lucide="square-pen" style="width:14px;height:14px;"></i></button>
+                                        <button class="btn btn-sm btn-soft-danger" title="Delete"><i data-lucide="trash-2" style="width:14px;height:14px;"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>3</td>
+                                    <td><strong>Long Service Award (5 Years)</strong></td>
+                                    <td>Engraved Silver Plate</td>
+                                    <td>Recognizes 5 years of dedication and loyalty to Zentora.</td>
+                                    <td><span class="badge bg-soft-success text-success">Active</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-soft-info" title="Edit"><i data-lucide="square-pen" style="width:14px;height:14px;"></i></button>
+                                        <button class="btn btn-sm btn-soft-danger" title="Delete"><i data-lucide="trash-2" style="width:14px;height:14px;"></i></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- AddAwardType Modal -->
+<div id="AddAwardType" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="AddAwardType" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Add New Award Category</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="mb-3">
+                        <label class="form-label fs-xxs text-muted">Award Title</label>
+                        <input type="text" class="form-control" placeholder="e.g. Employee of the Month" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fs-xxs text-muted">Value / Reward</label>
+                        <input type="text" class="form-control" placeholder="e.g. $500 Cash" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fs-xxs text-muted">Description</label>
+                        <textarea class="form-control" rows="3" placeholder="Enter brief description..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 py-2 rounded-2 mt-2 shadow-sm">Save Award Type</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,199 @@
+@model IEnumerable<zentoraHRMS.Models.DesignationModel>
+@{
+    ViewBag.Title = "Designations";
+}
+
+<div class="container-fluid">
+    <div class="row justify-content-center py-5">
+        <div class="col-xxl-5 col-xl-7 text-center">
+            <a href="@Url.Action("Index","Home")" class="badge badge-default fw-normal shadow px-2 py-1 mb-2 fst-italic fs-xxs">
+                <i data-lucide="square-check" class="fs-sm me-1"></i> DashBoard
+            </a>
+            <h3 class="fw-bold">Designations List</h3>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-xxl-12">
+            <div class="card rounded-2">
+                <div class="card-header justify-content-between">
+                    <h5 class="card-title">Designation Details</h5>
+                    <button type="button" class="btn btn-sm btn-soft-primary" data-bs-toggle="modal" data-bs-target="#AddDesg">
+                        <i class="me-1" data-lucide="plus"></i> Add Designation
+                    </button>
+                </div>
+
+                <div class="card-body">
+                    <table id="checkbox-select-data" class="table table-striped dt-responsive checkbox-select-datatable align-middle mb-0">
+                        <thead class="thead-sm text-uppercase fs-xxs">
+                            <tr>
+                                <th class="fs-sm" style="width: 1%;"></th>
+                                <th>Designation ID</th>
+                                <th>Designation Name</th>
+                                <th>Description</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var c in Model)
+                            {
+                                <tr>
+                                    <td class="fs-sm" style="width: 1%;"></td>
+                                    <td>@c.DesignationId</td>
+                                    <td>@c.DesignationName</td>
+                                    <td>@c.Description</td>
+                                    <td>
+                                        @if (c.IsActive) { <span class="badge bg-success-subtle text-success">Active</span> }
+                                        else { <span class="badge bg-danger-subtle text-danger">Inactive</span> }
+                                    </td>
+                                    <td>
+                                        <a onclick="UpdateDesg(@c.DesignationId)" class="btn btn-sm btn-soft-info mt-1" title="Update"><i data-lucide="square-pen"></i></a>
+                                        <a onclick="DeleteDesg(@c.DesignationId)" class="btn btn-sm btn-soft-danger mt-1" title="Delete"><i data-lucide="trash-2"></i></a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AddDesg Modal -->
+    <div id="AddDesg" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form id="DesgForm" class="needs-validation" novalidate method="post">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Add Designation</h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="DesignationName" class="form-label">Designation Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="DesignationName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="Description" class="form-label">Description</label>
+                            <textarea class="form-control" id="Description" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-soft-primary">Save changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- UpdateDesg Modal -->
+    <div id="UpdateDesgModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form id="UpdateDesgForm" class="needs-validation" novalidate method="post">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Update Designation</h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="update_id" />
+                        <div class="mb-3">
+                            <label for="uDesignationName" class="form-label">Designation Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="uDesignationName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="uDescription" class="form-label">Description</label>
+                            <textarea class="form-control" id="uDescription" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-soft-primary">Save changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#DesgForm").on("submit", function (e) {
+            e.preventDefault();
+            var formData = {
+                DesignationName: $("#DesignationName").val(),
+                Description: $("#Description").val()
+            };
+            $.ajax({
+                url: '/HR/SaveDesignation',
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(formData),
+                success: function (res) {
+                    if (res.success) {
+                        location.reload();
+                    } else {
+                        alert("Error: " + res.message);
+                    }
+                }
+            });
+        });
+
+        $("#UpdateDesgForm").on("submit", function (e) {
+            e.preventDefault();
+            var formData = {
+                DesignationId: $("#update_id").val(),
+                DesignationName: $("#uDesignationName").val(),
+                Description: $("#uDescription").val()
+            };
+            $.ajax({
+                url: '/HR/UpdateDesignation',
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(formData),
+                success: function (res) {
+                    if (res.success) {
+                        location.reload();
+                    } else {
+                        alert("Error: " + res.message);
+                    }
+                }
+            });
+        });
+    });
+
+    function UpdateDesg(id) {
+        $.ajax({
+            url: '/HR/GetDesignationById',
+            type: 'GET',
+            data: { id: id },
+            success: function (data) {
+                if (data) {
+                    $("#update_id").val(data.DesignationId);
+                    $("#uDesignationName").val(data.DesignationName);
+                    $("#uDescription").val(data.Description);
+                    $("#UpdateDesgModal").modal("show");
+                }
+            }
+        });
+    }
+
+    function DeleteDesg(id) {
+        if (confirm("Are you sure you want to delete this designation?")) {
+            $.ajax({
+                url: '/HR/DeleteDesignation',
+                type: "POST",
+                data: { id: id },
+                success: function (res) {
+                    if (res.success) {
+                        location.reload();
+                    } else {
+                        alert("Error: " + res.message);
+                    }
+                }
+            });
+        }
+    }
+</script>
