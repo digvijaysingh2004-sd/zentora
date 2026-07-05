@@ -1,4 +1,4 @@
-﻿@model zentoraHRMS.Models.SidebarViewModel
+@model zentoraHRMS.Models.SidebarViewModel
 
 <div class="scrollbar" data-simplebar>
     <ul class="side-nav">
@@ -11,7 +11,7 @@
                 <li class="side-nav-item mb-1">
                     @if (parent.Children != null && parent.Children.Any())
                     {
-                        <a data-bs-toggle="collapse" href="#@targetId" aria-expanded="false" aria-controls="@targetId" class="side-nav-link">
+                        <a data-bs-toggle="collapse" href="#@(targetId)" aria-expanded="false" aria-controls="@targetId" class="side-nav-link">
                             <span class="menu-icon"><i data-lucide="@parent.IconClass"></i></span>
                             <span class="menu-text"> @parent.ModuleName </span>
                             <span class="menu-arrow"></span>
@@ -26,7 +26,7 @@
                                     <li class="side-nav-item mt-1">
                                         @if (child.SubChildren != null && child.SubChildren.Any())
                                         {
-                                            <a data-bs-toggle="collapse" href="#@subTargetId" aria-expanded="false" aria-controls="@subTargetId" class="side-nav-link">
+                                            <a data-bs-toggle="collapse" href="#@(subTargetId)" aria-expanded="false" aria-controls="@subTargetId" class="side-nav-link">
                                                 <span class="menu-text">@child.ModuleName</span>
                                                 <span class="menu-arrow"></span>
                                             </a>
