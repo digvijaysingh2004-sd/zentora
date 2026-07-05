@@ -114,7 +114,8 @@
         });
     </script>
     <script>
-        if (!@Html.Raw(Json.Encode(Session["UserId"])) ) {
+        @Html.Raw("var sessionUserId = " + Json.Encode(Session["UserId"]) + ";")
+        if (!sessionUserId) {
             // if no session, always go to login
             if (window.location.pathname.toLowerCase().indexOf("/") === -1) {
                 window.location.replace("/");
@@ -245,7 +246,7 @@
                 }
             }
 
-            var userPerms = @Html.Raw(Json.Encode(ViewBag.CurrentPermissions ?? new List<string>()));
+            @Html.Raw("var userPerms = " + Json.Encode(ViewBag.CurrentPermissions ?? new List<string>()) + ";")
             if (userPerms && userPerms.length > 0) {
                 // If the user does not have view permission, we might just hide the whole container, but usually view is base
                 if (!userPerms.includes("add")) { 
