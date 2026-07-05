@@ -28,7 +28,6 @@ bld/
 
 # Visual Studio 2015/2017/2019/2022 cache directory
 .vs/
-zentoraHRMS/.vs/
 
 # MSTest test Results
 [Tt]est[Rr]esult*/
@@ -70,3 +69,7 @@ ehthumbs.db
 Desktop.ini
 $RECYCLE.BIN/
 .DS_Store
+
+# Scripts and Database Setup files (Do not share or push to public repo)
+*.ps1
+*.sql
