@@ -69,11 +69,11 @@
                     <div class="modal-body">
                         <div class="mb-3">
                             <label for="EmployeeId" class="form-label">Employee <span class="text-danger">*</span></label>
-                            <select id="EmployeeId" class="form-select" required></select>
+                            <select id="EmployeeId" data-choices class="form-select" required></select>
                         </div>
                         <div class="mb-3">
                             <label for="DesignationId" class="form-label">New Designation <span class="text-danger">*</span></label>
-                            <select id="DesignationId" class="form-select" required></select>
+                            <select id="DesignationId" data-choices class="form-select" required></select>
                         </div>
                         <div class="mb-3">
                             <label for="PromotionDate" class="form-label">Promotion Date <span class="text-danger">*</span></label>
@@ -106,11 +106,11 @@
                         <input type="hidden" id="update_id" />
                         <div class="mb-3">
                             <label for="uEmployeeId" class="form-label">Employee <span class="text-danger">*</span></label>
-                            <select id="uEmployeeId" class="form-select" required></select>
+                            <select id="uEmployeeId" data-choices class="form-select" required></select>
                         </div>
                         <div class="mb-3">
                             <label for="uDesignationId" class="form-label">New Designation <span class="text-danger">*</span></label>
-                            <select id="uDesignationId" class="form-select" required></select>
+                            <select id="uDesignationId" data-choices class="form-select" required></select>
                         </div>
                         <div class="mb-3">
                             <label for="uPromotionDate" class="form-label">Promotion Date <span class="text-danger">*</span></label>
@@ -161,6 +161,9 @@
 
         $("#PromoForm").on("submit", function (e) {
             e.preventDefault();
+            if (!validateForm('PromoForm')) {
+                return false;
+            }
             var formData = {
                 EmployeeId: $("#EmployeeId").val(),
                 DesignationId: $("#DesignationId").val(),
@@ -184,6 +187,9 @@
 
         $("#UpdatePromoForm").on("submit", function (e) {
             e.preventDefault();
+            if (!validateForm('UpdatePromoForm')) {
+                return false;
+            }
             var formData = {
                 PromotionId: $("#update_id").val(),
                 EmployeeId: $("#uEmployeeId").val(),

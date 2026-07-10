@@ -1,4 +1,4 @@
-﻿@model IEnumerable<zentoraHRMS.Models.SubDepartmentModel>
+@model IEnumerable<zentoraHRMS.Models.SubDepartmentModel>
 @{
     ViewBag.Title = "SubDepartment";
 }
@@ -281,6 +281,10 @@
         $("#SubDepartmentForm").on("submit", function (e) {
             e.preventDefault();
 
+            if (!validateForm('SubDepartmentForm')) {
+                return false;
+            }
+
             var formData = {
                 SubDepartmentName: $("#SubDepartment_name").val(),
                 DepartmentId: $("#department").val(),
@@ -309,6 +313,10 @@
 
         $("#UpdateSubDepartmentForm").on("submit", function (e) {
             e.preventDefault();
+
+            if (!validateForm('UpdateSubDepartmentForm')) {
+                return false;
+            }
 
             var formData = {
                 SubDepartmentId: $("#subdepartment_id").val(),

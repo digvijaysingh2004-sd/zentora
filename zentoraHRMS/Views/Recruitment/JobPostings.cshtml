@@ -82,7 +82,7 @@
                         </div>
                         <div class="mb-3">
                             <label for="JobType" class="form-label">Job Type <span class="text-danger">*</span></label>
-                            <select id="JobType" class="form-select" required>
+                            <select id="JobType" data-choices class="form-select" required>
                                 <option value="Full-Time" selected>Full-Time</option>
                                 <option value="Part-Time">Part-Time</option>
                                 <option value="Contract">Contract</option>
@@ -107,7 +107,7 @@
                         </div>
                         <div class="mb-3">
                             <label for="Status" class="form-label">Status <span class="text-danger">*</span></label>
-                            <select id="Status" class="form-select" required>
+                            <select id="Status" data-choices class="form-select" required>
                                 <option value="Active" selected>Active</option>
                                 <option value="Closed">Closed</option>
                             </select>
@@ -139,7 +139,7 @@
                         </div>
                         <div class="mb-3">
                             <label for="uJobType" class="form-label">Job Type <span class="text-danger">*</span></label>
-                            <select id="uJobType" class="form-select" required>
+                            <select id="uJobType" data-choices class="form-select" required>
                                 <option value="Full-Time">Full-Time</option>
                                 <option value="Part-Time">Part-Time</option>
                                 <option value="Contract">Contract</option>
@@ -164,7 +164,7 @@
                         </div>
                         <div class="mb-3">
                             <label for="uStatus" class="form-label">Status <span class="text-danger">*</span></label>
-                            <select id="uStatus" class="form-select" required>
+                            <select id="uStatus" data-choices class="form-select" required>
                                 <option value="Active">Active</option>
                                 <option value="Closed">Closed</option>
                             </select>
@@ -184,6 +184,9 @@
     $(document).ready(function () {
         $("#JobForm").on("submit", function (e) {
             e.preventDefault();
+            if (!validateForm('JobForm')) {
+                return false;
+            }
             var formData = {
                 Title: $("#Title").val(),
                 JobType: $("#JobType").val(),
@@ -210,6 +213,9 @@
 
         $("#UpdateJobForm").on("submit", function (e) {
             e.preventDefault();
+            if (!validateForm('UpdateJobForm')) {
+                return false;
+            }
             var formData = {
                 JobId: $("#update_id").val(),
                 Title: $("#uTitle").val(),

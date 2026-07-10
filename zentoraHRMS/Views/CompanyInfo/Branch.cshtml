@@ -1,4 +1,4 @@
-﻿@model IEnumerable<zentoraHRMS.Models.BranchModel>
+@model IEnumerable<zentoraHRMS.Models.BranchModel>
 @{
     ViewBag.Title = "Branch";
 }
@@ -335,13 +335,8 @@
          $("#BranchForm").on("submit", function (e) {
             e.preventDefault();
 
-            var form = this;
-
-            // ✅ Bootstrap validation
-            if (!form.checkValidity()) {
-                e.stopPropagation();
-                $(form).addClass("was-validated");
-                return;
+            if (!validateForm('BranchForm')) {
+                return false;
             }
 
             // ✅ Collect form data
@@ -381,6 +376,10 @@
 
         $("#UpdateBranchForm").on("submit", function (e) {
             e.preventDefault();
+
+            if (!validateForm('UpdateBranchForm')) {
+                return false;
+            }
 
             var formData = {
                 BranchId: $("#branch_id").val(),

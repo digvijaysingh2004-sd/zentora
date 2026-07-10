@@ -93,7 +93,7 @@
                         </div>
                         <div class="mb-3">
                             <label for="Status" class="form-label">Status</label>
-                            <select class="form-select" id="Status">
+                            <select class="form-select" id="Status" data-choices>
                                 <option value="In Progress">In Progress</option>
                                 <option value="On Hold">On Hold</option>
                                 <option value="Completed">Completed</option>
@@ -144,7 +144,7 @@
                         </div>
                         <div class="mb-3">
                             <label for="uStatus" class="form-label">Status</label>
-                            <select class="form-select" id="uStatus">
+                            <select class="form-select" id="uStatus" data-choices>
                                 <option value="In Progress">In Progress</option>
                                 <option value="On Hold">On Hold</option>
                                 <option value="Completed">Completed</option>
@@ -165,6 +165,9 @@
     $(document).ready(function () {
         $("#ProjectForm").on("submit", function (e) {
             e.preventDefault();
+            if (!validateForm('ProjectForm')) {
+                return false;
+            }
             var formData = {
                 ProjectName: $("#ProjectName").val(),
                 ProjectCode: $("#ProjectCode").val(),
@@ -190,6 +193,9 @@
 
         $("#UpdateProjectForm").on("submit", function (e) {
             e.preventDefault();
+            if (!validateForm('UpdateProjectForm')) {
+                return false;
+            }
             var formData = {
                 ProjectId: $("#update_id").val(),
                 ProjectName: $("#uProjectName").val(),

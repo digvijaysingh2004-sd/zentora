@@ -76,7 +76,7 @@
                         </div>
                         <div class="mb-3">
                             <label for="ComponentType" class="form-label">Component Type <span class="text-danger">*</span></label>
-                            <select id="ComponentType" class="form-select" required>
+                            <select id="ComponentType" data-choices class="form-select" required>
                                 <option value="Earning" selected>Earning</option>
                                 <option value="Deduction">Deduction</option>
                             </select>
@@ -112,7 +112,7 @@
                         </div>
                         <div class="mb-3">
                             <label for="uComponentType" class="form-label">Component Type <span class="text-danger">*</span></label>
-                            <select id="uComponentType" class="form-select" required>
+                            <select id="uComponentType" data-choices class="form-select" required>
                                 <option value="Earning">Earning</option>
                                 <option value="Deduction">Deduction</option>
                             </select>
@@ -136,6 +136,9 @@
     $(document).ready(function () {
         $("#ComponentForm").on("submit", function (e) {
             e.preventDefault();
+            if (!validateForm('ComponentForm')) {
+                return false;
+            }
             var formData = {
                 ComponentName: $("#ComponentName").val(),
                 ComponentType: $("#ComponentType").val(),
@@ -158,6 +161,9 @@
 
         $("#UpdateComponentForm").on("submit", function (e) {
             e.preventDefault();
+            if (!validateForm('UpdateComponentForm')) {
+                return false;
+            }
             var formData = {
                 ComponentId: $("#update_id").val(),
                 ComponentName: $("#uComponentName").val(),

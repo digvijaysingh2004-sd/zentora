@@ -75,15 +75,18 @@
                     <div class="modal-body">
                         <div class="mb-3">
                             <label for="EmployeeId" class="form-label">Employee <span class="text-danger">*</span></label>
-                            <select id="EmployeeId" class="form-select" required></select>
+                            <select id="EmployeeId" data-choices class="form-select" required></select>
+                            <div class="invalid-feedback">Please select the Employee.</div>
                         </div>
                         <div class="mb-3">
                             <label for="AttendanceDate" class="form-label">Date <span class="text-danger">*</span></label>
                             <input type="date" class="form-control" id="AttendanceDate" required>
+                            <div class="invalid-feedback">Please enter the Attendance Date.</div>
                         </div>
                         <div class="mb-3">
                             <label for="ClockIn" class="form-label">Clock In Time <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="ClockIn" placeholder="hh:mm e.g. 09:00" required>
+                            <div class="invalid-feedback">Please enter the Clock In Time.</div>
                         </div>
                         <div class="mb-3">
                             <label for="ClockOut" class="form-label">Clock Out Time</label>
@@ -91,11 +94,12 @@
                         </div>
                         <div class="mb-3">
                             <label for="Status" class="form-label">Status <span class="text-danger">*</span></label>
-                            <select id="Status" class="form-select" required>
+                            <select id="Status" data-choices class="form-select" required>
                                 <option value="Present" selected>Present</option>
                                 <option value="Late">Late</option>
                                 <option value="Absent">Absent</option>
                             </select>
+                            <div class="invalid-feedback">Please select the Status.</div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -120,15 +124,18 @@
                         <input type="hidden" id="update_id" />
                         <div class="mb-3">
                             <label for="uEmployeeId" class="form-label">Employee <span class="text-danger">*</span></label>
-                            <select id="uEmployeeId" class="form-select" required></select>
+                            <select id="uEmployeeId" data-choices class="form-select" required></select>
+                            <div class="invalid-feedback">Please select the Employee.</div>
                         </div>
                         <div class="mb-3">
                             <label for="uAttendanceDate" class="form-label">Date <span class="text-danger">*</span></label>
                             <input type="date" class="form-control" id="uAttendanceDate" required>
+                            <div class="invalid-feedback">Please enter the Attendance Date.</div>
                         </div>
                         <div class="mb-3">
                             <label for="uClockIn" class="form-label">Clock In Time <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="uClockIn" required>
+                            <div class="invalid-feedback">Please enter the Clock In Time.</div>
                         </div>
                         <div class="mb-3">
                             <label for="uClockOut" class="form-label">Clock Out Time</label>
@@ -136,11 +143,12 @@
                         </div>
                         <div class="mb-3">
                             <label for="uStatus" class="form-label">Status <span class="text-danger">*</span></label>
-                            <select id="uStatus" class="form-select" required>
+                            <select id="uStatus" data-choices class="form-select" required>
                                 <option value="Present">Present</option>
                                 <option value="Late">Late</option>
                                 <option value="Absent">Absent</option>
                             </select>
+                            <div class="invalid-feedback">Please select the Status.</div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -170,6 +178,9 @@
 
         $("#AttForm").on("submit", function (e) {
             e.preventDefault();
+            if (!validateForm('AttForm')) {
+                return false;
+            }
             var formData = {
                 employeeId: $("#EmployeeId").val(),
                 status: $("#Status").val(),
@@ -193,6 +204,9 @@
 
         $("#UpdateAttForm").on("submit", function (e) {
             e.preventDefault();
+            if (!validateForm('UpdateAttForm')) {
+                return false;
+            }
             var formData = {
                 attendanceId: $("#update_id").val(),
                 employeeId: $("#uEmployeeId").val(),

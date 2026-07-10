@@ -72,7 +72,7 @@
                     <div class="modal-body">
                         <div class="mb-3">
                             <label for="EmployeeId" class="form-label">Employee <span class="text-danger">*</span></label>
-                            <select id="EmployeeId" class="form-select" required></select>
+                            <select id="EmployeeId" data-choices class="form-select" required></select>
                         </div>
                         <div class="mb-3">
                             <label for="BasicSalary" class="form-label">Basic Salary <span class="text-danger">*</span></label>
@@ -109,7 +109,7 @@
                         <input type="hidden" id="update_id" />
                         <div class="mb-3">
                             <label for="uEmployeeId" class="form-label">Employee <span class="text-danger">*</span></label>
-                            <select id="uEmployeeId" class="form-select" required></select>
+                            <select id="uEmployeeId" data-choices class="form-select" required></select>
                         </div>
                         <div class="mb-3">
                             <label for="uBasicSalary" class="form-label">Basic Salary <span class="text-danger">*</span></label>
@@ -151,6 +151,9 @@
 
         $("#SalaryForm").on("submit", function (e) {
             e.preventDefault();
+            if (!validateForm('SalaryForm')) {
+                return false;
+            }
             var formData = {
                 EmployeeId: $("#EmployeeId").val(),
                 BasicSalary: $("#BasicSalary").val(),
@@ -174,6 +177,9 @@
 
         $("#UpdateSalaryForm").on("submit", function (e) {
             e.preventDefault();
+            if (!validateForm('UpdateSalaryForm')) {
+                return false;
+            }
             var formData = {
                 SalaryId: $("#update_id").val(),
                 EmployeeId: $("#uEmployeeId").val(),

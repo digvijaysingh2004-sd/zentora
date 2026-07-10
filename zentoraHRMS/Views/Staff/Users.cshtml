@@ -3,6 +3,56 @@
     ViewBag.Title = "User Management";
 }
 
+<style>
+    /* iOS Glassmorphic Badges */
+    .badge-glass {
+        backdrop-filter: blur(20px) saturate(180%);
+        -webkit-backdrop-filter: blur(20px) saturate(180%);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        font-weight: 600;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 10px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        letter-spacing: 0.4px;
+        text-transform: capitalize;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+        line-height: 1;
+    }
+
+    .badge-glass-danger {
+        background: rgba(255, 59, 48, 0.14) !important;
+        color: #ff3b30 !important;
+        border-color: rgba(255, 59, 48, 0.35) !important;
+    }
+
+    .badge-glass-warning {
+        background: rgba(255, 159, 10, 0.14) !important;
+        color: #ff9f0a !important;
+        border-color: rgba(255, 159, 10, 0.35) !important;
+    }
+
+    .badge-glass-primary {
+        background: rgba(0, 122, 255, 0.14) !important;
+        color: #007aff !important;
+        border-color: rgba(0, 122, 255, 0.35) !important;
+    }
+
+    .badge-glass-info {
+        background: rgba(50, 173, 230, 0.14) !important;
+        color: #32ade6 !important;
+        border-color: rgba(50, 173, 230, 0.35) !important;
+    }
+
+    .badge-glass-secondary {
+        background: rgba(142, 142, 147, 0.14) !important;
+        color: #8e8e93 !important;
+        border-color: rgba(142, 142, 147, 0.35) !important;
+    }
+</style>
+
 <div class="container-fluid">
     <div class="row justify-content-center py-5">
         <div class="col-xxl-5 col-xl-7 text-center">
@@ -45,11 +95,11 @@
                                     <td>@c.FullName</td>
                                     <td>@c.Username</td>
                                     <td>
-                                        @if (c.RoleType == "1") { <span class="badge bg-danger">Superadmin</span> }
-                                        else if (c.RoleType == "2") { <span class="badge bg-warning">Admin</span> }
-                                        else if (c.RoleType == "3") { <span class="badge bg-primary">Manager</span> }
-                                        else if (c.RoleType == "4") { <span class="badge bg-info">HR</span> }
-                                        else { <span class="badge bg-secondary">Employee</span> }
+                                         @if (c.RoleType == "1") { <span class="badge-glass badge-glass-danger">Superadmin</span> }
+                                         else if (c.RoleType == "2") { <span class="badge-glass badge-glass-warning">Admin</span> }
+                                         else if (c.RoleType == "3") { <span class="badge-glass badge-glass-primary">Manager</span> }
+                                         else if (c.RoleType == "4") { <span class="badge-glass badge-glass-info">HR</span> }
+                                         else { <span class="badge-glass badge-glass-secondary">Employee</span> }
                                     </td>
                                     <td>
                                         @if (c.IsActive) { <span class="badge bg-success-subtle text-success">Active</span> }
@@ -80,7 +130,7 @@
                     <div class="modal-body">
                         <div class="mb-3">
                             <label for="EmpId" class="form-label">Employee <span class="text-danger">*</span></label>
-                            <select id="EmpId" class="form-select" required></select>
+                            <select id="EmpId" data-choices class="form-select" required></select>
                         </div>
                         <div class="mb-3">
                             <label for="FullName" class="form-label">Full Name <span class="text-danger">*</span></label>
@@ -96,7 +146,7 @@
                         </div>
                         <div class="mb-3">
                             <label for="RoleType" class="form-label">Role Type <span class="text-danger">*</span></label>
-                            <select id="RoleType" class="form-select" required>
+                            <select id="RoleType" data-choices class="form-select" required>
                                 <option value="" selected disabled>Select Role</option>
                                 <option value="1">Superadmin</option>
                                 <option value="2">Admin</option>
@@ -128,7 +178,7 @@
                         <input type="hidden" id="update_id" />
                         <div class="mb-3">
                             <label for="uEmpId" class="form-label">Employee <span class="text-danger">*</span></label>
-                            <select id="uEmpId" class="form-select" required></select>
+                            <select id="uEmpId" data-choices class="form-select" required></select>
                         </div>
                         <div class="mb-3">
                             <label for="uFullName" class="form-label">Full Name <span class="text-danger">*</span></label>
@@ -144,7 +194,7 @@
                         </div>
                         <div class="mb-3">
                             <label for="uRoleType" class="form-label">Role Type <span class="text-danger">*</span></label>
-                            <select id="uRoleType" class="form-select" required>
+                            <select id="uRoleType" data-choices class="form-select" required>
                                 <option value="1">Superadmin</option>
                                 <option value="2">Admin</option>
                                 <option value="3">Manager</option>
@@ -181,6 +231,9 @@
 
         $("#UserForm").on("submit", function (e) {
             e.preventDefault();
+            if (!validateForm('UserForm')) {
+                return false;
+            }
             var formData = {
                 EmpId: $("#EmpId").val(),
                 FullName: $("#FullName").val(),
@@ -205,6 +258,9 @@
 
         $("#UpdateUserForm").on("submit", function (e) {
             e.preventDefault();
+            if (!validateForm('UpdateUserForm')) {
+                return false;
+            }
             var formData = {
                 Id: $("#update_id").val(),
                 EmpId: $("#uEmpId").val(),

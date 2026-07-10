@@ -70,7 +70,7 @@
                     <div class="modal-body">
                         <div class="mb-3">
                             <label for="ParentModuleId" class="form-label">Parent Module <span class="text-danger">*</span></label>
-                            <select id="ParentModuleId" class="form-select" required></select>
+                            <select id="ParentModuleId" data-choices class="form-select" required></select>
                         </div>
                         <div class="mb-3">
                             <label for="ModuleName" class="form-label">Module Name <span class="text-danger">*</span></label>
@@ -107,7 +107,7 @@
                         <input type="hidden" id="update_id" />
                         <div class="mb-3">
                             <label for="uParentModuleId" class="form-label">Parent Module <span class="text-danger">*</span></label>
-                            <select id="uParentModuleId" class="form-select" required></select>
+                            <select id="uParentModuleId" data-choices class="form-select" required></select>
                         </div>
                         <div class="mb-3">
                             <label for="uModuleName" class="form-label">Module Name <span class="text-danger">*</span></label>
@@ -155,6 +155,9 @@
 
         $("#ChildForm").on("submit", function (e) {
             e.preventDefault();
+            if (!validateForm('ChildForm')) {
+                return false;
+            }
             var formData = {
                 ParentModuleId: $("#ParentModuleId").val(),
                 ModuleName: $("#ModuleName").val(),
@@ -178,6 +181,9 @@
 
         $("#UpdateChildForm").on("submit", function (e) {
             e.preventDefault();
+            if (!validateForm('UpdateChildForm')) {
+                return false;
+            }
             var formData = {
                 ChildModuleId: $("#update_id").val(),
                 ParentModuleId: $("#uParentModuleId").val(),

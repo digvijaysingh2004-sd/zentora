@@ -81,7 +81,7 @@
                     <div class="modal-body">
                         <div class="mb-3">
                             <label for="JobId" class="form-label">Job Opening <span class="text-danger">*</span></label>
-                            <select id="JobId" class="form-select" required></select>
+                            <select id="JobId" data-choices class="form-select" required></select>
                         </div>
                         <div class="mb-3">
                             <label for="FullName" class="form-label">Full Name <span class="text-danger">*</span></label>
@@ -101,7 +101,7 @@
                         </div>
                         <div class="mb-3">
                             <label for="ApplicationStatus" class="form-label">Status <span class="text-danger">*</span></label>
-                            <select id="ApplicationStatus" class="form-select" required>
+                            <select id="ApplicationStatus" data-choices class="form-select" required>
                                 <option value="Applied" selected>Applied</option>
                                 <option value="Shortlisted">Shortlisted</option>
                                 <option value="Interviewing">Interviewing</option>
@@ -132,7 +132,7 @@
                         <input type="hidden" id="update_id" />
                         <div class="mb-3">
                             <label for="uJobId" class="form-label">Job Opening <span class="text-danger">*</span></label>
-                            <select id="uJobId" class="form-select" required></select>
+                            <select id="uJobId" data-choices class="form-select" required></select>
                         </div>
                         <div class="mb-3">
                             <label for="uFullName" class="form-label">Full Name <span class="text-danger">*</span></label>
@@ -152,7 +152,7 @@
                         </div>
                         <div class="mb-3">
                             <label for="uApplicationStatus" class="form-label">Status <span class="text-danger">*</span></label>
-                            <select id="uApplicationStatus" class="form-select" required>
+                            <select id="uApplicationStatus" data-choices class="form-select" required>
                                 <option value="Applied">Applied</option>
                                 <option value="Shortlisted">Shortlisted</option>
                                 <option value="Interviewing">Interviewing</option>
@@ -188,6 +188,9 @@
 
         $("#CandidateForm").on("submit", function (e) {
             e.preventDefault();
+            if (!validateForm('CandidateForm')) {
+                return false;
+            }
             var formData = {
                 JobId: $("#JobId").val(),
                 FullName: $("#FullName").val(),
@@ -213,6 +216,9 @@
 
         $("#UpdateCandidateForm").on("submit", function (e) {
             e.preventDefault();
+            if (!validateForm('UpdateCandidateForm')) {
+                return false;
+            }
             var formData = {
                 CandidateId: $("#update_id").val(),
                 JobId: $("#uJobId").val(),

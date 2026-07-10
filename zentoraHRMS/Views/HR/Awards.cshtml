@@ -71,7 +71,7 @@
                     <div class="modal-body">
                         <div class="mb-3">
                             <label for="EmployeeId" class="form-label">Employee <span class="text-danger">*</span></label>
-                            <select id="EmployeeId" class="form-select" required></select>
+                            <select id="EmployeeId" data-choices class="form-select" required></select>
                         </div>
                         <div class="mb-3">
                             <label for="AwardType" class="form-label">Award Type <span class="text-danger">*</span></label>
@@ -116,7 +116,7 @@
                         <input type="hidden" id="update_id" />
                         <div class="mb-3">
                             <label for="uEmployeeId" class="form-label">Employee <span class="text-danger">*</span></label>
-                            <select id="uEmployeeId" class="form-select" required></select>
+                            <select id="uEmployeeId" data-choices class="form-select" required></select>
                         </div>
                         <div class="mb-3">
                             <label for="uAwardType" class="form-label">Award Type <span class="text-danger">*</span></label>
@@ -166,6 +166,9 @@
 
         $("#AwardForm").on("submit", function (e) {
             e.preventDefault();
+            if (!validateForm('AwardForm')) {
+                return false;
+            }
             var formData = {
                 EmployeeId: $("#EmployeeId").val(),
                 AwardType: $("#AwardType").val(),
@@ -191,6 +194,9 @@
 
         $("#UpdateAwardForm").on("submit", function (e) {
             e.preventDefault();
+            if (!validateForm('UpdateAwardForm')) {
+                return false;
+            }
             var formData = {
                 AwardId: $("#update_id").val(),
                 EmployeeId: $("#uEmployeeId").val(),

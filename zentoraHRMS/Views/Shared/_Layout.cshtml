@@ -31,6 +31,18 @@
     <!-- Icon css -->
     <script src="~/assets/plugins/lucide/lucide.min.js"></script>
 
+    <!-- Choices Validation Styling -->
+    <style>
+        select.is-invalid + .choices .choices__inner {
+            border-color: #dc3545 !important;
+        }
+        .choices.is-invalid .choices__inner {
+            border-color: #dc3545 !important;
+        }
+        select.is-invalid ~ .invalid-feedback {
+            display: block !important;
+        }
+    </style>
 </head>
 <body>
     <div class="wrapper">
@@ -260,6 +272,49 @@
                 }
             }
         });
+
+        // Global Validator for forms (supporting Choices.js validation state)
+        function validateForm(formId) {
+            var isValid = true;
+            $('#' + formId + ' .is-invalid').removeClass('is-invalid');
+            $('#' + formId + ' .choices').removeClass('is-invalid');
+            
+            $('#' + formId + ' [required]').each(function () {
+                var $el = $(this);
+                var val = $el.val();
+                
+                if (!val || val.toString().trim() === '') {
+                    isValid = false;
+                    $el.addClass('is-invalid');
+                    
+                    var $container = $el.is('select') && $el.closest('.choices').length > 0 ? $el.closest('.choices') : $el;
+                    if ($el.is('select')) {
+                        $container.addClass('is-invalid');
+                    }
+                    
+                    var $feedback = $container.siblings('.invalid-feedback');
+                    
+                    var labelText = '';
+                    var fieldId = $el.attr('id');
+                    if (fieldId) {
+                        labelText = $('label[for="' + fieldId + '"]').text();
+                    }
+                    if (!labelText) {
+                        labelText = $el.closest('.mb-3, .col-md-6, .col-md-4, .col-md-12').find('label').text();
+                    }
+                    labelText = labelText.replace('*', '').trim() || 'this field';
+                    
+                    var msg = $el.is('select') ? 'Please select the ' + labelText + '.' : 'Please enter the ' + labelText + '.';
+                    if ($feedback.length === 0) {
+                        $container.parent().append('<div class="invalid-feedback">' + msg + '</div>');
+                    } else {
+                        $feedback.text(msg);
+                    }
+                }
+            });
+            
+            return isValid;
+        }
     </script>
 </body>
 </html>
