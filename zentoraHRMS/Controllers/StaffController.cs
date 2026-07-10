@@ -217,8 +217,8 @@ namespace zentoraHRMS.Controllers
             {
                 using (SqlConnection con = new SqlConnection(connectionString))
                 {
-                    string query = @"INSERT INTO EmployeeDetails (EmpCode, FirstName, LastName, Username, Phone, Email, Designation, Company, Branch, Department, SubDepartment, IsActive, IsDeleted, CreatedDate, SystemAddedOn) 
-                                     VALUES (@EmpCode, @FirstName, @LastName, @Username, @Phone, @Email, @Designation, @Company, @Branch, @Department, @SubDepartment, 1, 0, GETDATE(), GETDATE())";
+                    string query = @"INSERT INTO EmployeeDetails (EmpCode, FirstName, LastName, Username, Phone, Email, Designation, Company, Branch, Department, SubDepartment, PhoneCode, Password, OfficeShift, OfficeLocation, DOJ, DOB, State, City, Country, ZipCode, RoleType, ReportingManager, CreateBy, IsActive, IsDeleted, CreatedDate, SystemAddedOn) 
+                                     VALUES (@EmpCode, @FirstName, @LastName, @Username, @Phone, @Email, @Designation, @Company, @Branch, @Department, @SubDepartment, '+91', '123456', 'General', 'Noida', GETDATE(), GETDATE(), '', '', '', '', 1, 0, 1, 1, 0, GETDATE(), GETDATE())";
                     using (SqlCommand cmd = new SqlCommand(query, con))
                     {
                         cmd.Parameters.AddWithValue("@EmpCode", model.EmpCode ?? "");
@@ -444,6 +444,64 @@ namespace zentoraHRMS.Controllers
                 string query = "SELECT SubDepartmentName FROM SubDepartments ORDER BY SubDepartmentName";
                 using (SqlCommand cmd = new SqlCommand(query, con))
                 {
+                    con.Open();
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            list.Add(reader["SubDepartmentName"].ToString());
+                        }
+                    }
+                }
+            }
+            return Json(list, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpGet]
+        public JsonResult GetDepartmentsByBranch(string branchName)
+        {
+            List<string> list = new List<string>();
+            if (string.IsNullOrEmpty(branchName))
+            {
+                return Json(list, JsonRequestBehavior.AllowGet);
+            }
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                string query = @"SELECT DepartmentName FROM Departments 
+                                 WHERE BranchID = (SELECT TOP 1 BranchId FROM Branches WHERE BranchName = @BranchName) 
+                                 ORDER BY DepartmentName";
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+                    cmd.Parameters.AddWithValue("@BranchName", branchName);
+                    con.Open();
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            list.Add(reader["DepartmentName"].ToString());
+                        }
+                    }
+                }
+            }
+            return Json(list, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpGet]
+        public JsonResult GetSubDepartmentsByDepartment(string departmentName)
+        {
+            List<string> list = new List<string>();
+            if (string.IsNullOrEmpty(departmentName))
+            {
+                return Json(list, JsonRequestBehavior.AllowGet);
+            }
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                string query = @"SELECT SubDepartmentName FROM SubDepartments 
+                                 WHERE DepartmentID = (SELECT TOP 1 DepartmentID FROM Departments WHERE DepartmentName = @DepartmentName) 
+                                 ORDER BY SubDepartmentName";
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+                    cmd.Parameters.AddWithValue("@DepartmentName", departmentName);
                     con.Open();
                     using (SqlDataReader reader = cmd.ExecuteReader())
                     {

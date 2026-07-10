@@ -3,6 +3,20 @@
     ViewBag.Title = "Employee Directory";
 }
 
+<style>
+    /* Styling for Choices.js validation error state */
+    select.is-invalid + .choices .choices__inner {
+        border-color: #dc3545 !important;
+    }
+    .choices.is-invalid .choices__inner {
+        border-color: #dc3545 !important;
+    }
+    /* Ensure invalid feedback shows up for selects with Choices.js */
+    select.is-invalid ~ .invalid-feedback {
+        display: block !important;
+    }
+</style>
+
 <div class="container-fluid">
     <div class="row justify-content-center py-5">
         <div class="col-xxl-5 col-xl-7 text-center">
@@ -84,64 +98,75 @@
                             <div class="col-md-6 mb-3">
                                 <label for="EmpCode" class="form-label">Employee Code <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="EmpCode" required>
+                                <div class="invalid-feedback">Please enter the Employee Code.</div>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="Username" class="form-label">Username <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="Username" required>
+                                <div class="invalid-feedback">Please enter the Username.</div>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="FirstName" class="form-label">First Name <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="FirstName" required>
+                                <div class="invalid-feedback">Please enter the First Name.</div>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="LastName" class="form-label">LastName <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="LastName" required>
+                                <div class="invalid-feedback">Please enter the Last Name.</div>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="Phone" class="form-label">Phone <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="Phone" required>
+                                <div class="invalid-feedback">Please enter the Phone number.</div>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="Email" class="form-label">Email <span class="text-danger">*</span></label>
                                 <input type="email" class="form-control" id="Email" required>
+                                <div class="invalid-feedback">Please enter a valid Email address.</div>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="Designation" class="form-label">Designation <span class="text-danger">*</span></label>
-                                <select class="form-control form-select" id="Designation" required>
+                                <select class="form-control form-select" id="Designation" data-choices required>
                                     <option value="">Loading...</option>
                                 </select>
+                                <div class="invalid-feedback">Please select the Designation.</div>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="Department" class="form-label">Department <span class="text-danger">*</span></label>
-                                <select class="form-control form-select" id="Department" required>
+                                <select class="form-control form-select" id="Department" data-choices required>
                                     <option value="">Loading...</option>
                                 </select>
+                                <div class="invalid-feedback">Please select the Department.</div>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="SubDepartment" class="form-label">Sub-Department <span class="text-danger">*</span></label>
-                                <select class="form-control form-select" id="SubDepartment" required>
+                                <select class="form-control form-select" id="SubDepartment" data-choices required>
                                     <option value="">Loading...</option>
                                 </select>
+                                <div class="invalid-feedback">Please select the Sub-Department.</div>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="Branch" class="form-label">Branch <span class="text-danger">*</span></label>
-                                <select class="form-control form-select" id="Branch" required>
+                                <select class="form-control form-select" id="Branch" data-choices required>
                                     <option value="">Loading...</option>
                                 </select>
+                                <div class="invalid-feedback">Please select the Branch.</div>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="Company" class="form-label">Company <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="Company" placeholder="e.g. Zentora Corporate" required>
+                                <div class="invalid-feedback">Please enter the Company.</div>
                             </div>
                         </div>
                     </div>
@@ -169,64 +194,75 @@
                             <div class="col-md-6 mb-3">
                                 <label for="uEmpCode" class="form-label">Employee Code <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="uEmpCode" required>
+                                <div class="invalid-feedback">Please enter the Employee Code.</div>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="uUsername" class="form-label">Username <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="uUsername" required>
+                                <div class="invalid-feedback">Please enter the Username.</div>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="uFirstName" class="form-label">First Name <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="uFirstName" required>
+                                <div class="invalid-feedback">Please enter the First Name.</div>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="uLastName" class="form-label">LastName <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="uLastName" required>
+                                <div class="invalid-feedback">Please enter the Last Name.</div>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="uPhone" class="form-label">Phone <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="uPhone" required>
+                                <div class="invalid-feedback">Please enter the Phone number.</div>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="uEmail" class="form-label">Email <span class="text-danger">*</span></label>
                                 <input type="email" class="form-control" id="uEmail" required>
+                                <div class="invalid-feedback">Please enter a valid Email address.</div>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="uDesignation" class="form-label">Designation <span class="text-danger">*</span></label>
-                                <select class="form-control form-select" id="uDesignation" required>
+                                <select class="form-control form-select" id="uDesignation" data-choices required>
                                     <option value="">Loading...</option>
                                 </select>
+                                <div class="invalid-feedback">Please select the Designation.</div>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="uDepartment" class="form-label">Department <span class="text-danger">*</span></label>
-                                <select class="form-control form-select" id="uDepartment" required>
+                                <select class="form-control form-select" id="uDepartment" data-choices required>
                                     <option value="">Loading...</option>
                                 </select>
+                                <div class="invalid-feedback">Please select the Department.</div>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="uSubDepartment" class="form-label">Sub-Department <span class="text-danger">*</span></label>
-                                <select class="form-control form-select" id="uSubDepartment" required>
+                                <select class="form-control form-select" id="uSubDepartment" data-choices required>
                                     <option value="">Loading...</option>
                                 </select>
+                                <div class="invalid-feedback">Please select the Sub-Department.</div>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="uBranch" class="form-label">Branch <span class="text-danger">*</span></label>
-                                <select class="form-control form-select" id="uBranch" required>
+                                <select class="form-control form-select" id="uBranch" data-choices required>
                                     <option value="">Loading...</option>
                                 </select>
+                                <div class="invalid-feedback">Please select the Branch.</div>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="uCompany" class="form-label">Company <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="uCompany" required>
+                                <div class="invalid-feedback">Please enter the Company.</div>
                             </div>
                         </div>
                     </div>
@@ -241,11 +277,96 @@
 </div>
 
 <script>
+    // Intercept data-choices elements before DOMContentLoaded to prevent automatic double initialization
+    document.querySelectorAll('#Designation, #uDesignation, #Department, #uDepartment, #SubDepartment, #uSubDepartment, #Branch, #uBranch').forEach(function(el) {
+        el.removeAttribute('data-choices');
+    });
+
+    var designationChoice, departmentChoice, subdepartmentChoice, branchChoice;
+    var uDesignationChoice, uDepartmentChoice, uSubdepartmentChoice, uBranchChoice;
+
     $(document).ready(function () {
-        loadDropdowns();
+        // Initialize Choices instances manually
+        initChoices();
+
+        // Load initial dropdowns (Designations and Branches)
+        loadInitialDropdowns();
+
+        // Branch changes cascade
+        $('#Branch').on('change', function () {
+            var branchName = $(this).val();
+            if (branchName) {
+                $.ajax({
+                    url: '/Staff/GetDepartmentsByBranch',
+                    type: 'GET',
+                    data: { branchName: branchName },
+                    success: function (list) {
+                        setSelectChoices(departmentChoice, list, 'Select Department', true);
+                        setSelectChoices(subdepartmentChoice, [], 'Select Sub-Department (Please select Department first)', false);
+                    }
+                });
+            } else {
+                setSelectChoices(departmentChoice, [], 'Select Department (Please select Branch first)', false);
+                setSelectChoices(subdepartmentChoice, [], 'Select Sub-Department (Please select Department first)', false);
+            }
+        });
+
+        $('#uBranch').on('change', function () {
+            var branchName = $(this).val();
+            if (branchName) {
+                $.ajax({
+                    url: '/Staff/GetDepartmentsByBranch',
+                    type: 'GET',
+                    data: { branchName: branchName },
+                    success: function (list) {
+                        setSelectChoices(uDepartmentChoice, list, 'Select Department', true);
+                        setSelectChoices(uSubdepartmentChoice, [], 'Select Sub-Department (Please select Department first)', false);
+                    }
+                });
+            } else {
+                setSelectChoices(uDepartmentChoice, [], 'Select Department (Please select Branch first)', false);
+                setSelectChoices(uSubdepartmentChoice, [], 'Select Sub-Department (Please select Department first)', false);
+            }
+        });
+
+        // Department changes cascade
+        $('#Department').on('change', function () {
+            var departmentName = $(this).val();
+            if (departmentName) {
+                $.ajax({
+                    url: '/Staff/GetSubDepartmentsByDepartment',
+                    type: 'GET',
+                    data: { departmentName: departmentName },
+                    success: function (list) {
+                        setSelectChoices(subdepartmentChoice, list, 'Select Sub-Department', true);
+                    }
+                });
+            } else {
+                setSelectChoices(subdepartmentChoice, [], 'Select Sub-Department (Please select Department first)', false);
+            }
+        });
+
+        $('#uDepartment').on('change', function () {
+            var departmentName = $(this).val();
+            if (departmentName) {
+                $.ajax({
+                    url: '/Staff/GetSubDepartmentsByDepartment',
+                    type: 'GET',
+                    data: { departmentName: departmentName },
+                    success: function (list) {
+                        setSelectChoices(uSubdepartmentChoice, list, 'Select Sub-Department', true);
+                    }
+                });
+            } else {
+                setSelectChoices(uSubdepartmentChoice, [], 'Select Sub-Department (Please select Department first)', false);
+            }
+        });
 
         $("#EmpForm").on("submit", function (e) {
             e.preventDefault();
+            if (!validateForm('EmpForm')) {
+                return false;
+            }
             var formData = {
                 EmpCode: $("#EmpCode").val(),
                 Username: $("#Username").val(),
@@ -276,6 +397,9 @@
 
         $("#UpdateEmpForm").on("submit", function (e) {
             e.preventDefault();
+            if (!validateForm('UpdateEmpForm')) {
+                return false;
+            }
             var formData = {
                 Id: $("#update_id").val(),
                 EmpCode: $("#uEmpCode").val(),
@@ -306,16 +430,55 @@
         });
     });
 
-    function loadDropdowns() {
+    function initChoices() {
+        designationChoice = new Choices('#Designation', { searchEnabled: true, shouldSort: false });
+        departmentChoice = new Choices('#Department', { searchEnabled: true, shouldSort: false });
+        subdepartmentChoice = new Choices('#SubDepartment', { searchEnabled: true, shouldSort: false });
+        branchChoice = new Choices('#Branch', { searchEnabled: true, shouldSort: false });
+
+        uDesignationChoice = new Choices('#uDesignation', { searchEnabled: true, shouldSort: false });
+        uDepartmentChoice = new Choices('#uDepartment', { searchEnabled: true, shouldSort: false });
+        uSubdepartmentChoice = new Choices('#uSubDepartment', { searchEnabled: true, shouldSort: false });
+        uBranchChoice = new Choices('#uBranch', { searchEnabled: true, shouldSort: false });
+    }
+
+    function setSelectChoices(choiceInstance, list, placeholderText, enabled) {
+        choiceInstance.clearStore();
+        
+        var choicesArray = [];
+        if (placeholderText) {
+            choicesArray.push({
+                value: '',
+                label: placeholderText,
+                selected: true,
+                disabled: true
+            });
+        }
+        
+        $.each(list, function (i, item) {
+            choicesArray.push({
+                value: item,
+                label: item,
+                selected: false,
+                disabled: false
+            });
+        });
+        
+        choiceInstance.setChoices(choicesArray, 'value', 'label', true);
+        if (enabled) {
+            choiceInstance.enable();
+        } else {
+            choiceInstance.disable();
+        }
+    }
+
+    function loadInitialDropdowns() {
         $.ajax({
             url: '/Staff/GetDesignationsList',
             type: 'GET',
             success: function (list) {
-                var options = '<option value="">Select Designation</option>';
-                $.each(list, function (i, item) {
-                    options += '<option value="' + item + '">' + item + '</option>';
-                });
-                $('#Designation, #uDesignation').html(options);
+                setSelectChoices(designationChoice, list, 'Select Designation', true);
+                setSelectChoices(uDesignationChoice, list, 'Select Designation', true);
             }
         });
 
@@ -323,37 +486,66 @@
             url: '/Staff/GetBranchesList',
             type: 'GET',
             success: function (list) {
-                var options = '<option value="">Select Branch</option>';
-                $.each(list, function (i, item) {
-                    options += '<option value="' + item + '">' + item + '</option>';
-                });
-                $('#Branch, #uBranch').html(options);
+                setSelectChoices(branchChoice, list, 'Select Branch', true);
+                setSelectChoices(uBranchChoice, list, 'Select Branch', true);
             }
         });
+        
+        // Initially disable Department and SubDepartment
+        setSelectChoices(departmentChoice, [], 'Select Department (Please select Branch first)', false);
+        setSelectChoices(uDepartmentChoice, [], 'Select Department (Please select Branch first)', false);
+        setSelectChoices(subdepartmentChoice, [], 'Select Sub-Department (Please select Department first)', false);
+        setSelectChoices(uSubdepartmentChoice, [], 'Select Sub-Department (Please select Department first)', false);
+    }
 
-        $.ajax({
-            url: '/Staff/GetDepartmentsList',
-            type: 'GET',
-            success: function (list) {
-                var options = '<option value="">Select Department</option>';
-                $.each(list, function (i, item) {
-                    options += '<option value="' + item + '">' + item + '</option>';
-                });
-                $('#Department, #uDepartment').html(options);
+    function validateForm(formId) {
+        var isValid = true;
+        
+        // Remove all previous validation styling
+        $('#' + formId + ' .is-invalid').removeClass('is-invalid');
+        $('#' + formId + ' .choices').removeClass('is-invalid');
+        
+        var isUpdate = (formId === 'UpdateEmpForm');
+        var prefix = isUpdate ? 'u' : '';
+        
+        var fields = [
+            { id: prefix + 'EmpCode', name: 'Employee Code', isSelect: false },
+            { id: prefix + 'Username', name: 'Username', isSelect: false },
+            { id: prefix + 'FirstName', name: 'First Name', isSelect: false },
+            { id: prefix + 'LastName', name: 'Last Name', isSelect: false },
+            { id: prefix + 'Phone', name: 'Phone', isSelect: false },
+            { id: prefix + 'Email', name: 'Email', isSelect: false },
+            { id: prefix + 'Designation', name: 'Designation', isSelect: true },
+            { id: prefix + 'Department', name: 'Department', isSelect: true },
+            { id: prefix + 'SubDepartment', name: 'Sub-Department', isSelect: true },
+            { id: prefix + 'Branch', name: 'Branch', isSelect: true },
+            { id: prefix + 'Company', name: 'Company', isSelect: false }
+        ];
+        
+        $.each(fields, function (i, field) {
+            var $el = $('#' + field.id);
+            var val = $el.val();
+            
+            if (!val || val.trim() === '') {
+                isValid = false;
+                $el.addClass('is-invalid');
+                
+                var $container = field.isSelect ? $el.closest('.choices') : $el;
+                if (field.isSelect) {
+                    $container.addClass('is-invalid');
+                }
+                
+                var $feedback = $container.siblings('.invalid-feedback');
+                var msg = field.isSelect ? 'Please select the ' + field.name + '.' : 'Please enter the ' + field.name + '.';
+                if ($feedback.length === 0) {
+                    $container.parent().append('<div class="invalid-feedback">' + msg + '</div>');
+                } else {
+                    $feedback.text(msg);
+                }
             }
         });
-
-        $.ajax({
-            url: '/Staff/GetSubDepartmentsList',
-            type: 'GET',
-            success: function (list) {
-                var options = '<option value="">Select Sub-Department</option>';
-                $.each(list, function (i, item) {
-                    options += '<option value="' + item + '">' + item + '</option>';
-                });
-                $('#SubDepartment, #uSubDepartment').html(options);
-            }
-        });
+        
+        return isValid;
     }
 
     function UpdateEmp(id) {
@@ -370,12 +562,43 @@
                     $("#uLastName").val(data.LastName);
                     $("#uPhone").val(data.Phone);
                     $("#uEmail").val(data.Email);
-                    $("#uDesignation").val(data.Designation);
-                    $("#uDepartment").val(data.Department);
-                    $("#uSubDepartment").val(data.SubDepartment);
                     $("#uCompany").val(data.Company);
-                    $("#uBranch").val(data.Branch);
-                    $("#UpdateEmpModal").modal("show");
+                    
+                    // Trigger Cascades sequentially
+                    uDesignationChoice.setChoiceByValue(data.Designation);
+                    uBranchChoice.setChoiceByValue(data.Branch);
+                    
+                    if (data.Branch) {
+                        $.ajax({
+                            url: '/Staff/GetDepartmentsByBranch',
+                            type: 'GET',
+                            data: { branchName: data.Branch },
+                            success: function (deptList) {
+                                setSelectChoices(uDepartmentChoice, deptList, 'Select Department', true);
+                                uDepartmentChoice.setChoiceByValue(data.Department);
+                                
+                                if (data.Department) {
+                                    $.ajax({
+                                        url: '/Staff/GetSubDepartmentsByDepartment',
+                                        type: 'GET',
+                                        data: { departmentName: data.Department },
+                                        success: function (subDeptList) {
+                                            setSelectChoices(uSubdepartmentChoice, subDeptList, 'Select Sub-Department', true);
+                                            uSubdepartmentChoice.setChoiceByValue(data.SubDepartment);
+                                            $("#UpdateEmpModal").modal("show");
+                                        }
+                                    });
+                                } else {
+                                    setSelectChoices(uSubdepartmentChoice, [], 'Select Sub-Department (Please select Department first)', false);
+                                    $("#UpdateEmpModal").modal("show");
+                                }
+                            }
+                        });
+                    } else {
+                        setSelectChoices(uDepartmentChoice, [], 'Select Department (Please select Branch first)', false);
+                        setSelectChoices(uSubdepartmentChoice, [], 'Select Sub-Department (Please select Department first)', false);
+                        $("#UpdateEmpModal").modal("show");
+                    }
                 }
             }
         });
