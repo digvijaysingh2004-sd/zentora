@@ -34,6 +34,8 @@
                                 <th>Email</th>
                                 <th>Designation</th>
                                 <th>Department</th>
+                                <th>Sub-Department</th>
+                                <th>Branch</th>
                                 <th>Status</th>
                                 <th>Action</th>
                             </tr>
@@ -49,6 +51,8 @@
                                     <td>@c.Email</td>
                                     <td>@c.Designation</td>
                                     <td>@c.Department</td>
+                                    <td>@c.SubDepartment</td>
+                                    <td>@c.Branch</td>
                                     <td>
                                         @if (c.IsActive) { <span class="badge bg-success-subtle text-success">Active</span> }
                                         else { <span class="badge bg-danger-subtle text-danger">Inactive</span> }
@@ -109,21 +113,35 @@
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="Designation" class="form-label">Designation <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="Designation" placeholder="e.g. Software Developer" required>
+                                <select class="form-control form-select" id="Designation" required>
+                                    <option value="">Loading...</option>
+                                </select>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="Department" class="form-label">Department <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="Department" placeholder="e.g. Technology" required>
+                                <select class="form-control form-select" id="Department" required>
+                                    <option value="">Loading...</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="SubDepartment" class="form-label">Sub-Department <span class="text-danger">*</span></label>
+                                <select class="form-control form-select" id="SubDepartment" required>
+                                    <option value="">Loading...</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="Branch" class="form-label">Branch <span class="text-danger">*</span></label>
+                                <select class="form-control form-select" id="Branch" required>
+                                    <option value="">Loading...</option>
+                                </select>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="Company" class="form-label">Company <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="Company" placeholder="e.g. Zentora Corporate" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="Branch" class="form-label">Branch <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="Branch" placeholder="e.g. Noida Office" required>
                             </div>
                         </div>
                     </div>
@@ -180,21 +198,35 @@
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="uDesignation" class="form-label">Designation <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="uDesignation" required>
+                                <select class="form-control form-select" id="uDesignation" required>
+                                    <option value="">Loading...</option>
+                                </select>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="uDepartment" class="form-label">Department <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="uDepartment" required>
+                                <select class="form-control form-select" id="uDepartment" required>
+                                    <option value="">Loading...</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="uSubDepartment" class="form-label">Sub-Department <span class="text-danger">*</span></label>
+                                <select class="form-control form-select" id="uSubDepartment" required>
+                                    <option value="">Loading...</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="uBranch" class="form-label">Branch <span class="text-danger">*</span></label>
+                                <select class="form-control form-select" id="uBranch" required>
+                                    <option value="">Loading...</option>
+                                </select>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="uCompany" class="form-label">Company <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="uCompany" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="uBranch" class="form-label">Branch <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="uBranch" required>
                             </div>
                         </div>
                     </div>
@@ -210,6 +242,8 @@
 
 <script>
     $(document).ready(function () {
+        loadDropdowns();
+
         $("#EmpForm").on("submit", function (e) {
             e.preventDefault();
             var formData = {
@@ -221,6 +255,7 @@
                 Email: $("#Email").val(),
                 Designation: $("#Designation").val(),
                 Department: $("#Department").val(),
+                SubDepartment: $("#SubDepartment").val(),
                 Company: $("#Company").val(),
                 Branch: $("#Branch").val()
             };
@@ -251,6 +286,7 @@
                 Email: $("#uEmail").val(),
                 Designation: $("#uDesignation").val(),
                 Department: $("#uDepartment").val(),
+                SubDepartment: $("#uSubDepartment").val(),
                 Company: $("#uCompany").val(),
                 Branch: $("#uBranch").val()
             };
@@ -270,6 +306,56 @@
         });
     });
 
+    function loadDropdowns() {
+        $.ajax({
+            url: '/Staff/GetDesignationsList',
+            type: 'GET',
+            success: function (list) {
+                var options = '<option value="">Select Designation</option>';
+                $.each(list, function (i, item) {
+                    options += '<option value="' + item + '">' + item + '</option>';
+                });
+                $('#Designation, #uDesignation').html(options);
+            }
+        });
+
+        $.ajax({
+            url: '/Staff/GetBranchesList',
+            type: 'GET',
+            success: function (list) {
+                var options = '<option value="">Select Branch</option>';
+                $.each(list, function (i, item) {
+                    options += '<option value="' + item + '">' + item + '</option>';
+                });
+                $('#Branch, #uBranch').html(options);
+            }
+        });
+
+        $.ajax({
+            url: '/Staff/GetDepartmentsList',
+            type: 'GET',
+            success: function (list) {
+                var options = '<option value="">Select Department</option>';
+                $.each(list, function (i, item) {
+                    options += '<option value="' + item + '">' + item + '</option>';
+                });
+                $('#Department, #uDepartment').html(options);
+            }
+        });
+
+        $.ajax({
+            url: '/Staff/GetSubDepartmentsList',
+            type: 'GET',
+            success: function (list) {
+                var options = '<option value="">Select Sub-Department</option>';
+                $.each(list, function (i, item) {
+                    options += '<option value="' + item + '">' + item + '</option>';
+                });
+                $('#SubDepartment, #uSubDepartment').html(options);
+            }
+        });
+    }
+
     function UpdateEmp(id) {
         $.ajax({
             url: '/Staff/GetEmployeeById',
@@ -286,6 +372,7 @@
                     $("#uEmail").val(data.Email);
                     $("#uDesignation").val(data.Designation);
                     $("#uDepartment").val(data.Department);
+                    $("#uSubDepartment").val(data.SubDepartment);
                     $("#uCompany").val(data.Company);
                     $("#uBranch").val(data.Branch);
                     $("#UpdateEmpModal").modal("show");

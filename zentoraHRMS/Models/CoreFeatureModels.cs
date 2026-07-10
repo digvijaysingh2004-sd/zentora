@@ -155,6 +155,7 @@ namespace zentoraHRMS.Models
         public string Company { get; set; }
         public string Branch { get; set; }
         public string Department { get; set; }
+        public string SubDepartment { get; set; }
         public decimal BasicSalary { get; set; }
         public bool IsActive { get; set; }
     }

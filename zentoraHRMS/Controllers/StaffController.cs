@@ -179,7 +179,7 @@ namespace zentoraHRMS.Controllers
             List<EmployeeModel> list = new List<EmployeeModel>();
             using (SqlConnection con = new SqlConnection(connectionString))
             {
-                string query = "SELECT Id, EmpCode, FirstName, LastName, Username, Phone, Email, Designation, Company, Branch, Department, IsActive FROM EmployeeDetails WHERE IsDeleted = 0";
+                string query = "SELECT Id, EmpCode, FirstName, LastName, Username, Phone, Email, Designation, Company, Branch, Department, SubDepartment, IsActive FROM EmployeeDetails WHERE IsDeleted = 0";
                 using (SqlCommand cmd = new SqlCommand(query, con))
                 {
                     con.Open();
@@ -200,6 +200,7 @@ namespace zentoraHRMS.Controllers
                                 Company = reader["Company"].ToString(),
                                 Branch = reader["Branch"].ToString(),
                                 Department = reader["Department"].ToString(),
+                                SubDepartment = reader["SubDepartment"].ToString(),
                                 IsActive = Convert.ToBoolean(reader["IsActive"])
                             });
                         }
@@ -216,8 +217,8 @@ namespace zentoraHRMS.Controllers
             {
                 using (SqlConnection con = new SqlConnection(connectionString))
                 {
-                    string query = @"INSERT INTO EmployeeDetails (EmpCode, FirstName, LastName, Username, Phone, Email, Designation, Company, Branch, Department, IsActive, IsDeleted, CreatedDate, SystemAddedOn) 
-                                     VALUES (@EmpCode, @FirstName, @LastName, @Username, @Phone, @Email, @Designation, @Company, @Branch, @Department, 1, 0, GETDATE(), GETDATE())";
+                    string query = @"INSERT INTO EmployeeDetails (EmpCode, FirstName, LastName, Username, Phone, Email, Designation, Company, Branch, Department, SubDepartment, IsActive, IsDeleted, CreatedDate, SystemAddedOn) 
+                                     VALUES (@EmpCode, @FirstName, @LastName, @Username, @Phone, @Email, @Designation, @Company, @Branch, @Department, @SubDepartment, 1, 0, GETDATE(), GETDATE())";
                     using (SqlCommand cmd = new SqlCommand(query, con))
                     {
                         cmd.Parameters.AddWithValue("@EmpCode", model.EmpCode ?? "");
@@ -230,6 +231,7 @@ namespace zentoraHRMS.Controllers
                         cmd.Parameters.AddWithValue("@Company", model.Company ?? "");
                         cmd.Parameters.AddWithValue("@Branch", model.Branch ?? "");
                         cmd.Parameters.AddWithValue("@Department", model.Department ?? "");
+                        cmd.Parameters.AddWithValue("@SubDepartment", model.SubDepartment ?? "");
                         con.Open();
                         cmd.ExecuteNonQuery();
                     }
@@ -247,7 +249,7 @@ namespace zentoraHRMS.Controllers
             EmployeeModel model = null;
             using (SqlConnection con = new SqlConnection(connectionString))
             {
-                string query = "SELECT Id, EmpCode, FirstName, LastName, Username, Phone, Email, Designation, Company, Branch, Department, IsActive FROM EmployeeDetails WHERE Id = @Id";
+                string query = "SELECT Id, EmpCode, FirstName, LastName, Username, Phone, Email, Designation, Company, Branch, Department, SubDepartment, IsActive FROM EmployeeDetails WHERE Id = @Id";
                 using (SqlCommand cmd = new SqlCommand(query, con))
                 {
                     cmd.Parameters.AddWithValue("@Id", id);
@@ -269,6 +271,7 @@ namespace zentoraHRMS.Controllers
                                 Company = reader["Company"].ToString(),
                                 Branch = reader["Branch"].ToString(),
                                 Department = reader["Department"].ToString(),
+                                SubDepartment = reader["SubDepartment"].ToString(),
                                 IsActive = Convert.ToBoolean(reader["IsActive"])
                             };
                         }
@@ -287,7 +290,7 @@ namespace zentoraHRMS.Controllers
                 {
                     string query = @"UPDATE EmployeeDetails SET EmpCode = @EmpCode, FirstName = @FirstName, LastName = @LastName, 
                                      Username = @Username, Phone = @Phone, Email = @Email, Designation = @Designation, 
-                                     Company = @Company, Branch = @Branch, Department = @Department WHERE Id = @Id";
+                                     Company = @Company, Branch = @Branch, Department = @Department, SubDepartment = @SubDepartment WHERE Id = @Id";
                     using (SqlCommand cmd = new SqlCommand(query, con))
                     {
                         cmd.Parameters.AddWithValue("@Id", model.Id);
@@ -301,6 +304,7 @@ namespace zentoraHRMS.Controllers
                         cmd.Parameters.AddWithValue("@Company", model.Company ?? "");
                         cmd.Parameters.AddWithValue("@Branch", model.Branch ?? "");
                         cmd.Parameters.AddWithValue("@Department", model.Department ?? "");
+                        cmd.Parameters.AddWithValue("@SubDepartment", model.SubDepartment ?? "");
                         con.Open();
                         cmd.ExecuteNonQuery();
                     }
@@ -358,6 +362,94 @@ namespace zentoraHRMS.Controllers
                                 FirstName = reader["FirstName"].ToString(),
                                 LastName = reader["LastName"].ToString()
                             });
+                        }
+                    }
+                }
+            }
+            return Json(list, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpGet]
+        public JsonResult GetDesignationsList()
+        {
+            List<string> list = new List<string>();
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                string query = "SELECT DesignationName FROM Designations WHERE IsActive = 1 ORDER BY DesignationName";
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+                    con.Open();
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            list.Add(reader["DesignationName"].ToString());
+                        }
+                    }
+                }
+            }
+            return Json(list, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpGet]
+        public JsonResult GetBranchesList()
+        {
+            List<string> list = new List<string>();
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                string query = "SELECT BranchName FROM Branches ORDER BY BranchName";
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+                    con.Open();
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            list.Add(reader["BranchName"].ToString());
+                        }
+                    }
+                }
+            }
+            return Json(list, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpGet]
+        public JsonResult GetDepartmentsList()
+        {
+            List<string> list = new List<string>();
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                string query = "SELECT DepartmentName FROM Departments ORDER BY DepartmentName";
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+                    con.Open();
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            list.Add(reader["DepartmentName"].ToString());
+                        }
+                    }
+                }
+            }
+            return Json(list, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpGet]
+        public JsonResult GetSubDepartmentsList()
+        {
+            List<string> list = new List<string>();
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                string query = "SELECT SubDepartmentName FROM SubDepartments ORDER BY SubDepartmentName";
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+                    con.Open();
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            list.Add(reader["SubDepartmentName"].ToString());
                         }
                     }
                 }
