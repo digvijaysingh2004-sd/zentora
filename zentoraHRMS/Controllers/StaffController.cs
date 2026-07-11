@@ -348,7 +348,7 @@ namespace zentoraHRMS.Controllers
             List<EmployeeModel> list = new List<EmployeeModel>();
             using (SqlConnection con = new SqlConnection(connectionString))
             {
-                string query = "SELECT Id, FirstName, LastName FROM EmployeeDetails WHERE IsDeleted = 0 AND IsActive = 1";
+                string query = "SELECT Id, FirstName, LastName, Username FROM EmployeeDetails WHERE IsDeleted = 0 AND IsActive = 1";
                 using (SqlCommand cmd = new SqlCommand(query, con))
                 {
                     con.Open();
@@ -360,7 +360,8 @@ namespace zentoraHRMS.Controllers
                             {
                                 Id = Convert.ToInt32(reader["Id"]),
                                 FirstName = reader["FirstName"].ToString(),
-                                LastName = reader["LastName"].ToString()
+                                LastName = reader["LastName"].ToString(),
+                                Username = reader["Username"] != DBNull.Value ? reader["Username"].ToString() : ""
                             });
                         }
                     }

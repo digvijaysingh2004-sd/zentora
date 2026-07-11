@@ -134,7 +134,7 @@
                         </div>
                         <div class="mb-3">
                             <label for="FullName" class="form-label">Full Name <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="FullName" required>
+                            <input type="text" class="form-control" id="FullName" required readonly placeholder="Auto-populated from employee selection">
                         </div>
                         <div class="mb-3">
                             <label for="Username" class="form-label">Username <span class="text-danger">*</span></label>
@@ -182,7 +182,7 @@
                         </div>
                         <div class="mb-3">
                             <label for="uFullName" class="form-label">Full Name <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="uFullName" required>
+                            <input type="text" class="form-control" id="uFullName" required readonly>
                         </div>
                         <div class="mb-3">
                             <label for="uUsername" class="form-label">Username <span class="text-danger">*</span></label>
@@ -215,17 +215,69 @@
 
 <script>
     $(document).ready(function () {
+        var employeeList = [];
+
         // Load employee dropdowns
         $.ajax({
             url: '/Staff/GetEmployeeList',
             type: 'GET',
             success: function (data) {
+                employeeList = data;
                 var s = '<option value="" selected disabled>Select Employee</option>';
                 for (var i = 0; i < data.length; i++) {
                     s += '<option value="' + data[i].Id + '">' + data[i].FirstName + ' ' + data[i].LastName + '</option>';
                 }
                 $("#EmpId").html(s);
                 $("#uEmpId").html(s);
+            }
+        });
+
+        // Auto-populate fields when Employee is selected in Create modal
+        $("#EmpId").on("change", function () {
+            var empId = $(this).val();
+            var emp = employeeList.find(e => e.Id == empId);
+            if (emp) {
+                $("#FullName").val(emp.FirstName + " " + emp.LastName);
+                
+                // Only suggest username if it's currently empty or previously auto-suggested
+                if (!$("#Username").val() || $("#Username").data("auto-suggested") === true) {
+                    var suggested = emp.Username || (emp.FirstName + "." + emp.LastName).toLowerCase().replace(/\s+/g, "");
+                    $("#Username").val(suggested).data("auto-suggested", true);
+                }
+            } else {
+                $("#FullName").val("");
+                if ($("#Username").data("auto-suggested") === true) {
+                    $("#Username").val("").data("auto-suggested", false);
+                }
+            }
+        });
+
+        // Mark username as manually edited if user types in it
+        $("#Username").on("input", function () {
+            $(this).data("auto-suggested", false);
+        });
+
+        // Auto-populate fields when Employee is selected in Update modal
+        $("#uEmpId").on("change", function () {
+            var empId = $(this).val();
+            var emp = employeeList.find(e => e.Id == empId);
+            if (emp) {
+                $("#uFullName").val(emp.FirstName + " " + emp.LastName);
+            }
+        });
+
+        // Reset AddUserModal inputs and Choices instances on hidden
+        $("#AddUserModal").on("hidden.bs.modal", function () {
+            $("#UserForm")[0].reset();
+            $("#Username").data("auto-suggested", false);
+            
+            var empIdEl = document.getElementById("EmpId");
+            if (empIdEl && empIdEl.choicesInstance) {
+                empIdEl.choicesInstance.setChoiceByValue("");
+            }
+            var roleTypeEl = document.getElementById("RoleType");
+            if (roleTypeEl && roleTypeEl.choicesInstance) {
+                roleTypeEl.choicesInstance.setChoiceByValue("");
             }
         });
 
@@ -293,11 +345,27 @@
             success: function (data) {
                 if (data) {
                     $("#update_id").val(data.Id);
-                    $("#uEmpId").val(data.EmpId);
+                    
+                    // Update uEmpId using Choices.js
+                    var uEmpIdEl = document.getElementById("uEmpId");
+                    if (uEmpIdEl && uEmpIdEl.choicesInstance) {
+                        uEmpIdEl.choicesInstance.setChoiceByValue(data.EmpId.toString());
+                    } else {
+                        $("#uEmpId").val(data.EmpId);
+                    }
+
                     $("#uFullName").val(data.FullName);
                     $("#uUsername").val(data.Username);
                     $("#uPassword").val(data.Password);
-                    $("#uRoleType").val(data.RoleType);
+                    
+                    // Update uRoleType using Choices.js
+                    var uRoleTypeEl = document.getElementById("uRoleType");
+                    if (uRoleTypeEl && uRoleTypeEl.choicesInstance) {
+                        uRoleTypeEl.choicesInstance.setChoiceByValue(data.RoleType.toString());
+                    } else {
+                        $("#uRoleType").val(data.RoleType);
+                    }
+
                     $("#UpdateUserModal").modal("show");
                 }
             }
