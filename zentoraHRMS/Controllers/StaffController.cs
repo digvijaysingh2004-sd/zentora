@@ -63,8 +63,10 @@ namespace zentoraHRMS.Controllers
             {
                 using (SqlConnection con = new SqlConnection(connectionString))
                 {
-                    string query = @"INSERT INTO LoginDetails (EmpId, FullName, Username, Password, RoleType, IsActive, IsDeleted, CreatedDate, CreatedBy) 
-                                     VALUES (@EmpId, @FullName, @Username, @Password, @RoleType, 1, 0, GETDATE(), 1)";
+                    string query = @"INSERT INTO LoginDetails (EmpId, FullName, Username, Password, RoleType, IsActive, IsDeleted, CreatedDate, CreatedBy, Phone, Email, LastLogin, SystemAddedOn) 
+                                     SELECT @EmpId, @FullName, @Username, @Password, @RoleType, 1, 0, GETDATE(), 1, 
+                                            COALESCE(Phone, ''), COALESCE(Email, ''), GETDATE(), GETDATE() 
+                                     FROM EmployeeDetails WHERE Id = @EmpId";
                     using (SqlCommand cmd = new SqlCommand(query, con))
                     {
                         cmd.Parameters.AddWithValue("@EmpId", model.EmpId);
@@ -123,7 +125,10 @@ namespace zentoraHRMS.Controllers
                 using (SqlConnection con = new SqlConnection(connectionString))
                 {
                     string query = @"UPDATE LoginDetails SET EmpId = @EmpId, FullName = @FullName, Username = @Username, 
-                                     Password = @Password, RoleType = @RoleType WHERE Id = @Id";
+                                     Password = @Password, RoleType = @RoleType,
+                                     Phone = (SELECT COALESCE(Phone, '') FROM EmployeeDetails WHERE Id = @EmpId),
+                                     Email = (SELECT COALESCE(Email, '') FROM EmployeeDetails WHERE Id = @EmpId)
+                                     WHERE Id = @Id";
                     using (SqlCommand cmd = new SqlCommand(query, con))
                     {
                         cmd.Parameters.AddWithValue("@Id", model.Id);
