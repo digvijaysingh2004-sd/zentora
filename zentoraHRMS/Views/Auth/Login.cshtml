@@ -1,4 +1,4 @@
-﻿
+
 @{
     ViewBag.Title = "Dashboard";
     Layout = null;
@@ -78,6 +78,10 @@
                                         <label for="userPassword" class="form-label">Password <span class="text-danger">*</span></label>
                                         <div class="input-group">
                                             <input type="password" class="form-control" id="userPassword" name="Password" placeholder="••••••••" required>
+                                            <button class="btn btn-outline-light border" type="button" id="toggleLoginPasswordBtn">
+                                                <i data-lucide="eye" class="eye-open"></i>
+                                                <i data-lucide="eye-off" class="eye-closed d-none"></i>
+                                            </button>
                                         </div>
                                     </div>
 
@@ -104,6 +108,19 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function () {
+            $("#toggleLoginPasswordBtn").on("click", function () {
+                var input = $("#userPassword");
+                if (input.attr("type") === "password") {
+                    input.attr("type", "text");
+                    $(this).find(".eye-open").addClass("d-none");
+                    $(this).find(".eye-closed").removeClass("d-none");
+                } else {
+                    input.attr("type", "password");
+                    $(this).find(".eye-open").removeClass("d-none");
+                    $(this).find(".eye-closed").addClass("d-none");
+                }
+            });
+
             $("#loginForm").on("submit", function (e) {
                 e.preventDefault();
 

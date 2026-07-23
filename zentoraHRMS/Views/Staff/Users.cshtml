@@ -142,7 +142,13 @@
                         </div>
                         <div class="mb-3">
                             <label for="Password" class="form-label">Password <span class="text-danger">*</span></label>
-                            <input type="password" class="form-control" id="Password" required>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="Password" required>
+                                <button class="btn btn-outline-light border" type="button" id="togglePasswordBtn">
+                                    <i data-lucide="eye" class="eye-open"></i>
+                                    <i data-lucide="eye-off" class="eye-closed d-none"></i>
+                                </button>
+                            </div>
                         </div>
                         <div class="mb-3">
                             <label for="RoleType" class="form-label">Role Type <span class="text-danger">*</span></label>
@@ -190,7 +196,13 @@
                         </div>
                         <div class="mb-3">
                             <label for="uPassword" class="form-label">Password <span class="text-danger">*</span></label>
-                            <input type="password" class="form-control" id="uPassword" required>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="uPassword" required>
+                                <button class="btn btn-outline-light border" type="button" id="toggleUPasswordBtn">
+                                    <i data-lucide="eye" class="eye-open"></i>
+                                    <i data-lucide="eye-off" class="eye-closed d-none"></i>
+                                </button>
+                            </div>
                         </div>
                         <div class="mb-3">
                             <label for="uRoleType" class="form-label">Role Type <span class="text-danger">*</span></label>
@@ -215,6 +227,34 @@
 
 <script>
     $(document).ready(function () {
+        // Toggle password visibility in Create Modal
+        $("#togglePasswordBtn").on("click", function () {
+            var input = $("#Password");
+            if (input.attr("type") === "password") {
+                input.attr("type", "text");
+                $(this).find(".eye-open").addClass("d-none");
+                $(this).find(".eye-closed").removeClass("d-none");
+            } else {
+                input.attr("type", "password");
+                $(this).find(".eye-open").removeClass("d-none");
+                $(this).find(".eye-closed").addClass("d-none");
+            }
+        });
+
+        // Toggle password visibility in Update Modal
+        $("#toggleUPasswordBtn").on("click", function () {
+            var input = $("#uPassword");
+            if (input.attr("type") === "password") {
+                input.attr("type", "text");
+                $(this).find(".eye-open").addClass("d-none");
+                $(this).find(".eye-closed").removeClass("d-none");
+            } else {
+                input.attr("type", "password");
+                $(this).find(".eye-open").removeClass("d-none");
+                $(this).find(".eye-closed").addClass("d-none");
+            }
+        });
+
         var employeeList = [];
 
         // Load employee dropdowns
@@ -271,6 +311,11 @@
             $("#UserForm")[0].reset();
             $("#Username").data("auto-suggested", false);
             
+            // Reset password visibility
+            $("#Password").attr("type", "password");
+            $("#togglePasswordBtn").find(".eye-open").removeClass("d-none");
+            $("#togglePasswordBtn").find(".eye-closed").addClass("d-none");
+            
             var empIdEl = document.getElementById("EmpId");
             if (empIdEl && empIdEl.choicesInstance) {
                 empIdEl.choicesInstance.setChoiceByValue("");
@@ -279,6 +324,13 @@
             if (roleTypeEl && roleTypeEl.choicesInstance) {
                 roleTypeEl.choicesInstance.setChoiceByValue("");
             }
+        });
+
+        // Reset UpdateUserModal password visibility on hidden
+        $("#UpdateUserModal").on("hidden.bs.modal", function () {
+            $("#uPassword").attr("type", "password");
+            $("#toggleUPasswordBtn").find(".eye-open").removeClass("d-none");
+            $("#toggleUPasswordBtn").find(".eye-closed").addClass("d-none");
         });
 
         $("#UserForm").on("submit", function (e) {
