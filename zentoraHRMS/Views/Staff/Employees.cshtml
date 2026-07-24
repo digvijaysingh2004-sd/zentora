@@ -15,6 +15,14 @@
     select.is-invalid ~ .invalid-feedback {
         display: block !important;
     }
+    /* Smooth transitions for tabs */
+    .tab-pane {
+        animation: fadeIn 0.3s ease-in-out;
+    }
+    @@keyframes fadeIn {
+        from { opacity: 0; transform: translateY(5px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
 </style>
 
 <div class="container-fluid">
@@ -32,7 +40,7 @@
             <div class="card rounded-2">
                 <div class="card-header justify-content-between">
                     <h5 class="card-title">Employee Details</h5>
-                    <button type="button" class="btn btn-sm btn-soft-primary" data-bs-toggle="modal" data-bs-target="#AddEmpModal">
+                    <button type="button" class="btn btn-sm btn-soft-primary" onclick="OpenAddModal()">
                         <i class="me-1" data-lucide="plus"></i> Add Employee
                     </button>
                 </div>
@@ -48,8 +56,8 @@
                                 <th>Email</th>
                                 <th>Designation</th>
                                 <th>Department</th>
-                                <th>Sub-Department</th>
                                 <th>Branch</th>
+                                <th>Shift</th>
                                 <th>Status</th>
                                 <th>Action</th>
                             </tr>
@@ -60,13 +68,13 @@
                                 <tr>
                                     <td class="fs-sm" style="width: 1%;"></td>
                                     <td>@c.EmpCode</td>
-                                    <td>@c.FirstName @c.LastName</td>
-                                    <td>@c.Phone</td>
+                                    <td>@c.FirstName @(string.IsNullOrEmpty(c.MiddleName) ? "" : c.MiddleName + " ") @c.LastName</td>
+                                    <td>@(c.PhoneCode ?? "+91") @c.Phone</td>
                                     <td>@c.Email</td>
                                     <td>@c.Designation</td>
                                     <td>@c.Department</td>
-                                    <td>@c.SubDepartment</td>
                                     <td>@c.Branch</td>
+                                    <td>@(string.IsNullOrEmpty(c.OfficeShift) ? "General" : c.OfficeShift)</td>
                                     <td>
                                         @if (c.IsActive) { <span class="badge bg-success-subtle text-success">Active</span> }
                                         else { <span class="badge bg-danger-subtle text-danger">Inactive</span> }
@@ -89,90 +97,267 @@
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
                 <form id="EmpForm" class="needs-validation" novalidate method="post">
-                    <div class="modal-header">
-                        <h4 class="modal-title">Add New Employee</h4>
+                    <div class="modal-header border-bottom-0 pb-0">
+                        <h4 class="modal-title fw-bold">Add New Employee</h4>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="EmpCode" class="form-label">Employee Code <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="EmpCode" required>
-                                <div class="invalid-feedback">Please enter the Employee Code.</div>
+                        <!-- Navigation Tabs -->
+                        <ul class="nav nav-pills nav-justified bg-light rounded-pill p-1 mb-4" role="tablist">
+                            <li class="nav-item">
+                                <button class="nav-link rounded-pill active py-2" data-bs-toggle="tab" data-bs-target="#add-personal" type="button" role="tab">Personal</button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link rounded-pill py-2" data-bs-toggle="tab" data-bs-target="#add-contact" type="button" role="tab">Contact</button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link rounded-pill py-2" data-bs-toggle="tab" data-bs-target="#add-job" type="button" role="tab">Job & Work</button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link rounded-pill py-2" data-bs-toggle="tab" data-bs-target="#add-relations" type="button" role="tab">Relations</button>
+                            </li>
+                        </ul>
+
+                        <div class="tab-content">
+                            <!-- Personal Tab -->
+                            <div class="tab-pane fade show active" id="add-personal" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-md-4 mb-3">
+                                        <label for="FirstName" class="form-label fw-semibold">First Name <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="FirstName" required>
+                                        <div class="invalid-feedback">First Name is required.</div>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label for="MiddleName" class="form-label fw-semibold">Middle Name</label>
+                                        <input type="text" class="form-control" id="MiddleName">
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label for="LastName" class="form-label fw-semibold">Last Name <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="LastName" required>
+                                        <div class="invalid-feedback">Last Name is required.</div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-4 mb-3">
+                                        <label for="Gender" class="form-label fw-semibold">Gender</label>
+                                        <select class="form-select form-control" id="Gender">
+                                            <option value="">Select Gender</option>
+                                            <option value="Male">Male</option>
+                                            <option value="Female">Female</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label for="MaritalStatus" class="form-label fw-semibold">Marital Status</label>
+                                        <select class="form-select form-control" id="MaritalStatus">
+                                            <option value="">Select Status</option>
+                                            <option value="Single">Single</option>
+                                            <option value="Married">Married</option>
+                                            <option value="Divorced">Divorced</option>
+                                            <option value="Widowed">Widowed</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label for="DOB" class="form-label fw-semibold">Date of Birth</label>
+                                        <input type="date" class="form-control" id="DOB">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 mb-3">
+                                        <label for="ProfileImage" class="form-label fw-semibold">Profile Image URL</label>
+                                        <input type="url" class="form-control" id="ProfileImage" placeholder="https://example.com/avatar.jpg">
+                                    </div>
+                                </div>
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="Username" class="form-label">Username <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="Username" required>
-                                <div class="invalid-feedback">Please enter the Username.</div>
+
+                            <!-- Contact Tab -->
+                            <div class="tab-pane fade" id="add-contact" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-md-3 mb-3">
+                                        <label for="PhoneCode" class="form-label fw-semibold">Phone Code <span class="text-danger">*</span></label>
+                                        <select class="form-select form-control" id="PhoneCode" required>
+                                            <option value="+91" selected>+91 (India)</option>
+                                            <option value="+1">+1 (USA)</option>
+                                            <option value="+44">+44 (UK)</option>
+                                            <option value="+971">+971 (UAE)</option>
+                                            <option value="+61">+61 (Australia)</option>
+                                            <option value="+65">+65 (Singapore)</option>
+                                        </select>
+                                        <div class="invalid-feedback">Phone Code is required.</div>
+                                    </div>
+                                    <div class="col-md-5 mb-3">
+                                        <label for="Phone" class="form-label fw-semibold">Phone Number <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="Phone" required>
+                                        <div class="invalid-feedback">Phone Number is required.</div>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label for="Email" class="form-label fw-semibold">Email Address <span class="text-danger">*</span></label>
+                                        <input type="email" class="form-control" id="Email" required>
+                                        <div class="invalid-feedback">Valid Email is required.</div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 mb-3">
+                                        <label for="Address" class="form-label fw-semibold">Street Address</label>
+                                        <textarea class="form-control" id="Address" rows="2" placeholder="Enter street address..."></textarea>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-3 mb-3">
+                                        <label for="City" class="form-label fw-semibold">City</label>
+                                        <input type="text" class="form-control" id="City">
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <label for="State" class="form-label fw-semibold">State</label>
+                                        <input type="text" class="form-control" id="State">
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <label for="Country" class="form-label fw-semibold">Country</label>
+                                        <input type="text" class="form-control" id="Country">
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <label for="ZipCode" class="form-label fw-semibold">Zip Code</label>
+                                        <input type="text" class="form-control" id="ZipCode">
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="FirstName" class="form-label">First Name <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="FirstName" required>
-                                <div class="invalid-feedback">Please enter the First Name.</div>
+
+                            <!-- Job & Work Tab -->
+                            <div class="tab-pane fade" id="add-job" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-md-4 mb-3">
+                                        <label for="EmpCode" class="form-label fw-semibold">Employee Code <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="EmpCode" required>
+                                        <div class="invalid-feedback">Employee Code is required.</div>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label for="Username" class="form-label fw-semibold">Username <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="Username" required>
+                                        <div class="invalid-feedback">Username is required.</div>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label for="Password" class="form-label fw-semibold">Password <span class="text-danger">*</span></label>
+                                        <input type="password" class="form-control" id="Password" required value="123456">
+                                        <div class="invalid-feedback">Password is required.</div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="Company" class="form-label fw-semibold">Company Name <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="Company" placeholder="e.g. Zentora Corporate" required>
+                                        <div class="invalid-feedback">Company Name is required.</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="Branch" class="form-label fw-semibold">Branch <span class="text-danger">*</span></label>
+                                        <select class="form-select form-control" id="Branch" required>
+                                            <option value="">Loading...</option>
+                                        </select>
+                                        <div class="invalid-feedback">Branch is required.</div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="Department" class="form-label fw-semibold">Department <span class="text-danger">*</span></label>
+                                        <select class="form-select form-control" id="Department" required>
+                                            <option value="">Select Branch first...</option>
+                                        </select>
+                                        <div class="invalid-feedback">Department is required.</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="SubDepartment" class="form-label fw-semibold">Sub-Department <span class="text-danger">*</span></label>
+                                        <select class="form-select form-control" id="SubDepartment" required>
+                                            <option value="">Select Department first...</option>
+                                        </select>
+                                        <div class="invalid-feedback">Sub-Department is required.</div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-4 mb-3">
+                                        <label for="Designation" class="form-label fw-semibold">Designation <span class="text-danger">*</span></label>
+                                        <select class="form-select form-control" id="Designation" required>
+                                            <option value="">Loading...</option>
+                                        </select>
+                                        <div class="invalid-feedback">Designation is required.</div>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label for="OfficeShift" class="form-label fw-semibold">Office Shift</label>
+                                        <select class="form-select form-control" id="OfficeShift">
+                                            <option value="">Loading...</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label for="OfficeLocation" class="form-label fw-semibold">Office Location</label>
+                                        <input type="text" class="form-control" id="OfficeLocation" placeholder="e.g. Noida Office">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="DOJ" class="form-label fw-semibold">Date of Joining (DOJ)</label>
+                                        <input type="date" class="form-control" id="DOJ">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="DOL" class="form-label fw-semibold">Date of Leaving (DOL)</label>
+                                        <input type="date" class="form-control" id="DOL">
+                                    </div>
+                                </div>
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="LastName" class="form-label">LastName <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="LastName" required>
-                                <div class="invalid-feedback">Please enter the Last Name.</div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="Phone" class="form-label">Phone <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="Phone" required>
-                                <div class="invalid-feedback">Please enter the Phone number.</div>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="Email" class="form-label">Email <span class="text-danger">*</span></label>
-                                <input type="email" class="form-control" id="Email" required>
-                                <div class="invalid-feedback">Please enter a valid Email address.</div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="Designation" class="form-label">Designation <span class="text-danger">*</span></label>
-                                <select class="form-control form-select" id="Designation" data-choices required>
-                                    <option value="">Loading...</option>
-                                </select>
-                                <div class="invalid-feedback">Please select the Designation.</div>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="Department" class="form-label">Department <span class="text-danger">*</span></label>
-                                <select class="form-control form-select" id="Department" data-choices required>
-                                    <option value="">Loading...</option>
-                                </select>
-                                <div class="invalid-feedback">Please select the Department.</div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="SubDepartment" class="form-label">Sub-Department <span class="text-danger">*</span></label>
-                                <select class="form-control form-select" id="SubDepartment" data-choices required>
-                                    <option value="">Loading...</option>
-                                </select>
-                                <div class="invalid-feedback">Please select the Sub-Department.</div>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="Branch" class="form-label">Branch <span class="text-danger">*</span></label>
-                                <select class="form-control form-select" id="Branch" data-choices required>
-                                    <option value="">Loading...</option>
-                                </select>
-                                <div class="invalid-feedback">Please select the Branch.</div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="Company" class="form-label">Company <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="Company" placeholder="e.g. Zentora Corporate" required>
-                                <div class="invalid-feedback">Please enter the Company.</div>
+
+                            <!-- Relations & System Tab -->
+                            <div class="tab-pane fade" id="add-relations" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="ReportingManager" class="form-label fw-semibold">Reporting Manager</label>
+                                        <select class="form-select form-control" id="ReportingManager">
+                                            <option value="0">None</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="AssociateReportingManager" class="form-label fw-semibold">Associate Reporting Manager</label>
+                                        <select class="form-select form-control" id="AssociateReportingManager">
+                                            <option value="0">None</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-4 mb-3">
+                                        <label for="RoleType" class="form-label fw-semibold">Role Type</label>
+                                        <select class="form-select form-control" id="RoleType">
+                                            <option value="5" selected>Employee</option>
+                                            <option value="4">HR</option>
+                                            <option value="3">Manager</option>
+                                            <option value="2">Admin</option>
+                                            <option value="1">Superadmin</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label for="ProjectRole" class="form-label fw-semibold">Project Role</label>
+                                        <input type="text" class="form-control" id="ProjectRole" placeholder="e.g. Lead Dev / QA">
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label for="BasicSalary" class="form-label fw-semibold">Basic Salary</label>
+                                        <input type="number" step="0.01" class="form-control" id="BasicSalary" value="0.00">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="LeaveCategory" class="form-label fw-semibold">Leave Category Rule</label>
+                                        <select class="form-select form-control" id="LeaveCategory">
+                                            <option value="">Loading...</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="HolidayCategory" class="form-label fw-semibold">Holiday Category Rule</label>
+                                        <select class="form-select form-control" id="HolidayCategory">
+                                            <option value="">Loading...</option>
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-soft-primary">Save changes</button>
+                        <button type="submit" class="btn btn-soft-primary px-4">Save Employee</button>
                     </div>
                 </form>
             </div>
@@ -184,91 +369,271 @@
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
                 <form id="UpdateEmpForm" class="needs-validation" novalidate method="post">
-                    <div class="modal-header">
-                        <h4 class="modal-title">Update Employee Details</h4>
+                    <div class="modal-header border-bottom-0 pb-0">
+                        <h4 class="modal-title fw-bold">Update Employee Details</h4>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                         <input type="hidden" id="update_id" />
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="uEmpCode" class="form-label">Employee Code <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="uEmpCode" required>
-                                <div class="invalid-feedback">Please enter the Employee Code.</div>
+
+                        <!-- Navigation Tabs -->
+                        <ul class="nav nav-pills nav-justified bg-light rounded-pill p-1 mb-4" role="tablist">
+                            <li class="nav-item">
+                                <button class="nav-link rounded-pill active py-2" data-bs-toggle="tab" data-bs-target="#u-personal" type="button" role="tab">Personal</button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link rounded-pill py-2" data-bs-toggle="tab" data-bs-target="#u-contact" type="button" role="tab">Contact</button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link rounded-pill py-2" data-bs-toggle="tab" data-bs-target="#u-job" type="button" role="tab">Job & Work</button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link rounded-pill py-2" data-bs-toggle="tab" data-bs-target="#u-relations" type="button" role="tab">Relations</button>
+                            </li>
+                        </ul>
+
+                        <div class="tab-content">
+                            <!-- Personal Tab -->
+                            <div class="tab-pane fade show active" id="u-personal" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-md-4 mb-3">
+                                        <label for="uFirstName" class="form-label fw-semibold">First Name <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="uFirstName" required>
+                                        <div class="invalid-feedback">First Name is required.</div>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label for="uMiddleName" class="form-label fw-semibold">Middle Name</label>
+                                        <input type="text" class="form-control" id="uMiddleName">
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label for="uLastName" class="form-label fw-semibold">Last Name <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="uLastName" required>
+                                        <div class="invalid-feedback">Last Name is required.</div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-4 mb-3">
+                                        <label for="uGender" class="form-label fw-semibold">Gender</label>
+                                        <select class="form-select form-control" id="uGender">
+                                            <option value="">Select Gender</option>
+                                            <option value="Male">Male</option>
+                                            <option value="Female">Female</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label for="uMaritalStatus" class="form-label fw-semibold">Marital Status</label>
+                                        <select class="form-select form-control" id="uMaritalStatus">
+                                            <option value="">Select Status</option>
+                                            <option value="Single">Single</option>
+                                            <option value="Married">Married</option>
+                                            <option value="Divorced">Divorced</option>
+                                            <option value="Widowed">Widowed</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label for="uDOB" class="form-label fw-semibold">Date of Birth</label>
+                                        <input type="date" class="form-control" id="uDOB">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 mb-3">
+                                        <label for="uProfileImage" class="form-label fw-semibold">Profile Image URL</label>
+                                        <input type="url" class="form-control" id="uProfileImage" placeholder="https://example.com/avatar.jpg">
+                                    </div>
+                                </div>
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="uUsername" class="form-label">Username <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="uUsername" required>
-                                <div class="invalid-feedback">Please enter the Username.</div>
+
+                            <!-- Contact Tab -->
+                            <div class="tab-pane fade" id="u-contact" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-md-3 mb-3">
+                                        <label for="uPhoneCode" class="form-label fw-semibold">Phone Code <span class="text-danger">*</span></label>
+                                        <select class="form-select form-control" id="uPhoneCode" required>
+                                            <option value="+91">+91 (India)</option>
+                                            <option value="+1">+1 (USA)</option>
+                                            <option value="+44">+44 (UK)</option>
+                                            <option value="+971">+971 (UAE)</option>
+                                            <option value="+61">+61 (Australia)</option>
+                                            <option value="+65">+65 (Singapore)</option>
+                                        </select>
+                                        <div class="invalid-feedback">Phone Code is required.</div>
+                                    </div>
+                                    <div class="col-md-5 mb-3">
+                                        <label for="uPhone" class="form-label fw-semibold">Phone Number <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="uPhone" required>
+                                        <div class="invalid-feedback">Phone Number is required.</div>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label for="uEmail" class="form-label fw-semibold">Email Address <span class="text-danger">*</span></label>
+                                        <input type="email" class="form-control" id="uEmail" required>
+                                        <div class="invalid-feedback">Valid Email is required.</div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 mb-3">
+                                        <label for="uAddress" class="form-label fw-semibold">Street Address</label>
+                                        <textarea class="form-control" id="uAddress" rows="2" placeholder="Enter street address..."></textarea>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-3 mb-3">
+                                        <label for="uCity" class="form-label fw-semibold">City</label>
+                                        <input type="text" class="form-control" id="uCity">
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <label for="uState" class="form-label fw-semibold">State</label>
+                                        <input type="text" class="form-control" id="uState">
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <label for="uCountry" class="form-label fw-semibold">Country</label>
+                                        <input type="text" class="form-control" id="uCountry">
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <label for="uZipCode" class="form-label fw-semibold">Zip Code</label>
+                                        <input type="text" class="form-control" id="uZipCode">
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="uFirstName" class="form-label">First Name <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="uFirstName" required>
-                                <div class="invalid-feedback">Please enter the First Name.</div>
+
+                            <!-- Job & Work Tab -->
+                            <div class="tab-pane fade" id="u-job" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-md-4 mb-3">
+                                        <label for="uEmpCode" class="form-label fw-semibold">Employee Code <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="uEmpCode" required>
+                                        <div class="invalid-feedback">Employee Code is required.</div>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label for="uUsername" class="form-label fw-semibold">Username <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="uUsername" required>
+                                        <div class="invalid-feedback">Username is required.</div>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label for="uPassword" class="form-label fw-semibold">Password <span class="text-danger">*</span></label>
+                                        <input type="password" class="form-control" id="uPassword" required>
+                                        <div class="invalid-feedback">Password is required.</div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="uCompany" class="form-label fw-semibold">Company Name <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="uCompany" required>
+                                        <div class="invalid-feedback">Company Name is required.</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="uBranch" class="form-label fw-semibold">Branch <span class="text-danger">*</span></label>
+                                        <select class="form-select form-control" id="uBranch" required>
+                                            <option value="">Loading...</option>
+                                        </select>
+                                        <div class="invalid-feedback">Branch is required.</div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="uDepartment" class="form-label fw-semibold">Department <span class="text-danger">*</span></label>
+                                        <select class="form-select form-control" id="uDepartment" required>
+                                            <option value="">Select Branch first...</option>
+                                        </select>
+                                        <div class="invalid-feedback">Department is required.</div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="uSubDepartment" class="form-label fw-semibold">Sub-Department <span class="text-danger">*</span></label>
+                                        <select class="form-select form-control" id="uSubDepartment" required>
+                                            <option value="">Select Department first...</option>
+                                        </select>
+                                        <div class="invalid-feedback">Sub-Department is required.</div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-4 mb-3">
+                                        <label for="uDesignation" class="form-label fw-semibold">Designation <span class="text-danger">*</span></label>
+                                        <select class="form-select form-control" id="uDesignation" required>
+                                            <option value="">Loading...</option>
+                                        </select>
+                                        <div class="invalid-feedback">Designation is required.</div>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label for="uOfficeShift" class="form-label fw-semibold">Office Shift</label>
+                                        <select class="form-select form-control" id="uOfficeShift">
+                                            <option value="">Loading...</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label for="uOfficeLocation" class="form-label fw-semibold">Office Location</label>
+                                        <input type="text" class="form-control" id="uOfficeLocation">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="uDOJ" class="form-label fw-semibold">Date of Joining (DOJ)</label>
+                                        <input type="date" class="form-control" id="uDOJ">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="uDOL" class="form-label fw-semibold">Date of Leaving (DOL)</label>
+                                        <input type="date" class="form-control" id="uDOL">
+                                    </div>
+                                </div>
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="uLastName" class="form-label">LastName <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="uLastName" required>
-                                <div class="invalid-feedback">Please enter the Last Name.</div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="uPhone" class="form-label">Phone <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="uPhone" required>
-                                <div class="invalid-feedback">Please enter the Phone number.</div>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="uEmail" class="form-label">Email <span class="text-danger">*</span></label>
-                                <input type="email" class="form-control" id="uEmail" required>
-                                <div class="invalid-feedback">Please enter a valid Email address.</div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="uDesignation" class="form-label">Designation <span class="text-danger">*</span></label>
-                                <select class="form-control form-select" id="uDesignation" data-choices required>
-                                    <option value="">Loading...</option>
-                                </select>
-                                <div class="invalid-feedback">Please select the Designation.</div>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="uDepartment" class="form-label">Department <span class="text-danger">*</span></label>
-                                <select class="form-control form-select" id="uDepartment" data-choices required>
-                                    <option value="">Loading...</option>
-                                </select>
-                                <div class="invalid-feedback">Please select the Department.</div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="uSubDepartment" class="form-label">Sub-Department <span class="text-danger">*</span></label>
-                                <select class="form-control form-select" id="uSubDepartment" data-choices required>
-                                    <option value="">Loading...</option>
-                                </select>
-                                <div class="invalid-feedback">Please select the Sub-Department.</div>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="uBranch" class="form-label">Branch <span class="text-danger">*</span></label>
-                                <select class="form-control form-select" id="uBranch" data-choices required>
-                                    <option value="">Loading...</option>
-                                </select>
-                                <div class="invalid-feedback">Please select the Branch.</div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="uCompany" class="form-label">Company <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="uCompany" required>
-                                <div class="invalid-feedback">Please enter the Company.</div>
+
+                            <!-- Relations & System Tab -->
+                            <div class="tab-pane fade" id="u-relations" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="uReportingManager" class="form-label fw-semibold">Reporting Manager</label>
+                                        <select class="form-select form-control" id="uReportingManager">
+                                            <option value="0">None</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="uAssociateReportingManager" class="form-label fw-semibold">Associate Reporting Manager</label>
+                                        <select class="form-select form-control" id="uAssociateReportingManager">
+                                            <option value="0">None</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-4 mb-3">
+                                        <label for="uRoleType" class="form-label fw-semibold">Role Type</label>
+                                        <select class="form-select form-control" id="uRoleType">
+                                            <option value="5">Employee</option>
+                                            <option value="4">HR</option>
+                                            <option value="3">Manager</option>
+                                            <option value="2">Admin</option>
+                                            <option value="1">Superadmin</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label for="uProjectRole" class="form-label fw-semibold">Project Role</label>
+                                        <input type="text" class="form-control" id="uProjectRole">
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <div class="form-check form-switch mt-4 pt-1">
+                                            <input class="form-check-input" type="checkbox" id="uIsActive" checked>
+                                            <label class="form-check-label fw-semibold" for="uIsActive">Is Active</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="uLeaveCategory" class="form-label fw-semibold">Leave Category Rule</label>
+                                        <select class="form-select form-control" id="uLeaveCategory">
+                                            <option value="">Loading...</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="uHolidayCategory" class="form-label fw-semibold">Holiday Category Rule</label>
+                                        <select class="form-select form-control" id="uHolidayCategory">
+                                            <option value="">Loading...</option>
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-soft-primary">Save changes</button>
+                        <button type="submit" class="btn btn-soft-primary px-4">Save Changes</button>
                     </div>
                 </form>
             </div>
@@ -278,18 +643,28 @@
 
 <script>
     // Intercept data-choices elements before DOMContentLoaded to prevent automatic double initialization
-    document.querySelectorAll('#Designation, #uDesignation, #Department, #uDepartment, #SubDepartment, #uSubDepartment, #Branch, #uBranch').forEach(function(el) {
+    var choicesToClean = [
+        '#Designation', '#uDesignation', '#Department', '#uDepartment', '#SubDepartment', '#uSubDepartment', 
+        '#Branch', '#uBranch', '#OfficeShift', '#uOfficeShift', '#HolidayCategory', '#uHolidayCategory', 
+        '#LeaveCategory', '#uLeaveCategory', '#ReportingManager', '#uReportingManager', 
+        '#AssociateReportingManager', '#uAssociateReportingManager', '#Gender', '#uGender', 
+        '#MaritalStatus', '#uMaritalStatus', '#PhoneCode', '#uPhoneCode', '#RoleType', '#uRoleType'
+    ];
+    document.querySelectorAll(choicesToClean.join(', ')).forEach(function(el) {
         el.removeAttribute('data-choices');
     });
 
     var designationChoice, departmentChoice, subdepartmentChoice, branchChoice;
     var uDesignationChoice, uDepartmentChoice, uSubdepartmentChoice, uBranchChoice;
+    var shiftChoice, uShiftChoice, holidayChoice, uHolidayChoice, leaveChoice, uLeaveChoice;
+    var managerChoice, uManagerChoice, assocManagerChoice, uAssocManagerChoice;
+    var genderChoice, uGenderChoice, maritalChoice, uMaritalChoice, phoneCodeChoice, uPhoneCodeChoice, roleChoice, uRoleChoice;
 
     $(document).ready(function () {
         // Initialize Choices instances manually
         initChoices();
 
-        // Load initial dropdowns (Designations and Branches)
+        // Load initial dropdowns
         loadInitialDropdowns();
 
         // Branch changes cascade
@@ -370,15 +745,39 @@
             var formData = {
                 EmpCode: $("#EmpCode").val(),
                 Username: $("#Username").val(),
+                Password: $("#Password").val(),
                 FirstName: $("#FirstName").val(),
+                MiddleName: $("#MiddleName").val(),
                 LastName: $("#LastName").val(),
+                Gender: $("#Gender").val(),
+                MaritalStatus: $("#MaritalStatus").val(),
+                DOB: $("#DOB").val() || null,
+                ProfileImage: $("#ProfileImage").val(),
+                PhoneCode: $("#PhoneCode").val(),
                 Phone: $("#Phone").val(),
                 Email: $("#Email").val(),
+                Address: $("#Address").val(),
+                City: $("#City").val(),
+                State: $("#State").val(),
+                Country: $("#Country").val(),
+                ZipCode: $("#ZipCode").val(),
                 Designation: $("#Designation").val(),
+                Company: $("#Company").val(),
+                Branch: $("#Branch").val(),
                 Department: $("#Department").val(),
                 SubDepartment: $("#SubDepartment").val(),
-                Company: $("#Company").val(),
-                Branch: $("#Branch").val()
+                OfficeShift: $("#OfficeShift").val(),
+                OfficeLocation: $("#OfficeLocation").val(),
+                DOJ: $("#DOJ").val() || null,
+                DOL: $("#DOL").val() || null,
+                RoleType: parseInt($("#RoleType").val()) || 5,
+                ProjectRole: $("#ProjectRole").val(),
+                ReportingManager: parseInt($("#ReportingManager").val()) || 0,
+                AssociateReportingManager: parseInt($("#AssociateReportingManager").val()) || 0,
+                LeaveCategory: $("#LeaveCategory").val(),
+                HolidayCategory: $("#HolidayCategory").val(),
+                BasicSalary: parseFloat($("#BasicSalary").val()) || 0.0,
+                IsActive: true
             };
             $.ajax({
                 url: '/Staff/SaveEmployee',
@@ -404,15 +803,38 @@
                 Id: $("#update_id").val(),
                 EmpCode: $("#uEmpCode").val(),
                 Username: $("#uUsername").val(),
+                Password: $("#uPassword").val(),
                 FirstName: $("#uFirstName").val(),
+                MiddleName: $("#uMiddleName").val(),
                 LastName: $("#uLastName").val(),
+                Gender: $("#uGender").val(),
+                MaritalStatus: $("#uMaritalStatus").val(),
+                DOB: $("#uDOB").val() || null,
+                ProfileImage: $("#uProfileImage").val(),
+                PhoneCode: $("#uPhoneCode").val(),
                 Phone: $("#uPhone").val(),
                 Email: $("#uEmail").val(),
+                Address: $("#uAddress").val(),
+                City: $("#uCity").val(),
+                State: $("#uState").val(),
+                Country: $("#uCountry").val(),
+                ZipCode: $("#uZipCode").val(),
                 Designation: $("#uDesignation").val(),
+                Company: $("#uCompany").val(),
+                Branch: $("#uBranch").val(),
                 Department: $("#uDepartment").val(),
                 SubDepartment: $("#uSubDepartment").val(),
-                Company: $("#uCompany").val(),
-                Branch: $("#uBranch").val()
+                OfficeShift: $("#uOfficeShift").val(),
+                OfficeLocation: $("#uOfficeLocation").val(),
+                DOJ: $("#uDOJ").val() || null,
+                DOL: $("#uDOL").val() || null,
+                RoleType: parseInt($("#uRoleType").val()) || 5,
+                ProjectRole: $("#uProjectRole").val(),
+                ReportingManager: parseInt($("#uReportingManager").val()) || 0,
+                AssociateReportingManager: parseInt($("#uAssociateReportingManager").val()) || 0,
+                LeaveCategory: $("#uLeaveCategory").val(),
+                HolidayCategory: $("#uHolidayCategory").val(),
+                IsActive: $("#uIsActive").is(":checked")
             };
             $.ajax({
                 url: '/Staff/UpdateEmployee',
@@ -435,11 +857,29 @@
         departmentChoice = new Choices('#Department', { searchEnabled: true, shouldSort: false });
         subdepartmentChoice = new Choices('#SubDepartment', { searchEnabled: true, shouldSort: false });
         branchChoice = new Choices('#Branch', { searchEnabled: true, shouldSort: false });
+        shiftChoice = new Choices('#OfficeShift', { searchEnabled: true, shouldSort: false });
+        holidayChoice = new Choices('#HolidayCategory', { searchEnabled: true, shouldSort: false });
+        leaveChoice = new Choices('#LeaveCategory', { searchEnabled: true, shouldSort: false });
+        managerChoice = new Choices('#ReportingManager', { searchEnabled: true, shouldSort: false });
+        assocManagerChoice = new Choices('#AssociateReportingManager', { searchEnabled: true, shouldSort: false });
+        genderChoice = new Choices('#Gender', { searchEnabled: false, shouldSort: false });
+        maritalChoice = new Choices('#MaritalStatus', { searchEnabled: false, shouldSort: false });
+        phoneCodeChoice = new Choices('#PhoneCode', { searchEnabled: true, shouldSort: false });
+        roleChoice = new Choices('#RoleType', { searchEnabled: false, shouldSort: false });
 
         uDesignationChoice = new Choices('#uDesignation', { searchEnabled: true, shouldSort: false });
         uDepartmentChoice = new Choices('#uDepartment', { searchEnabled: true, shouldSort: false });
         uSubdepartmentChoice = new Choices('#uSubDepartment', { searchEnabled: true, shouldSort: false });
         uBranchChoice = new Choices('#uBranch', { searchEnabled: true, shouldSort: false });
+        uShiftChoice = new Choices('#uOfficeShift', { searchEnabled: true, shouldSort: false });
+        uHolidayChoice = new Choices('#uHolidayCategory', { searchEnabled: true, shouldSort: false });
+        uLeaveChoice = new Choices('#uLeaveCategory', { searchEnabled: true, shouldSort: false });
+        uManagerChoice = new Choices('#uReportingManager', { searchEnabled: true, shouldSort: false });
+        uAssocManagerChoice = new Choices('#uAssociateReportingManager', { searchEnabled: true, shouldSort: false });
+        uGenderChoice = new Choices('#uGender', { searchEnabled: false, shouldSort: false });
+        uMaritalChoice = new Choices('#uMaritalStatus', { searchEnabled: false, shouldSort: false });
+        uPhoneCodeChoice = new Choices('#uPhoneCode', { searchEnabled: true, shouldSort: false });
+        uRoleChoice = new Choices('#uRoleType', { searchEnabled: false, shouldSort: false });
     }
 
     function setSelectChoices(choiceInstance, list, placeholderText, enabled) {
@@ -472,6 +912,26 @@
         }
     }
 
+    function setEmployeeDropdownChoices(choiceInstance, list, placeholderText) {
+        choiceInstance.clearStore();
+        var choicesArray = [{
+            value: '0',
+            label: placeholderText || 'None',
+            selected: true,
+            disabled: false
+        }];
+
+        $.each(list, function(i, item) {
+            choicesArray.push({
+                value: item.Id.toString(),
+                label: item.FirstName + ' ' + (item.MiddleName ? item.MiddleName + ' ' : '') + item.LastName + ' (' + item.Username + ')',
+                selected: false,
+                disabled: false
+            });
+        });
+        choiceInstance.setChoices(choicesArray, 'value', 'label', true);
+    }
+
     function loadInitialDropdowns() {
         $.ajax({
             url: '/Staff/GetDesignationsList',
@@ -490,12 +950,78 @@
                 setSelectChoices(uBranchChoice, list, 'Select Branch', true);
             }
         });
+
+        $.ajax({
+            url: '/Staff/GetShiftsList',
+            type: 'GET',
+            success: function (list) {
+                setSelectChoices(shiftChoice, list, 'Select Shift', true);
+                setSelectChoices(uShiftChoice, list, 'Select Shift', true);
+            }
+        });
+
+        $.ajax({
+            url: '/Staff/GetHolidayCategoriesList',
+            type: 'GET',
+            success: function (list) {
+                setSelectChoices(holidayChoice, list, 'Select Holiday Category Rule', true);
+                setSelectChoices(uHolidayChoice, list, 'Select Holiday Category Rule', true);
+            }
+        });
+
+        $.ajax({
+            url: '/Staff/GetLeaveCategoriesList',
+            type: 'GET',
+            success: function (list) {
+                setSelectChoices(leaveChoice, list, 'Select Leave Category Rule', true);
+                setSelectChoices(uLeaveChoice, list, 'Select Leave Category Rule', true);
+            }
+        });
+
+        // Load Reporting Managers
+        $.ajax({
+            url: '/Staff/GetEmployeeList',
+            type: 'GET',
+            success: function (list) {
+                setEmployeeDropdownChoices(managerChoice, list, 'None (Reporting Manager)');
+                setEmployeeDropdownChoices(uManagerChoice, list, 'None (Reporting Manager)');
+                setEmployeeDropdownChoices(assocManagerChoice, list, 'None (Associate Reporting Manager)');
+                setEmployeeDropdownChoices(uAssocManagerChoice, list, 'None (Associate Reporting Manager)');
+            }
+        });
         
         // Initially disable Department and SubDepartment
         setSelectChoices(departmentChoice, [], 'Select Department (Please select Branch first)', false);
         setSelectChoices(uDepartmentChoice, [], 'Select Department (Please select Branch first)', false);
         setSelectChoices(subdepartmentChoice, [], 'Select Sub-Department (Please select Department first)', false);
         setSelectChoices(uSubdepartmentChoice, [], 'Select Sub-Department (Please select Department first)', false);
+    }
+
+    function OpenAddModal() {
+        // Reset form and reset choices
+        $('#EmpForm')[0].reset();
+        
+        // Reset choices values to defaults
+        genderChoice.setChoiceByValue("");
+        maritalChoice.setChoiceByValue("");
+        phoneCodeChoice.setChoiceByValue("+91");
+        branchChoice.setChoiceByValue("");
+        designationChoice.setChoiceByValue("");
+        shiftChoice.setChoiceByValue("");
+        holidayChoice.setChoiceByValue("");
+        leaveChoice.setChoiceByValue("");
+        managerChoice.setChoiceByValue("0");
+        assocManagerChoice.setChoiceByValue("0");
+        roleChoice.setChoiceByValue("5");
+        
+        setSelectChoices(departmentChoice, [], 'Select Department (Please select Branch first)', false);
+        setSelectChoices(subdepartmentChoice, [], 'Select Sub-Department (Please select Department first)', false);
+
+        // Open first tab by default
+        var tabTrigger = new bootstrap.Tab(document.querySelector('#AddEmpModal button[data-bs-target="#add-personal"]'));
+        tabTrigger.show();
+
+        $('#AddEmpModal').modal('show');
     }
 
     function validateForm(formId) {
@@ -511,6 +1037,7 @@
         var fields = [
             { id: prefix + 'EmpCode', name: 'Employee Code', isSelect: false },
             { id: prefix + 'Username', name: 'Username', isSelect: false },
+            { id: prefix + 'Password', name: 'Password', isSelect: false },
             { id: prefix + 'FirstName', name: 'First Name', isSelect: false },
             { id: prefix + 'LastName', name: 'Last Name', isSelect: false },
             { id: prefix + 'Phone', name: 'Phone', isSelect: false },
@@ -519,7 +1046,8 @@
             { id: prefix + 'Department', name: 'Department', isSelect: true },
             { id: prefix + 'SubDepartment', name: 'Sub-Department', isSelect: true },
             { id: prefix + 'Branch', name: 'Branch', isSelect: true },
-            { id: prefix + 'Company', name: 'Company', isSelect: false }
+            { id: prefix + 'Company', name: 'Company', isSelect: false },
+            { id: prefix + 'PhoneCode', name: 'Phone Code', isSelect: true }
         ];
         
         $.each(fields, function (i, field) {
@@ -544,8 +1072,34 @@
                 }
             }
         });
+
+        // If not valid, activate the first tab containing invalid inputs
+        if (!isValid) {
+            var $firstInvalid = $('#' + formId + ' .is-invalid').first();
+            var $tabPane = $firstInvalid.closest('.tab-pane');
+            if ($tabPane.length > 0) {
+                var paneId = $tabPane.attr('id');
+                var tabBtn = document.querySelector('#' + formId + ' button[data-bs-target="#' + paneId + '"]');
+                if (tabBtn) {
+                    var tabInstance = new bootstrap.Tab(tabBtn);
+                    tabInstance.show();
+                }
+            }
+        }
         
         return isValid;
+    }
+
+    function formatJsonDate(jsonDateString) {
+        if (!jsonDateString) return '';
+        try {
+            var date = new Date(parseInt(jsonDateString.substr(6)));
+            if (isNaN(date.getTime())) return '';
+            var formatted = date.getFullYear() + '-' + ('0' + (date.getMonth() + 1)).slice(-2) + '-' + ('0' + date.getDate()).slice(-2);
+            return formatted;
+        } catch(e) {
+            return '';
+        }
     }
 
     function UpdateEmp(id) {
@@ -555,19 +1109,62 @@
             data: { id: id },
             success: function (data) {
                 if (data) {
+                    // Reset form first
+                    $('#UpdateEmpForm')[0].reset();
+
                     $("#update_id").val(data.Id);
                     $("#uEmpCode").val(data.EmpCode);
                     $("#uUsername").val(data.Username);
+                    $("#uPassword").val(data.Password || "123456");
                     $("#uFirstName").val(data.FirstName);
+                    $("#uMiddleName").val(data.MiddleName);
                     $("#uLastName").val(data.LastName);
                     $("#uPhone").val(data.Phone);
                     $("#uEmail").val(data.Email);
                     $("#uCompany").val(data.Company);
+                    $("#uOfficeLocation").val(data.OfficeLocation);
+                    $("#uProjectRole").val(data.ProjectRole);
+                    $("#uAddress").val(data.Address);
+                    $("#uCity").val(data.City);
+                    $("#uState").val(data.State);
+                    $("#uCountry").val(data.Country);
+                    $("#uZipCode").val(data.ZipCode);
+                    $("#uProfileImage").val(data.ProfileImage);
+                    
+                    // Toggle Active Status
+                    $("#uIsActive").prop("checked", data.IsActive);
+
+                    // Formatted Dates
+                    $("#uDOB").val(formatJsonDate(data.DOB));
+                    $("#uDOJ").val(formatJsonDate(data.DOJ));
+                    $("#uDOL").val(formatJsonDate(data.DOL));
+
+                    // Choices setting values
+                    genderChoice.setChoiceByValue(data.Gender || "");
+                    maritalChoice.setChoiceByValue(data.MaritalStatus || "");
+                    phoneCodeChoice.setChoiceByValue(data.PhoneCode || "+91");
+                    designationChoice.setChoiceByValue(data.Designation || "");
+                    shiftChoice.setChoiceByValue(data.OfficeShift || "");
+                    holidayChoice.setChoiceByValue(data.HolidayCategory || "");
+                    leaveChoice.setChoiceByValue(data.LeaveCategory || "");
+                    
+                    managerChoice.setChoiceByValue((data.ReportingManager || 0).toString());
+                    assocManagerChoice.setChoiceByValue((data.AssociateReportingManager || 0).toString());
+                    roleChoice.setChoiceByValue((data.RoleType || 5).toString());
                     
                     // Trigger Cascades sequentially
                     uDesignationChoice.setChoiceByValue(data.Designation);
                     uBranchChoice.setChoiceByValue(data.Branch);
-                    
+                    uShiftChoice.setChoiceByValue(data.OfficeShift);
+                    uHolidayChoice.setChoiceByValue(data.HolidayCategory);
+                    uLeaveChoice.setChoiceByValue(data.LeaveCategory);
+                    uManagerChoice.setChoiceByValue((data.ReportingManager || 0).toString());
+                    uAssocManagerChoice.setChoiceByValue((data.AssociateReportingManager || 0).toString());
+                    uRoleChoice.setChoiceByValue((data.RoleType || 5).toString());
+                    uGenderChoice.setChoiceByValue(data.Gender || "");
+                    uMaritalChoice.setChoiceByValue(data.MaritalStatus || "");
+                    uPhoneCodeChoice.setChoiceByValue(data.PhoneCode || "+91");
+
                     if (data.Branch) {
                         $.ajax({
                             url: '/Staff/GetDepartmentsByBranch',
@@ -585,11 +1182,21 @@
                                         success: function (subDeptList) {
                                             setSelectChoices(uSubdepartmentChoice, subDeptList, 'Select Sub-Department', true);
                                             uSubdepartmentChoice.setChoiceByValue(data.SubDepartment);
+                                            
+                                            // Open first tab by default
+                                            var tabTrigger = new bootstrap.Tab(document.querySelector('#UpdateEmpModal button[data-bs-target="#u-personal"]'));
+                                            tabTrigger.show();
+
                                             $("#UpdateEmpModal").modal("show");
                                         }
                                     });
                                 } else {
                                     setSelectChoices(uSubdepartmentChoice, [], 'Select Sub-Department (Please select Department first)', false);
+                                    
+                                    // Open first tab by default
+                                    var tabTrigger = new bootstrap.Tab(document.querySelector('#UpdateEmpModal button[data-bs-target="#u-personal"]'));
+                                    tabTrigger.show();
+
                                     $("#UpdateEmpModal").modal("show");
                                 }
                             }
@@ -597,6 +1204,11 @@
                     } else {
                         setSelectChoices(uDepartmentChoice, [], 'Select Department (Please select Branch first)', false);
                         setSelectChoices(uSubdepartmentChoice, [], 'Select Sub-Department (Please select Department first)', false);
+                        
+                        // Open first tab by default
+                        var tabTrigger = new bootstrap.Tab(document.querySelector('#UpdateEmpModal button[data-bs-target="#u-personal"]'));
+                        tabTrigger.show();
+
                         $("#UpdateEmpModal").modal("show");
                     }
                 }

@@ -184,7 +184,7 @@ namespace zentoraHRMS.Controllers
             List<EmployeeModel> list = new List<EmployeeModel>();
             using (SqlConnection con = new SqlConnection(connectionString))
             {
-                string query = "SELECT Id, EmpCode, FirstName, LastName, Username, Phone, Email, Designation, Company, Branch, Department, SubDepartment, IsActive FROM EmployeeDetails WHERE IsDeleted = 0";
+                string query = @"SELECT Id, EmpCode, FirstName, MiddleName, LastName, Username, PhoneCode, Phone, Email, Password, Gender, MaritalStatus, Designation, Company, Branch, Department, SubDepartment, OfficeShift, OfficeLocation, DOJ, DOL, DOB, ProfileImage, Address, State, City, Country, ZipCode, RoleType, LeaveCategory, HolidayCategory, ProjectRole, ReportingManager, AssociateReportingManager, IsActive FROM EmployeeDetails WHERE IsDeleted = 0";
                 using (SqlCommand cmd = new SqlCommand(query, con))
                 {
                     con.Open();
@@ -195,17 +195,39 @@ namespace zentoraHRMS.Controllers
                             list.Add(new EmployeeModel
                             {
                                 Id = Convert.ToInt32(reader["Id"]),
-                                EmpCode = reader["EmpCode"].ToString(),
-                                FirstName = reader["FirstName"].ToString(),
-                                LastName = reader["LastName"].ToString(),
-                                Username = reader["Username"].ToString(),
-                                Phone = reader["Phone"].ToString(),
-                                Email = reader["Email"].ToString(),
-                                Designation = reader["Designation"].ToString(),
-                                Company = reader["Company"].ToString(),
-                                Branch = reader["Branch"].ToString(),
-                                Department = reader["Department"].ToString(),
-                                SubDepartment = reader["SubDepartment"].ToString(),
+                                EmpCode = reader["EmpCode"] != DBNull.Value ? reader["EmpCode"].ToString() : "",
+                                FirstName = reader["FirstName"] != DBNull.Value ? reader["FirstName"].ToString() : "",
+                                MiddleName = reader["MiddleName"] != DBNull.Value ? reader["MiddleName"].ToString() : "",
+                                LastName = reader["LastName"] != DBNull.Value ? reader["LastName"].ToString() : "",
+                                Username = reader["Username"] != DBNull.Value ? reader["Username"].ToString() : "",
+                                PhoneCode = reader["PhoneCode"] != DBNull.Value ? reader["PhoneCode"].ToString() : "",
+                                Phone = reader["Phone"] != DBNull.Value ? reader["Phone"].ToString() : "",
+                                Email = reader["Email"] != DBNull.Value ? reader["Email"].ToString() : "",
+                                Password = reader["Password"] != DBNull.Value ? reader["Password"].ToString() : "",
+                                Gender = reader["Gender"] != DBNull.Value ? reader["Gender"].ToString() : "",
+                                MaritalStatus = reader["MaritalStatus"] != DBNull.Value ? reader["MaritalStatus"].ToString() : "",
+                                Designation = reader["Designation"] != DBNull.Value ? reader["Designation"].ToString() : "",
+                                Company = reader["Company"] != DBNull.Value ? reader["Company"].ToString() : "",
+                                Branch = reader["Branch"] != DBNull.Value ? reader["Branch"].ToString() : "",
+                                Department = reader["Department"] != DBNull.Value ? reader["Department"].ToString() : "",
+                                SubDepartment = reader["SubDepartment"] != DBNull.Value ? reader["SubDepartment"].ToString() : "",
+                                OfficeShift = reader["OfficeShift"] != DBNull.Value ? reader["OfficeShift"].ToString() : "",
+                                OfficeLocation = reader["OfficeLocation"] != DBNull.Value ? reader["OfficeLocation"].ToString() : "",
+                                DOJ = reader["DOJ"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(reader["DOJ"]) : null,
+                                DOL = reader["DOL"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(reader["DOL"]) : null,
+                                DOB = reader["DOB"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(reader["DOB"]) : null,
+                                ProfileImage = reader["ProfileImage"] != DBNull.Value ? reader["ProfileImage"].ToString() : "",
+                                Address = reader["Address"] != DBNull.Value ? reader["Address"].ToString() : "",
+                                State = reader["State"] != DBNull.Value ? reader["State"].ToString() : "",
+                                City = reader["City"] != DBNull.Value ? reader["City"].ToString() : "",
+                                Country = reader["Country"] != DBNull.Value ? reader["Country"].ToString() : "",
+                                ZipCode = reader["ZipCode"] != DBNull.Value ? reader["ZipCode"].ToString() : "",
+                                RoleType = reader["RoleType"] != DBNull.Value ? (int?)Convert.ToInt32(reader["RoleType"]) : null,
+                                LeaveCategory = reader["LeaveCategory"] != DBNull.Value ? reader["LeaveCategory"].ToString() : "",
+                                HolidayCategory = reader["HolidayCategory"] != DBNull.Value ? reader["HolidayCategory"].ToString() : "",
+                                ProjectRole = reader["ProjectRole"] != DBNull.Value ? reader["ProjectRole"].ToString() : "",
+                                ReportingManager = reader["ReportingManager"] != DBNull.Value ? (int?)Convert.ToInt32(reader["ReportingManager"]) : null,
+                                AssociateReportingManager = reader["AssociateReportingManager"] != DBNull.Value ? (int?)Convert.ToInt32(reader["AssociateReportingManager"]) : null,
                                 IsActive = Convert.ToBoolean(reader["IsActive"])
                             });
                         }
@@ -222,21 +244,46 @@ namespace zentoraHRMS.Controllers
             {
                 using (SqlConnection con = new SqlConnection(connectionString))
                 {
-                    string query = @"INSERT INTO EmployeeDetails (EmpCode, FirstName, LastName, Username, Phone, Email, Designation, Company, Branch, Department, SubDepartment, PhoneCode, Password, OfficeShift, OfficeLocation, DOJ, DOB, State, City, Country, ZipCode, RoleType, ReportingManager, CreateBy, IsActive, IsDeleted, CreatedDate, SystemAddedOn) 
-                                     VALUES (@EmpCode, @FirstName, @LastName, @Username, @Phone, @Email, @Designation, @Company, @Branch, @Department, @SubDepartment, '+91', '123456', 'General', 'Noida', GETDATE(), GETDATE(), '', '', '', '', 1, 0, 1, 1, 0, GETDATE(), GETDATE())";
+                    string query = @"INSERT INTO EmployeeDetails 
+                                     (EmpCode, FirstName, MiddleName, LastName, Username, PhoneCode, Phone, Email, Password, Gender, MaritalStatus, Designation, Company, Branch, Department, SubDepartment, OfficeShift, OfficeLocation, DOJ, DOL, DOB, ProfileImage, Address, State, City, Country, ZipCode, RoleType, LeaveCategory, HolidayCategory, ProjectRole, ReportingManager, AssociateReportingManager, CreateBy, IsActive, IsDeleted, CreatedDate, SystemAddedOn) 
+                                     VALUES 
+                                     (@EmpCode, @FirstName, @MiddleName, @LastName, @Username, @PhoneCode, @Phone, @Email, @Password, @Gender, @MaritalStatus, @Designation, @Company, @Branch, @Department, @SubDepartment, @OfficeShift, @OfficeLocation, @DOJ, @DOL, @DOB, @ProfileImage, @Address, @State, @City, @Country, @ZipCode, @RoleType, @LeaveCategory, @HolidayCategory, @ProjectRole, @ReportingManager, @AssociateReportingManager, 1, 1, 0, GETDATE(), GETDATE())";
                     using (SqlCommand cmd = new SqlCommand(query, con))
                     {
                         cmd.Parameters.AddWithValue("@EmpCode", model.EmpCode ?? "");
                         cmd.Parameters.AddWithValue("@FirstName", model.FirstName ?? "");
+                        cmd.Parameters.AddWithValue("@MiddleName", model.MiddleName ?? "");
                         cmd.Parameters.AddWithValue("@LastName", model.LastName ?? "");
                         cmd.Parameters.AddWithValue("@Username", model.Username ?? "");
+                        cmd.Parameters.AddWithValue("@PhoneCode", model.PhoneCode ?? "+91");
                         cmd.Parameters.AddWithValue("@Phone", model.Phone ?? "");
                         cmd.Parameters.AddWithValue("@Email", model.Email ?? "");
+                        cmd.Parameters.AddWithValue("@Password", model.Password ?? "123456");
+                        cmd.Parameters.AddWithValue("@Gender", model.Gender ?? "");
+                        cmd.Parameters.AddWithValue("@MaritalStatus", model.MaritalStatus ?? "");
                         cmd.Parameters.AddWithValue("@Designation", model.Designation ?? "");
                         cmd.Parameters.AddWithValue("@Company", model.Company ?? "");
                         cmd.Parameters.AddWithValue("@Branch", model.Branch ?? "");
                         cmd.Parameters.AddWithValue("@Department", model.Department ?? "");
                         cmd.Parameters.AddWithValue("@SubDepartment", model.SubDepartment ?? "");
+                        cmd.Parameters.AddWithValue("@OfficeShift", model.OfficeShift ?? "General");
+                        cmd.Parameters.AddWithValue("@OfficeLocation", model.OfficeLocation ?? "");
+                        cmd.Parameters.AddWithValue("@DOJ", (object)model.DOJ ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue("@DOL", (object)model.DOL ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue("@DOB", (object)model.DOB ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue("@ProfileImage", model.ProfileImage ?? "");
+                        cmd.Parameters.AddWithValue("@Address", model.Address ?? "");
+                        cmd.Parameters.AddWithValue("@State", model.State ?? "");
+                        cmd.Parameters.AddWithValue("@City", model.City ?? "");
+                        cmd.Parameters.AddWithValue("@Country", model.Country ?? "");
+                        cmd.Parameters.AddWithValue("@ZipCode", model.ZipCode ?? "");
+                        cmd.Parameters.AddWithValue("@RoleType", (object)model.RoleType ?? 1);
+                        cmd.Parameters.AddWithValue("@LeaveCategory", model.LeaveCategory ?? "");
+                        cmd.Parameters.AddWithValue("@HolidayCategory", model.HolidayCategory ?? "");
+                        cmd.Parameters.AddWithValue("@ProjectRole", model.ProjectRole ?? "");
+                        cmd.Parameters.AddWithValue("@ReportingManager", (object)model.ReportingManager ?? 0);
+                        cmd.Parameters.AddWithValue("@AssociateReportingManager", (object)model.AssociateReportingManager ?? 0);
+                        
                         con.Open();
                         cmd.ExecuteNonQuery();
                     }
@@ -254,7 +301,7 @@ namespace zentoraHRMS.Controllers
             EmployeeModel model = null;
             using (SqlConnection con = new SqlConnection(connectionString))
             {
-                string query = "SELECT Id, EmpCode, FirstName, LastName, Username, Phone, Email, Designation, Company, Branch, Department, SubDepartment, IsActive FROM EmployeeDetails WHERE Id = @Id";
+                string query = "SELECT Id, EmpCode, FirstName, MiddleName, LastName, Username, PhoneCode, Phone, Email, Password, Gender, MaritalStatus, Designation, Company, Branch, Department, SubDepartment, OfficeShift, OfficeLocation, DOJ, DOL, DOB, ProfileImage, Address, State, City, Country, ZipCode, RoleType, LeaveCategory, HolidayCategory, ProjectRole, ReportingManager, AssociateReportingManager, IsActive FROM EmployeeDetails WHERE Id = @Id";
                 using (SqlCommand cmd = new SqlCommand(query, con))
                 {
                     cmd.Parameters.AddWithValue("@Id", id);
@@ -266,17 +313,39 @@ namespace zentoraHRMS.Controllers
                             model = new EmployeeModel
                             {
                                 Id = Convert.ToInt32(reader["Id"]),
-                                EmpCode = reader["EmpCode"].ToString(),
-                                FirstName = reader["FirstName"].ToString(),
-                                LastName = reader["LastName"].ToString(),
-                                Username = reader["Username"].ToString(),
-                                Phone = reader["Phone"].ToString(),
-                                Email = reader["Email"].ToString(),
-                                Designation = reader["Designation"].ToString(),
-                                Company = reader["Company"].ToString(),
-                                Branch = reader["Branch"].ToString(),
-                                Department = reader["Department"].ToString(),
-                                SubDepartment = reader["SubDepartment"].ToString(),
+                                EmpCode = reader["EmpCode"] != DBNull.Value ? reader["EmpCode"].ToString() : "",
+                                FirstName = reader["FirstName"] != DBNull.Value ? reader["FirstName"].ToString() : "",
+                                MiddleName = reader["MiddleName"] != DBNull.Value ? reader["MiddleName"].ToString() : "",
+                                LastName = reader["LastName"] != DBNull.Value ? reader["LastName"].ToString() : "",
+                                Username = reader["Username"] != DBNull.Value ? reader["Username"].ToString() : "",
+                                PhoneCode = reader["PhoneCode"] != DBNull.Value ? reader["PhoneCode"].ToString() : "",
+                                Phone = reader["Phone"] != DBNull.Value ? reader["Phone"].ToString() : "",
+                                Email = reader["Email"] != DBNull.Value ? reader["Email"].ToString() : "",
+                                Password = reader["Password"] != DBNull.Value ? reader["Password"].ToString() : "",
+                                Gender = reader["Gender"] != DBNull.Value ? reader["Gender"].ToString() : "",
+                                MaritalStatus = reader["MaritalStatus"] != DBNull.Value ? reader["MaritalStatus"].ToString() : "",
+                                Designation = reader["Designation"] != DBNull.Value ? reader["Designation"].ToString() : "",
+                                Company = reader["Company"] != DBNull.Value ? reader["Company"].ToString() : "",
+                                Branch = reader["Branch"] != DBNull.Value ? reader["Branch"].ToString() : "",
+                                Department = reader["Department"] != DBNull.Value ? reader["Department"].ToString() : "",
+                                SubDepartment = reader["SubDepartment"] != DBNull.Value ? reader["SubDepartment"].ToString() : "",
+                                OfficeShift = reader["OfficeShift"] != DBNull.Value ? reader["OfficeShift"].ToString() : "",
+                                OfficeLocation = reader["OfficeLocation"] != DBNull.Value ? reader["OfficeLocation"].ToString() : "",
+                                DOJ = reader["DOJ"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(reader["DOJ"]) : null,
+                                DOL = reader["DOL"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(reader["DOL"]) : null,
+                                DOB = reader["DOB"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(reader["DOB"]) : null,
+                                ProfileImage = reader["ProfileImage"] != DBNull.Value ? reader["ProfileImage"].ToString() : "",
+                                Address = reader["Address"] != DBNull.Value ? reader["Address"].ToString() : "",
+                                State = reader["State"] != DBNull.Value ? reader["State"].ToString() : "",
+                                City = reader["City"] != DBNull.Value ? reader["City"].ToString() : "",
+                                Country = reader["Country"] != DBNull.Value ? reader["Country"].ToString() : "",
+                                ZipCode = reader["ZipCode"] != DBNull.Value ? reader["ZipCode"].ToString() : "",
+                                RoleType = reader["RoleType"] != DBNull.Value ? (int?)Convert.ToInt32(reader["RoleType"]) : null,
+                                LeaveCategory = reader["LeaveCategory"] != DBNull.Value ? reader["LeaveCategory"].ToString() : "",
+                                HolidayCategory = reader["HolidayCategory"] != DBNull.Value ? reader["HolidayCategory"].ToString() : "",
+                                ProjectRole = reader["ProjectRole"] != DBNull.Value ? reader["ProjectRole"].ToString() : "",
+                                ReportingManager = reader["ReportingManager"] != DBNull.Value ? (int?)Convert.ToInt32(reader["ReportingManager"]) : null,
+                                AssociateReportingManager = reader["AssociateReportingManager"] != DBNull.Value ? (int?)Convert.ToInt32(reader["AssociateReportingManager"]) : null,
                                 IsActive = Convert.ToBoolean(reader["IsActive"])
                             };
                         }
@@ -293,23 +362,56 @@ namespace zentoraHRMS.Controllers
             {
                 using (SqlConnection con = new SqlConnection(connectionString))
                 {
-                    string query = @"UPDATE EmployeeDetails SET EmpCode = @EmpCode, FirstName = @FirstName, LastName = @LastName, 
-                                     Username = @Username, Phone = @Phone, Email = @Email, Designation = @Designation, 
-                                     Company = @Company, Branch = @Branch, Department = @Department, SubDepartment = @SubDepartment WHERE Id = @Id";
+                    string query = @"UPDATE EmployeeDetails SET 
+                                     EmpCode = @EmpCode, FirstName = @FirstName, MiddleName = @MiddleName, LastName = @LastName, 
+                                     Username = @Username, PhoneCode = @PhoneCode, Phone = @Phone, Email = @Email, Password = @Password, 
+                                     Gender = @Gender, MaritalStatus = @MaritalStatus, Designation = @Designation, Company = @Company, 
+                                     Branch = @Branch, Department = @Department, SubDepartment = @SubDepartment, OfficeShift = @OfficeShift, 
+                                     OfficeLocation = @OfficeLocation, DOJ = @DOJ, DOL = @DOL, DOB = @DOB, ProfileImage = @ProfileImage, 
+                                     Address = @Address, State = @State, City = @City, Country = @Country, ZipCode = @ZipCode, 
+                                     RoleType = @RoleType, LeaveCategory = @LeaveCategory, HolidayCategory = @HolidayCategory, 
+                                     ProjectRole = @ProjectRole, ReportingManager = @ReportingManager, 
+                                     AssociateReportingManager = @AssociateReportingManager, IsActive = @IsActive,
+                                     UpdatedDate = GETDATE(), UpdatedBy = 1
+                                     WHERE Id = @Id";
                     using (SqlCommand cmd = new SqlCommand(query, con))
                     {
                         cmd.Parameters.AddWithValue("@Id", model.Id);
                         cmd.Parameters.AddWithValue("@EmpCode", model.EmpCode ?? "");
                         cmd.Parameters.AddWithValue("@FirstName", model.FirstName ?? "");
+                        cmd.Parameters.AddWithValue("@MiddleName", model.MiddleName ?? "");
                         cmd.Parameters.AddWithValue("@LastName", model.LastName ?? "");
                         cmd.Parameters.AddWithValue("@Username", model.Username ?? "");
+                        cmd.Parameters.AddWithValue("@PhoneCode", model.PhoneCode ?? "+91");
                         cmd.Parameters.AddWithValue("@Phone", model.Phone ?? "");
                         cmd.Parameters.AddWithValue("@Email", model.Email ?? "");
+                        cmd.Parameters.AddWithValue("@Password", model.Password ?? "123456");
+                        cmd.Parameters.AddWithValue("@Gender", model.Gender ?? "");
+                        cmd.Parameters.AddWithValue("@MaritalStatus", model.MaritalStatus ?? "");
                         cmd.Parameters.AddWithValue("@Designation", model.Designation ?? "");
                         cmd.Parameters.AddWithValue("@Company", model.Company ?? "");
                         cmd.Parameters.AddWithValue("@Branch", model.Branch ?? "");
                         cmd.Parameters.AddWithValue("@Department", model.Department ?? "");
                         cmd.Parameters.AddWithValue("@SubDepartment", model.SubDepartment ?? "");
+                        cmd.Parameters.AddWithValue("@OfficeShift", model.OfficeShift ?? "General");
+                        cmd.Parameters.AddWithValue("@OfficeLocation", model.OfficeLocation ?? "");
+                        cmd.Parameters.AddWithValue("@DOJ", (object)model.DOJ ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue("@DOL", (object)model.DOL ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue("@DOB", (object)model.DOB ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue("@ProfileImage", model.ProfileImage ?? "");
+                        cmd.Parameters.AddWithValue("@Address", model.Address ?? "");
+                        cmd.Parameters.AddWithValue("@State", model.State ?? "");
+                        cmd.Parameters.AddWithValue("@City", model.City ?? "");
+                        cmd.Parameters.AddWithValue("@Country", model.Country ?? "");
+                        cmd.Parameters.AddWithValue("@ZipCode", model.ZipCode ?? "");
+                        cmd.Parameters.AddWithValue("@RoleType", (object)model.RoleType ?? 1);
+                        cmd.Parameters.AddWithValue("@LeaveCategory", model.LeaveCategory ?? "");
+                        cmd.Parameters.AddWithValue("@HolidayCategory", model.HolidayCategory ?? "");
+                        cmd.Parameters.AddWithValue("@ProjectRole", model.ProjectRole ?? "");
+                        cmd.Parameters.AddWithValue("@ReportingManager", (object)model.ReportingManager ?? 0);
+                        cmd.Parameters.AddWithValue("@AssociateReportingManager", (object)model.AssociateReportingManager ?? 0);
+                        cmd.Parameters.AddWithValue("@IsActive", model.IsActive);
+                        
                         con.Open();
                         cmd.ExecuteNonQuery();
                     }
@@ -514,6 +616,72 @@ namespace zentoraHRMS.Controllers
                         while (reader.Read())
                         {
                             list.Add(reader["SubDepartmentName"].ToString());
+                        }
+                    }
+                }
+            }
+            return Json(list, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpGet]
+        public JsonResult GetShiftsList()
+        {
+            List<string> list = new List<string>();
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                string query = "SELECT ShiftName FROM Shifts WHERE IsActive = 1 ORDER BY ShiftName";
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+                    con.Open();
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            list.Add(reader["ShiftName"].ToString());
+                        }
+                    }
+                }
+            }
+            return Json(list, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpGet]
+        public JsonResult GetHolidayCategoriesList()
+        {
+            List<string> list = new List<string>();
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                string query = "SELECT CategoryName FROM HolidayCategory WHERE IsActive = 1 ORDER BY CategoryName";
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+                    con.Open();
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            list.Add(reader["CategoryName"].ToString());
+                        }
+                    }
+                }
+            }
+            return Json(list, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpGet]
+        public JsonResult GetLeaveCategoriesList()
+        {
+            List<string> list = new List<string>();
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                string query = "SELECT CategoryName FROM LeaveCategory WHERE IsActive = 1 ORDER BY CategoryName";
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+                    con.Open();
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            list.Add(reader["CategoryName"].ToString());
                         }
                     }
                 }

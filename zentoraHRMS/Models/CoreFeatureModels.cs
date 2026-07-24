@@ -147,15 +147,37 @@ namespace zentoraHRMS.Models
         public int Id { get; set; }
         public string EmpCode { get; set; }
         public string FirstName { get; set; }
+        public string MiddleName { get; set; }
         public string LastName { get; set; }
         public string Username { get; set; }
+        public string PhoneCode { get; set; }
         public string Phone { get; set; }
         public string Email { get; set; }
+        public string Password { get; set; }
+        public string Gender { get; set; }
+        public string MaritalStatus { get; set; }
         public string Designation { get; set; }
         public string Company { get; set; }
         public string Branch { get; set; }
         public string Department { get; set; }
         public string SubDepartment { get; set; }
+        public string OfficeShift { get; set; }
+        public string OfficeLocation { get; set; }
+        public DateTime? DOJ { get; set; }
+        public DateTime? DOL { get; set; }
+        public DateTime? DOB { get; set; }
+        public string ProfileImage { get; set; }
+        public string Address { get; set; }
+        public string State { get; set; }
+        public string City { get; set; }
+        public string Country { get; set; }
+        public string ZipCode { get; set; }
+        public int? RoleType { get; set; }
+        public string LeaveCategory { get; set; }
+        public string HolidayCategory { get; set; }
+        public string ProjectRole { get; set; }
+        public int? ReportingManager { get; set; }
+        public int? AssociateReportingManager { get; set; }
         public decimal BasicSalary { get; set; }
         public bool IsActive { get; set; }
     }
