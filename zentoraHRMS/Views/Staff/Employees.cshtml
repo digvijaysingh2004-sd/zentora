@@ -53,7 +53,6 @@
                                 <th>Emp Code</th>
                                 <th>Name</th>
                                 <th>Phone</th>
-                                <th>Email</th>
                                 <th>Designation</th>
                                 <th>Department</th>
                                 <th>Branch</th>
@@ -67,10 +66,26 @@
                             {
                                 <tr>
                                     <td class="fs-sm" style="width: 1%;"></td>
-                                    <td>@c.EmpCode</td>
-                                    <td>@c.FirstName @(string.IsNullOrEmpty(c.MiddleName) ? "" : c.MiddleName + " ") @c.LastName</td>
+                                    <td class="fw-semibold">@c.EmpCode</td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            @if (!string.IsNullOrEmpty(c.ProfileImage))
+                                            {
+                                                <img src="@c.ProfileImage" class="rounded-circle border border-2 border-light-subtle shadow-sm" alt="Profile" style="width: 38px; height: 38px; object-fit: cover;" onerror="this.onerror=null; this.src='/assets/images/users/avatar-1.jpg';" />
+                                            }
+                                            else
+                                            {
+                                                <div class="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center shadow-sm fw-semibold" style="width: 38px; height: 38px; font-size: 11px; min-width: 38px;">
+                                                    @(c.FirstName.Length > 0 ? c.FirstName.Substring(0,1) : "")@(c.LastName.Length > 0 ? c.LastName.Substring(0,1) : "")
+                                                </div>
+                                            }
+                                            <div>
+                                                <h6 class="mb-0 fs-sm fw-semibold">@c.FirstName @(string.IsNullOrEmpty(c.MiddleName) ? "" : c.MiddleName + " ") @c.LastName</h6>
+                                                <span class="text-muted fs-xxs">@c.Email</span>
+                                            </div>
+                                        </div>
+                                    </td>
                                     <td>@(c.PhoneCode ?? "+91") @c.Phone</td>
-                                    <td>@c.Email</td>
                                     <td>@c.Designation</td>
                                     <td>@c.Department</td>
                                     <td>@c.Branch</td>
@@ -121,6 +136,32 @@
                         <div class="tab-content">
                             <!-- Personal Tab -->
                             <div class="tab-pane fade show active" id="add-personal" role="tabpanel">
+                                <!-- Profile Photo Upload Section -->
+                                <div class="row align-items-center mb-4 bg-light-subtle p-3 rounded border border-dashed">
+                                    <div class="col-auto">
+                                        <div class="position-relative d-inline-block">
+                                            <img id="avatar-preview" src="/assets/images/users/avatar-1.jpg" class="rounded-circle border border-3 border-light shadow-sm" style="width: 80px; height: 80px; object-fit: cover;" onerror="this.onerror=null; this.src='/assets/images/users/avatar-1.jpg';" />
+                                            <span id="upload-spinner" class="spinner-border spinner-border-sm text-primary position-absolute top-50 start-50 translate-middle d-none" role="status"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        <h6 class="fw-bold mb-1 text-heading">Profile Photo</h6>
+                                        <p class="text-muted fs-xxs mb-2">Upload a picture from your device or specify a web URL.</p>
+                                        <div class="d-flex gap-2">
+                                            <button type="button" class="btn btn-sm btn-soft-primary" onclick="triggerFileUpload('add')">
+                                                <i class="me-1" data-lucide="upload-cloud"></i> Upload File
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-soft-secondary" onclick="toggleUrlInput('add')">
+                                                <i class="me-1" data-lucide="link-2"></i> Use URL
+                                            </button>
+                                        </div>
+                                        <input type="file" id="file-upload-add" class="d-none" accept="image/*" onchange="handleFileChange(this, 'add')">
+                                        <div id="url-input-container-add" class="mt-2 d-none" style="max-width: 400px;">
+                                            <input type="url" class="form-control form-control-sm" id="ProfileImage" placeholder="Paste image URL here..." oninput="handleUrlInput(this, 'add')">
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div class="row">
                                     <div class="col-md-4 mb-3">
                                         <label for="FirstName" class="form-label fw-semibold">First Name <span class="text-danger">*</span></label>
@@ -160,12 +201,6 @@
                                     <div class="col-md-4 mb-3">
                                         <label for="DOB" class="form-label fw-semibold">Date of Birth</label>
                                         <input type="date" class="form-control" id="DOB">
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-12 mb-3">
-                                        <label for="ProfileImage" class="form-label fw-semibold">Profile Image URL</label>
-                                        <input type="url" class="form-control" id="ProfileImage" placeholder="https://example.com/avatar.jpg">
                                     </div>
                                 </div>
                             </div>
@@ -227,7 +262,10 @@
                                 <div class="row">
                                     <div class="col-md-4 mb-3">
                                         <label for="EmpCode" class="form-label fw-semibold">Employee Code <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control" id="EmpCode" required>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" id="EmpCode" required placeholder="Generating...">
+                                            <button class="btn btn-outline-secondary" type="button" onclick="regenerateEmpCode('add')" title="Regenerate code"><i data-lucide="refresh-cw" class="fs-sm"></i></button>
+                                        </div>
                                         <div class="invalid-feedback">Employee Code is required.</div>
                                     </div>
                                     <div class="col-md-4 mb-3">
@@ -395,6 +433,32 @@
                         <div class="tab-content">
                             <!-- Personal Tab -->
                             <div class="tab-pane fade show active" id="u-personal" role="tabpanel">
+                                <!-- Profile Photo Upload Section (Edit) -->
+                                <div class="row align-items-center mb-4 bg-light-subtle p-3 rounded border border-dashed">
+                                    <div class="col-auto">
+                                        <div class="position-relative d-inline-block">
+                                            <img id="u-avatar-preview" src="/assets/images/users/avatar-1.jpg" class="rounded-circle border border-3 border-light shadow-sm" style="width: 80px; height: 80px; object-fit: cover;" onerror="this.onerror=null; this.src='/assets/images/users/avatar-1.jpg';" />
+                                            <span id="u-upload-spinner" class="spinner-border spinner-border-sm text-primary position-absolute top-50 start-50 translate-middle d-none" role="status"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        <h6 class="fw-bold mb-1 text-heading">Profile Photo</h6>
+                                        <p class="text-muted fs-xxs mb-2">Upload a picture from your device or specify a web URL.</p>
+                                        <div class="d-flex gap-2">
+                                            <button type="button" class="btn btn-sm btn-soft-primary" onclick="triggerFileUpload('edit')">
+                                                <i class="me-1" data-lucide="upload-cloud"></i> Upload New File
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-soft-secondary" onclick="toggleUrlInput('edit')">
+                                                <i class="me-1" data-lucide="link-2"></i> Use URL
+                                            </button>
+                                        </div>
+                                        <input type="file" id="file-upload-edit" class="d-none" accept="image/*" onchange="handleFileChange(this, 'edit')">
+                                        <div id="url-input-container-edit" class="mt-2 d-none" style="max-width: 400px;">
+                                            <input type="url" class="form-control form-control-sm" id="uProfileImage" placeholder="Paste image URL here..." oninput="handleUrlInput(this, 'edit')">
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div class="row">
                                     <div class="col-md-4 mb-3">
                                         <label for="uFirstName" class="form-label fw-semibold">First Name <span class="text-danger">*</span></label>
@@ -434,12 +498,6 @@
                                     <div class="col-md-4 mb-3">
                                         <label for="uDOB" class="form-label fw-semibold">Date of Birth</label>
                                         <input type="date" class="form-control" id="uDOB">
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-12 mb-3">
-                                        <label for="uProfileImage" class="form-label fw-semibold">Profile Image URL</label>
-                                        <input type="url" class="form-control" id="uProfileImage" placeholder="https://example.com/avatar.jpg">
                                     </div>
                                 </div>
                             </div>
@@ -501,7 +559,10 @@
                                 <div class="row">
                                     <div class="col-md-4 mb-3">
                                         <label for="uEmpCode" class="form-label fw-semibold">Employee Code <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control" id="uEmpCode" required>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" id="uEmpCode" required>
+                                            <button class="btn btn-outline-secondary" type="button" onclick="regenerateEmpCode('edit')" title="Regenerate code"><i data-lucide="refresh-cw" class="fs-sm"></i></button>
+                                        </div>
                                         <div class="invalid-feedback">Employee Code is required.</div>
                                     </div>
                                     <div class="col-md-4 mb-3">
@@ -997,6 +1058,85 @@
         setSelectChoices(uSubdepartmentChoice, [], 'Select Sub-Department (Please select Department first)', false);
     }
 
+    // Generate/Regenerate Next Employee Code
+    function regenerateEmpCode(type) {
+        var inputId = type === 'add' ? '#EmpCode' : '#uEmpCode';
+        $(inputId).val('').attr('placeholder', 'Generating...');
+        $.ajax({
+            url: '/Staff/GetNextEmployeeCode',
+            type: 'GET',
+            success: function (res) {
+                if (res.success) {
+                    $(inputId).val(res.code).attr('placeholder', '');
+                } else {
+                    $(inputId).val('').attr('placeholder', 'Error generating code');
+                }
+            },
+            error: function () {
+                $(inputId).val('').attr('placeholder', 'Error generating code');
+            }
+        });
+    }
+
+    // Trigger File Input Click
+    function triggerFileUpload(type) {
+        var uploadId = type === 'add' ? '#file-upload-add' : '#file-upload-edit';
+        $(uploadId).click();
+    }
+
+    // Toggle URL Container Visibility
+    function toggleUrlInput(type) {
+        var containerId = type === 'add' ? '#url-input-container-add' : '#url-input-container-edit';
+        $(containerId).toggleClass('d-none');
+    }
+
+    // Handles URL Text Input Change for instant preview
+    function handleUrlInput(input, type) {
+        var url = $(input).val();
+        var previewId = type === 'add' ? '#avatar-preview' : '#u-avatar-preview';
+        if (url && url.trim() !== '') {
+            $(previewId).attr('src', url);
+        } else {
+            $(previewId).attr('src', '/assets/images/users/avatar-1.jpg');
+        }
+    }
+
+    // Handle File Input Change (AJAX upload + Preview update)
+    function handleFileChange(input, type) {
+        if (input.files && input.files[0]) {
+            var file = input.files[0];
+            var formData = new FormData();
+            formData.append("file", file);
+
+            var spinnerId = type === 'add' ? '#upload-spinner' : '#u-upload-spinner';
+            var previewId = type === 'add' ? '#avatar-preview' : '#u-avatar-preview';
+            var urlInputId = type === 'add' ? '#ProfileImage' : '#uProfileImage';
+
+            $(spinnerId).removeClass('d-none');
+
+            $.ajax({
+                url: '/Staff/UploadProfileImage',
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function (res) {
+                    $(spinnerId).addClass('d-none');
+                    if (res.success) {
+                        $(previewId).attr('src', res.url);
+                        $(urlInputId).val(res.url);
+                    } else {
+                        alert("Upload failed: " + res.message);
+                    }
+                },
+                error: function () {
+                    $(spinnerId).addClass('d-none');
+                    alert("Error while uploading profile image.");
+                }
+            });
+        }
+    }
+
     function OpenAddModal() {
         // Reset form and reset choices
         $('#EmpForm')[0].reset();
@@ -1016,6 +1156,13 @@
         
         setSelectChoices(departmentChoice, [], 'Select Department (Please select Branch first)', false);
         setSelectChoices(subdepartmentChoice, [], 'Select Sub-Department (Please select Department first)', false);
+
+        // Fetch auto-generated next employee code
+        regenerateEmpCode('add');
+
+        // Reset profile avatar image and hide url container
+        $('#avatar-preview').attr('src', '/assets/images/users/avatar-1.jpg');
+        $('#url-input-container-add').addClass('d-none');
 
         // Open first tab by default
         var tabTrigger = new bootstrap.Tab(document.querySelector('#AddEmpModal button[data-bs-target="#add-personal"]'));
@@ -1131,6 +1278,14 @@
                     $("#uZipCode").val(data.ZipCode);
                     $("#uProfileImage").val(data.ProfileImage);
                     
+                    // Reset photo preview in Edit modal
+                    if (data.ProfileImage && data.ProfileImage.trim() !== '') {
+                        $('#u-avatar-preview').attr('src', data.ProfileImage);
+                    } else {
+                        $('#u-avatar-preview').attr('src', '/assets/images/users/avatar-1.jpg');
+                    }
+                    $('#url-input-container-edit').addClass('d-none');
+
                     // Toggle Active Status
                     $("#uIsActive").prop("checked", data.IsActive);
 

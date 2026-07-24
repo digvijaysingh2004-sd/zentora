@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
+using System.IO;
+using System.Web;
 using System.Web.Mvc;
 using zentoraHRMS.Models;
 
@@ -687,6 +689,61 @@ namespace zentoraHRMS.Controllers
                 }
             }
             return Json(list, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpGet]
+        public JsonResult GetNextEmployeeCode()
+        {
+            try
+            {
+                string nextCode = "EMP0001";
+                using (SqlConnection con = new SqlConnection(connectionString))
+                {
+                    string query = @"SELECT MAX(CAST(SUBSTRING(EmpCode, 4, LEN(EmpCode)) AS INT)) 
+                                     FROM EmployeeDetails 
+                                     WHERE EmpCode LIKE 'EMP%' AND ISNUMERIC(SUBSTRING(EmpCode, 4, LEN(EmpCode))) = 1";
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        con.Open();
+                        object result = cmd.ExecuteScalar();
+                        if (result != null && result != DBNull.Value)
+                        {
+                            int maxNum = Convert.ToInt32(result);
+                            nextCode = "EMP" + (maxNum + 1).ToString("D4");
+                        }
+                    }
+                }
+                return Json(new { success = true, code = nextCode }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpPost]
+        public JsonResult UploadProfileImage(HttpPostedFileBase file)
+        {
+            try
+            {
+                if (file != null && file.ContentLength > 0)
+                {
+                    string fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+                    string folderPath = Server.MapPath("~/Uploads/ProfileImages/");
+                    if (!Directory.Exists(folderPath))
+                    {
+                        Directory.CreateDirectory(folderPath);
+                    }
+                    string path = Path.Combine(folderPath, fileName);
+                    file.SaveAs(path);
+                    return Json(new { success = true, url = "/Uploads/ProfileImages/" + fileName });
+                }
+                return Json(new { success = false, message = "No file uploaded." });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
         }
         #endregion
     }

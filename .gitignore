@@ -73,3 +73,6 @@ $RECYCLE.BIN/
 # Scripts and Database Setup files (Do not share or push to public repo)
 *.ps1
 *.sql
+
+# User uploads directory (profile pictures, contracts, documents, etc.)
+**/Uploads/
