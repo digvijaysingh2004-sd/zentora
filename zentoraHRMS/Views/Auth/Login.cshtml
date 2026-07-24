@@ -127,6 +127,11 @@
                 var userIdentifier = $("#userIdentifier").val(); // can be email / phone / username
                 var password = $("#userPassword").val();
 
+                var $btn = $("#btnLogin");
+                $btn.prop("disabled", true);
+                $btn.html('<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Signing in...');
+                $("#loginError").text("");
+
                 $.ajax({
                     url: '/Auth/Login',
                     type: 'POST',
@@ -140,10 +145,14 @@
                             window.location.href = response.redirectUrl;
                         } else {
                             $("#loginError").text(response.message);
+                            $btn.prop("disabled", false);
+                            $btn.html('Sign In');
                         }
                     },
                     error: function () {
                         $("#loginError").text("An error occurred. Please try again.");
+                        $btn.prop("disabled", false);
+                        $btn.html('Sign In');
                     }
                 });
             });

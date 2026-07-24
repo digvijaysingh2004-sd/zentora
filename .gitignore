@@ -76,3 +76,4 @@ $RECYCLE.BIN/
 
 # User uploads directory (profile pictures, contracts, documents, etc.)
 **/Uploads/
+**/TempASPNetFiles/

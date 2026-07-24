@@ -23,6 +23,12 @@
         from { opacity: 0; transform: translateY(5px); }
         to { opacity: 1; transform: translateY(0); }
     }
+    /* Prevents DataTable header text from wrapping and overlapping sorting icons */
+    table.dataTable thead th {
+        white-space: nowrap !important;
+        padding-right: 28px !important;
+        position: relative;
+    }
 </style>
 
 <div class="container-fluid">
@@ -49,7 +55,7 @@
                     <table id="checkbox-select-data" class="table table-striped dt-responsive checkbox-select-datatable align-middle mb-0">
                         <thead class="thead-sm text-uppercase fs-xxs">
                             <tr>
-                                <th class="fs-sm" style="width: 1%;"></th>
+                                <th class="fs-sm" style="width: 1%;" data-orderable="false"></th>
                                 <th>Emp Code</th>
                                 <th>Name</th>
                                 <th>Phone</th>
@@ -58,7 +64,7 @@
                                 <th>Branch</th>
                                 <th>Shift</th>
                                 <th>Status</th>
-                                <th>Action</th>
+                                <th data-orderable="false">Action</th>
                             </tr>
                         </thead>
                         <tbody>

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Data;
@@ -49,6 +49,22 @@ namespace zentoraHRMS.Controllers
                         Session["RoleName"] = roleName;
                         Session["Designation"] = designation;
                         Session["RoleId"] = roleIntId;
+
+                        string profileImage = "";
+                        using (SqlConnection connImg = new SqlConnection(connectionString))
+                        {
+                            using (SqlCommand cmdImg = new SqlCommand("SELECT ProfileImage FROM EmployeeDetails WHERE Id = @Id", connImg))
+                            {
+                                cmdImg.Parameters.AddWithValue("@Id", userId);
+                                connImg.Open();
+                                object imgObj = cmdImg.ExecuteScalar();
+                                if (imgObj != null && imgObj != DBNull.Value)
+                                {
+                                    profileImage = imgObj.ToString();
+                                }
+                            }
+                        }
+                        Session["ProfileImage"] = profileImage;
 
                         // Single redirect URL
                         string redirectUrl = Url.Action("Index", "Home");

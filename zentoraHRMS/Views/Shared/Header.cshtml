@@ -272,8 +272,14 @@
             <div class="dropdown">
                 <a class="topbar-link dropdown-toggle drop-arrow-none px-2" data-bs-toggle="dropdown"
                    data-bs-offset="0,13" href="#!" aria-haspopup="false" aria-expanded="false">
-                    <img src="~/assets/images/users/user-2.jpg" width="32" class="rounded-circle d-flex"
-                         alt="user-image">
+                    @if (Session["ProfileImage"] != null && !string.IsNullOrEmpty(Session["ProfileImage"].ToString()))
+                    {
+                        <img src="@Session["ProfileImage"]" width="32" height="32" class="rounded-circle d-flex shadow-sm" style="object-fit: cover;" alt="user-image" onerror="this.onerror=null; this.src='/assets/images/users/user-2.jpg';" />
+                    }
+                    else
+                    {
+                        <img src="~/assets/images/users/user-2.jpg" width="32" height="32" class="rounded-circle d-flex shadow-sm" alt="user-image" />
+                    }
                     <div class="d-inline-block align-middle" style="padding-left: 10px;">
                         <h5 class="my-0 fw-semibold">@Session["UserName"]</h5>
                         <h6 class="my-0 text-muted">@Session["Designation"]</h6>

@@ -244,12 +244,14 @@ namespace zentoraHRMS.Controllers
         {
             try
             {
+                int newEmpId = 0;
                 using (SqlConnection con = new SqlConnection(connectionString))
                 {
                     string query = @"INSERT INTO EmployeeDetails 
                                      (EmpCode, FirstName, MiddleName, LastName, Username, PhoneCode, Phone, Email, Password, Gender, MaritalStatus, Designation, Company, Branch, Department, SubDepartment, OfficeShift, OfficeLocation, DOJ, DOL, DOB, ProfileImage, Address, State, City, Country, ZipCode, RoleType, LeaveCategory, HolidayCategory, ProjectRole, ReportingManager, AssociateReportingManager, CreateBy, IsActive, IsDeleted, CreatedDate, SystemAddedOn) 
                                      VALUES 
-                                     (@EmpCode, @FirstName, @MiddleName, @LastName, @Username, @PhoneCode, @Phone, @Email, @Password, @Gender, @MaritalStatus, @Designation, @Company, @Branch, @Department, @SubDepartment, @OfficeShift, @OfficeLocation, @DOJ, @DOL, @DOB, @ProfileImage, @Address, @State, @City, @Country, @ZipCode, @RoleType, @LeaveCategory, @HolidayCategory, @ProjectRole, @ReportingManager, @AssociateReportingManager, 1, 1, 0, GETDATE(), GETDATE())";
+                                     (@EmpCode, @FirstName, @MiddleName, @LastName, @Username, @PhoneCode, @Phone, @Email, @Password, @Gender, @MaritalStatus, @Designation, @Company, @Branch, @Department, @SubDepartment, @OfficeShift, @OfficeLocation, @DOJ, @DOL, @DOB, @ProfileImage, @Address, @State, @City, @Country, @ZipCode, @RoleType, @LeaveCategory, @HolidayCategory, @ProjectRole, @ReportingManager, @AssociateReportingManager, 1, 1, 0, GETDATE(), GETDATE());
+                                     SELECT SCOPE_IDENTITY();";
                     using (SqlCommand cmd = new SqlCommand(query, con))
                     {
                         cmd.Parameters.AddWithValue("@EmpCode", model.EmpCode ?? "");
@@ -279,7 +281,7 @@ namespace zentoraHRMS.Controllers
                         cmd.Parameters.AddWithValue("@City", model.City ?? "");
                         cmd.Parameters.AddWithValue("@Country", model.Country ?? "");
                         cmd.Parameters.AddWithValue("@ZipCode", model.ZipCode ?? "");
-                        cmd.Parameters.AddWithValue("@RoleType", (object)model.RoleType ?? 1);
+                        cmd.Parameters.AddWithValue("@RoleType", (object)model.RoleType ?? 5);
                         cmd.Parameters.AddWithValue("@LeaveCategory", model.LeaveCategory ?? "");
                         cmd.Parameters.AddWithValue("@HolidayCategory", model.HolidayCategory ?? "");
                         cmd.Parameters.AddWithValue("@ProjectRole", model.ProjectRole ?? "");
@@ -287,7 +289,28 @@ namespace zentoraHRMS.Controllers
                         cmd.Parameters.AddWithValue("@AssociateReportingManager", (object)model.AssociateReportingManager ?? 0);
                         
                         con.Open();
-                        cmd.ExecuteNonQuery();
+                        newEmpId = Convert.ToInt32(cmd.ExecuteScalar());
+                    }
+
+                    // Sync to LoginDetails
+                    if (newEmpId > 0)
+                    {
+                        string syncQuery = @"INSERT INTO LoginDetails 
+                                             (EmpId, FullName, Username, Password, RoleType, IsActive, IsDeleted, CreatedDate, CreatedBy, Phone, Email, LastLogin, SystemAddedOn) 
+                                             VALUES 
+                                             (@EmpId, @FullName, @Username, @Password, @RoleType, 1, 0, GETDATE(), 1, @Phone, @Email, GETDATE(), GETDATE())";
+                        using (SqlCommand syncCmd = new SqlCommand(syncQuery, con))
+                        {
+                            string fullName = (model.FirstName ?? "") + " " + (string.IsNullOrEmpty(model.MiddleName) ? "" : model.MiddleName + " ") + (model.LastName ?? "");
+                            syncCmd.Parameters.AddWithValue("@EmpId", newEmpId);
+                            syncCmd.Parameters.AddWithValue("@FullName", fullName.Trim());
+                            syncCmd.Parameters.AddWithValue("@Username", model.Username ?? "");
+                            syncCmd.Parameters.AddWithValue("@Password", model.Password ?? "123456");
+                            syncCmd.Parameters.AddWithValue("@RoleType", (model.RoleType ?? 5).ToString());
+                            syncCmd.Parameters.AddWithValue("@Phone", model.Phone ?? "");
+                            syncCmd.Parameters.AddWithValue("@Email", model.Email ?? "");
+                            syncCmd.ExecuteNonQuery();
+                        }
                     }
                 }
                 return Json(new { success = true, message = "Employee saved successfully!" });
@@ -406,7 +429,7 @@ namespace zentoraHRMS.Controllers
                         cmd.Parameters.AddWithValue("@City", model.City ?? "");
                         cmd.Parameters.AddWithValue("@Country", model.Country ?? "");
                         cmd.Parameters.AddWithValue("@ZipCode", model.ZipCode ?? "");
-                        cmd.Parameters.AddWithValue("@RoleType", (object)model.RoleType ?? 1);
+                        cmd.Parameters.AddWithValue("@RoleType", (object)model.RoleType ?? 5);
                         cmd.Parameters.AddWithValue("@LeaveCategory", model.LeaveCategory ?? "");
                         cmd.Parameters.AddWithValue("@HolidayCategory", model.HolidayCategory ?? "");
                         cmd.Parameters.AddWithValue("@ProjectRole", model.ProjectRole ?? "");
@@ -416,6 +439,62 @@ namespace zentoraHRMS.Controllers
                         
                         con.Open();
                         cmd.ExecuteNonQuery();
+                    }
+
+                    // Sync to LoginDetails (UPSERT style)
+                    string checkQuery = "SELECT COUNT(*) FROM LoginDetails WHERE EmpId = @EmpId AND IsDeleted = 0";
+                    int userCount = 0;
+                    using (SqlCommand checkCmd = new SqlCommand(checkQuery, con))
+                    {
+                        checkCmd.Parameters.AddWithValue("@EmpId", model.Id);
+                        userCount = Convert.ToInt32(checkCmd.ExecuteScalar());
+                    }
+
+                    string fullName = (model.FirstName ?? "") + " " + (string.IsNullOrEmpty(model.MiddleName) ? "" : model.MiddleName + " ") + (model.LastName ?? "");
+                    fullName = fullName.Trim();
+
+                    if (userCount > 0)
+                    {
+                        string updateQuery = @"UPDATE LoginDetails SET 
+                                               FullName = @FullName, 
+                                               Username = @Username, 
+                                               Password = @Password, 
+                                               RoleType = @RoleType, 
+                                               IsActive = @IsActive, 
+                                               Phone = @Phone, 
+                                               Email = @Email 
+                                               WHERE EmpId = @EmpId AND IsDeleted = 0";
+                        using (SqlCommand updateCmd = new SqlCommand(updateQuery, con))
+                        {
+                            updateCmd.Parameters.AddWithValue("@EmpId", model.Id);
+                            updateCmd.Parameters.AddWithValue("@FullName", fullName);
+                            updateCmd.Parameters.AddWithValue("@Username", model.Username ?? "");
+                            updateCmd.Parameters.AddWithValue("@Password", model.Password ?? "123456");
+                            updateCmd.Parameters.AddWithValue("@RoleType", (model.RoleType ?? 5).ToString());
+                            updateCmd.Parameters.AddWithValue("@IsActive", model.IsActive ? 1 : 0);
+                            updateCmd.Parameters.AddWithValue("@Phone", model.Phone ?? "");
+                            updateCmd.Parameters.AddWithValue("@Email", model.Email ?? "");
+                            updateCmd.ExecuteNonQuery();
+                        }
+                    }
+                    else
+                    {
+                        string insertQuery = @"INSERT INTO LoginDetails 
+                                               (EmpId, FullName, Username, Password, RoleType, IsActive, IsDeleted, CreatedDate, CreatedBy, Phone, Email, LastLogin, SystemAddedOn) 
+                                               VALUES 
+                                               (@EmpId, @FullName, @Username, @Password, @RoleType, @IsActive, 0, GETDATE(), 1, @Phone, @Email, GETDATE(), GETDATE())";
+                        using (SqlCommand insertCmd = new SqlCommand(insertQuery, con))
+                        {
+                            insertCmd.Parameters.AddWithValue("@EmpId", model.Id);
+                            insertCmd.Parameters.AddWithValue("@FullName", fullName);
+                            insertCmd.Parameters.AddWithValue("@Username", model.Username ?? "");
+                            insertCmd.Parameters.AddWithValue("@Password", model.Password ?? "123456");
+                            insertCmd.Parameters.AddWithValue("@RoleType", (model.RoleType ?? 5).ToString());
+                            insertCmd.Parameters.AddWithValue("@IsActive", model.IsActive ? 1 : 0);
+                            insertCmd.Parameters.AddWithValue("@Phone", model.Phone ?? "");
+                            insertCmd.Parameters.AddWithValue("@Email", model.Email ?? "");
+                            insertCmd.ExecuteNonQuery();
+                        }
                     }
                 }
                 return Json(new { success = true });
@@ -439,6 +518,14 @@ namespace zentoraHRMS.Controllers
                         cmd.Parameters.AddWithValue("@Id", id);
                         con.Open();
                         cmd.ExecuteNonQuery();
+                    }
+
+                    // Soft delete user in LoginDetails as well
+                    string syncQuery = "UPDATE LoginDetails SET IsDeleted = 1 WHERE EmpId = @EmpId";
+                    using (SqlCommand syncCmd = new SqlCommand(syncQuery, con))
+                    {
+                        syncCmd.Parameters.AddWithValue("@EmpId", id);
+                        syncCmd.ExecuteNonQuery();
                     }
                 }
                 return Json(new { success = true });
