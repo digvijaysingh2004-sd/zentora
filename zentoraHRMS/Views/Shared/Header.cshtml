@@ -278,7 +278,25 @@
                     }
                     else
                     {
-                        <img src="~/assets/images/users/user-2.jpg" width="32" height="32" class="rounded-circle d-flex shadow-sm" alt="user-image" />
+                        var userName = Session["UserName"]?.ToString() ?? "";
+                        var initials = "";
+                        if (!string.IsNullOrEmpty(userName))
+                        {
+                            var parts = userName.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                            if (parts.Length > 0)
+                            {
+                                initials += parts[0][0];
+                                if (parts.Length > 1)
+                                {
+                                    initials += parts[parts.Length - 1][0];
+                                }
+                            }
+                        }
+                        initials = initials.ToUpper();
+
+                        <div class="rounded-circle bg-primary-subtle text-primary d-inline-flex align-items-center justify-content-center shadow-sm fw-semibold align-middle" style="width: 32px; height: 32px; font-size: 11px; min-width: 32px;">
+                            @initials
+                        </div>
                     }
                     <div class="d-inline-block align-middle" style="padding-left: 10px;">
                         <h5 class="my-0 fw-semibold">@Session["UserName"]</h5>
