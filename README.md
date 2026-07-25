@@ -73,6 +73,16 @@ zentora/
 
 ---
 
+## 📖 System Documentation
+
+We maintain detailed documentation inside the [docs/](file:///C:/digvijayProjects/Projects/zentora/docs) directory to help developers understand the architecture and custom features:
+
+*   **[Documentation Index](file:///C:/digvijayProjects/Projects/zentora/docs/README.md)**: Central landing point for all developer guides.
+*   **[System Architecture](file:///C:/digvijayProjects/Projects/zentora/docs/architecture/ARCHITECTURE.md)**: Deep dive into the project's layered design, SQL schema, routing flows, and security filters.
+*   **[Development & Sprints](file:///C:/digvijayProjects/Projects/zentora/docs/development/MASTER_CONTEXT.md)**: Context, roadmap, rules, coding standard guides, and workflows for contributing.
+
+---
+
 ## ⚙️ Local Development Setup
 
 Follow these steps to configure and run Zentora HRMS on your local workstation.
