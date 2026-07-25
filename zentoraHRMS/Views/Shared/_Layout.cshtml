@@ -153,6 +153,15 @@
             "hideMethod": "fadeOut"
         };
     </script>
+    @if (Session["ErrorMessage"] != null)
+    {
+        <script>
+            $(document).ready(function () {
+                toastr.error("@Session["ErrorMessage"]");
+            });
+        </script>
+        Session["ErrorMessage"] = null;
+    }
     <script>
         $(document).ready(function () {
             // 1. Sleek dynamic page header & breadcrumb transformation
