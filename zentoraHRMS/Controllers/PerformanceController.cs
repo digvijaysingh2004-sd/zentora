@@ -66,6 +66,8 @@ namespace zentoraHRMS.Controllers
                             IndicatorName NVARCHAR(100) NOT NULL,
                             Description NVARCHAR(MAX) NULL,
                             IsActive BIT NOT NULL DEFAULT 1,
+                            MeasurementUnit NVARCHAR(100) NULL,
+                            TargetValue NVARCHAR(100) NULL,
                             CreatedAt DATETIME NULL DEFAULT GETDATE(),
                             UpdatedAt DATETIME NULL,
                             CreatedBy NVARCHAR(100) NULL,
@@ -75,12 +77,24 @@ namespace zentoraHRMS.Controllers
                         );
                         
                         -- Seed some initial data
-                        INSERT INTO dbo.Indicators (IndicatorCategoryId, IndicatorName, Description, IsActive, CreatedBy) VALUES
-                        (1, N'Coding Quality', N'Adherence to programming standards and code review practices.', 1, N'System'),
-                        (1, N'Problem Solving', N'Ability to analyze issues and implement efficient technical solutions.', 1, N'System'),
-                        (2, N'Communication', N'Effective verbal and written communication with peers and clients.', 1, N'System'),
-                        (2, N'Team Collaboration', N'Supporting other team members and contributing to team goals.', 1, N'System'),
-                        (3, N'Project Planning', N'Estimation accuracy and task coordination.', 1, N'System');
+                        INSERT INTO dbo.Indicators (IndicatorCategoryId, IndicatorName, Description, IsActive, MeasurementUnit, TargetValue, CreatedBy) VALUES
+                        (1, N'Coding Quality', N'Adherence to programming standards and code review practices.', 1, N'Percentage', N'95%', N'System'),
+                        (1, N'Problem Solving', N'Ability to analyze issues and implement efficient technical solutions.', 1, N'Score', N'4.5/5', N'System'),
+                        (2, N'Communication', N'Effective verbal and written communication with peers and clients.', 1, N'Score', N'4.0/5', N'System'),
+                        (2, N'Team Collaboration', N'Supporting other team members and contributing to team goals.', 1, N'Score', N'4.5/5', N'System'),
+                        (3, N'Project Planning', N'Estimation accuracy and task coordination.', 1, N'Percentage', N'90%', N'System');
+                    END
+                    ELSE
+                    BEGIN
+                        -- Migration: add columns if they exist on the table but not yet in database
+                        IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Indicators' AND COLUMN_NAME = 'MeasurementUnit')
+                        BEGIN
+                            ALTER TABLE dbo.Indicators ADD MeasurementUnit NVARCHAR(100) NULL;
+                        END
+                        IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Indicators' AND COLUMN_NAME = 'TargetValue')
+                        BEGIN
+                            ALTER TABLE dbo.Indicators ADD TargetValue NVARCHAR(100) NULL;
+                        END
                     END";
 
                 using (SqlCommand cmd = new SqlCommand(createIndicatorsQuery, con))
@@ -246,7 +260,7 @@ namespace zentoraHRMS.Controllers
             using (SqlConnection con = new SqlConnection(connectionString))
             {
                 string query = @"SELECT I.IndicatorId, I.IndicatorCategoryId, C.CategoryName, I.IndicatorName, I.Description, 
-                                        I.IsActive, I.CreatedAt, I.UpdatedAt, I.CreatedBy, I.UpdatedBy 
+                                        I.IsActive, I.MeasurementUnit, I.TargetValue, I.CreatedAt, I.UpdatedAt, I.CreatedBy, I.UpdatedBy 
                                  FROM Indicators I
                                  INNER JOIN IndicatorCategories C ON I.IndicatorCategoryId = C.IndicatorCategoryId
                                  ORDER BY I.IndicatorId DESC";
@@ -265,6 +279,8 @@ namespace zentoraHRMS.Controllers
                                 IndicatorName = reader["IndicatorName"].ToString(),
                                 Description = reader["Description"].ToString(),
                                 IsActive = Convert.ToBoolean(reader["IsActive"]),
+                                MeasurementUnit = reader["MeasurementUnit"].ToString(),
+                                TargetValue = reader["TargetValue"].ToString(),
                                 CreatedAt = reader["CreatedAt"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(reader["CreatedAt"]) : null,
                                 UpdatedAt = reader["UpdatedAt"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(reader["UpdatedAt"]) : null,
                                 CreatedBy = reader["CreatedBy"].ToString(),
@@ -285,14 +301,16 @@ namespace zentoraHRMS.Controllers
                 string creator = Session["UserName"]?.ToString() ?? "System";
                 using (SqlConnection con = new SqlConnection(connectionString))
                 {
-                    string query = @"INSERT INTO Indicators (IndicatorCategoryId, IndicatorName, Description, IsActive, CreatedAt, CreatedBy) 
-                                     VALUES (@IndicatorCategoryId, @IndicatorName, @Description, @IsActive, GETDATE(), @CreatedBy)";
+                    string query = @"INSERT INTO Indicators (IndicatorCategoryId, IndicatorName, Description, IsActive, MeasurementUnit, TargetValue, CreatedAt, CreatedBy) 
+                                     VALUES (@IndicatorCategoryId, @IndicatorName, @Description, @IsActive, @MeasurementUnit, @TargetValue, GETDATE(), @CreatedBy)";
                     using (SqlCommand cmd = new SqlCommand(query, con))
                     {
                         cmd.Parameters.AddWithValue("@IndicatorCategoryId", model.IndicatorCategoryId);
                         cmd.Parameters.AddWithValue("@IndicatorName", model.IndicatorName ?? "");
                         cmd.Parameters.AddWithValue("@Description", model.Description ?? "");
                         cmd.Parameters.AddWithValue("@IsActive", model.IsActive);
+                        cmd.Parameters.AddWithValue("@MeasurementUnit", model.MeasurementUnit ?? "");
+                        cmd.Parameters.AddWithValue("@TargetValue", model.TargetValue ?? "");
                         cmd.Parameters.AddWithValue("@CreatedBy", creator);
                         con.Open();
                         cmd.ExecuteNonQuery();
@@ -311,7 +329,7 @@ namespace zentoraHRMS.Controllers
             IndicatorModel model = null;
             using (SqlConnection con = new SqlConnection(connectionString))
             {
-                string query = "SELECT IndicatorId, IndicatorCategoryId, IndicatorName, Description, IsActive FROM Indicators WHERE IndicatorId = @IndicatorId";
+                string query = "SELECT IndicatorId, IndicatorCategoryId, IndicatorName, Description, IsActive, MeasurementUnit, TargetValue FROM Indicators WHERE IndicatorId = @IndicatorId";
                 using (SqlCommand cmd = new SqlCommand(query, con))
                 {
                     cmd.Parameters.AddWithValue("@IndicatorId", id);
@@ -326,7 +344,9 @@ namespace zentoraHRMS.Controllers
                                 IndicatorCategoryId = Convert.ToInt32(reader["IndicatorCategoryId"]),
                                 IndicatorName = reader["IndicatorName"].ToString(),
                                 Description = reader["Description"].ToString(),
-                                IsActive = Convert.ToBoolean(reader["IsActive"])
+                                IsActive = Convert.ToBoolean(reader["IsActive"]),
+                                MeasurementUnit = reader["MeasurementUnit"].ToString(),
+                                TargetValue = reader["TargetValue"].ToString()
                             };
                         }
                     }
@@ -346,6 +366,7 @@ namespace zentoraHRMS.Controllers
                     string query = @"UPDATE Indicators 
                                      SET IndicatorCategoryId = @IndicatorCategoryId, IndicatorName = @IndicatorName, 
                                          Description = @Description, IsActive = @IsActive, 
+                                         MeasurementUnit = @MeasurementUnit, TargetValue = @TargetValue,
                                          UpdatedAt = GETDATE(), UpdatedBy = @UpdatedBy 
                                      WHERE IndicatorId = @IndicatorId";
                     using (SqlCommand cmd = new SqlCommand(query, con))
@@ -355,6 +376,8 @@ namespace zentoraHRMS.Controllers
                         cmd.Parameters.AddWithValue("@IndicatorName", model.IndicatorName ?? "");
                         cmd.Parameters.AddWithValue("@Description", model.Description ?? "");
                         cmd.Parameters.AddWithValue("@IsActive", model.IsActive);
+                        cmd.Parameters.AddWithValue("@MeasurementUnit", model.MeasurementUnit ?? "");
+                        cmd.Parameters.AddWithValue("@TargetValue", model.TargetValue ?? "");
                         cmd.Parameters.AddWithValue("@UpdatedBy", updater);
                         con.Open();
                         cmd.ExecuteNonQuery();

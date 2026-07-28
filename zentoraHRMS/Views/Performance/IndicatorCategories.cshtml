@@ -32,8 +32,6 @@
                                 <th>Category Name</th>
                                 <th>Description</th>
                                 <th>Status</th>
-                                <th>Created By</th>
-                                <th>Created Date</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -49,8 +47,6 @@
                                         @if (c.IsActive) { <span class="badge bg-success-subtle text-success">Active</span> }
                                         else { <span class="badge bg-danger-subtle text-danger">Inactive</span> }
                                     </td>
-                                    <td>@c.CreatedBy</td>
-                                    <td>@(c.CreatedAt.HasValue ? c.CreatedAt.Value.ToString("yyyy-MM-dd HH:mm") : "")</td>
                                     <td>
                                         <a onclick="UpdateCategory(@c.IndicatorCategoryId)" class="btn btn-sm btn-soft-info mt-1" title="Update"><i data-lucide="square-pen"></i></a>
                                         <a onclick="DeleteCategory(@c.IndicatorCategoryId)" class="btn btn-sm btn-soft-danger mt-1" title="Delete"><i data-lucide="trash-2"></i></a>

@@ -31,10 +31,10 @@
                                 <th>Indicator ID</th>
                                 <th>Category</th>
                                 <th>Indicator Name</th>
+                                <th>Measurement Unit</th>
+                                <th>Target Value</th>
                                 <th>Description</th>
                                 <th>Status</th>
-                                <th>Created By</th>
-                                <th>Created Date</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -46,13 +46,13 @@
                                     <td>@c.IndicatorId</td>
                                     <td>@c.CategoryName</td>
                                     <td>@c.IndicatorName</td>
+                                    <td>@c.MeasurementUnit</td>
+                                    <td>@c.TargetValue</td>
                                     <td>@c.Description</td>
                                     <td>
                                         @if (c.IsActive) { <span class="badge bg-success-subtle text-success">Active</span> }
                                         else { <span class="badge bg-danger-subtle text-danger">Inactive</span> }
                                     </td>
-                                    <td>@c.CreatedBy</td>
-                                    <td>@(c.CreatedAt.HasValue ? c.CreatedAt.Value.ToString("yyyy-MM-dd HH:mm") : "")</td>
                                     <td>
                                         <a onclick="UpdateIndicator(@c.IndicatorId)" class="btn btn-sm btn-soft-info mt-1" title="Update"><i data-lucide="square-pen"></i></a>
                                         <a onclick="DeleteIndicator(@c.IndicatorId)" class="btn btn-sm btn-soft-danger mt-1" title="Delete"><i data-lucide="trash-2"></i></a>
@@ -85,6 +85,14 @@
                         <div class="mb-3">
                             <label for="IndicatorName" class="form-label">Indicator Name <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="IndicatorName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="MeasurementUnit" class="form-label">Measurement Unit</label>
+                            <input type="text" class="form-control" id="MeasurementUnit" placeholder="e.g. Percentage, Score, Quantity">
+                        </div>
+                        <div class="mb-3">
+                            <label for="TargetValue" class="form-label">Target Value</label>
+                            <input type="text" class="form-control" id="TargetValue" placeholder="e.g. 95%, 4.5/5, 100">
                         </div>
                         <div class="mb-3">
                             <label for="Description" class="form-label">Description</label>
@@ -129,6 +137,14 @@
                             <input type="text" class="form-control" id="uIndicatorName" required>
                         </div>
                         <div class="mb-3">
+                            <label for="uMeasurementUnit" class="form-label">Measurement Unit</label>
+                            <input type="text" class="form-control" id="uMeasurementUnit" placeholder="e.g. Percentage, Score, Quantity">
+                        </div>
+                        <div class="mb-3">
+                            <label for="uTargetValue" class="form-label">Target Value</label>
+                            <input type="text" class="form-control" id="uTargetValue" placeholder="e.g. 95%, 4.5/5, 100">
+                        </div>
+                        <div class="mb-3">
                             <label for="uDescription" class="form-label">Description</label>
                             <textarea class="form-control" id="uDescription" rows="3"></textarea>
                         </div>
@@ -159,6 +175,8 @@
             var formData = {
                 IndicatorCategoryId: $("#IndicatorCategoryId").val(),
                 IndicatorName: $("#IndicatorName").val(),
+                MeasurementUnit: $("#MeasurementUnit").val(),
+                TargetValue: $("#TargetValue").val(),
                 Description: $("#Description").val(),
                 IsActive: $("#IsActive").val() === "true"
             };
@@ -183,6 +201,8 @@
                 IndicatorId: $("#update_id").val(),
                 IndicatorCategoryId: $("#uIndicatorCategoryId").val(),
                 IndicatorName: $("#uIndicatorName").val(),
+                MeasurementUnit: $("#uMeasurementUnit").val(),
+                TargetValue: $("#uTargetValue").val(),
                 Description: $("#uDescription").val(),
                 IsActive: $("#uIsActive").val() === "true"
             };
@@ -232,6 +252,8 @@
                     $("#update_id").val(data.IndicatorId);
                     $("#uIndicatorCategoryId").val(data.IndicatorCategoryId);
                     $("#uIndicatorName").val(data.IndicatorName);
+                    $("#uMeasurementUnit").val(data.MeasurementUnit);
+                    $("#uTargetValue").val(data.TargetValue);
                     $("#uDescription").val(data.Description);
                     $("#uIsActive").val(data.IsActive.toString());
                     $("#UpdateIndicatorModal").modal("show");
