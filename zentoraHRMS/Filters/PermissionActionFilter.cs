@@ -140,8 +140,8 @@ namespace zentoraHRMS.Filters
                         ? lastSegment.Substring(0, lastSegment.Length - 1)
                         : lastSegment;
 
-                    if (action.Contains(lastSegment, StringComparison.OrdinalIgnoreCase) || 
-                        action.Contains(singular, StringComparison.OrdinalIgnoreCase))
+                    if (action.IndexOf(lastSegment, StringComparison.OrdinalIgnoreCase) >= 0 || 
+                        action.IndexOf(singular, StringComparison.OrdinalIgnoreCase) >= 0)
                     {
                         return route;
                     }
