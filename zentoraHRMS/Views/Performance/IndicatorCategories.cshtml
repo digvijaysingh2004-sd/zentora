@@ -80,7 +80,7 @@
                         </div>
                         <div class="mb-3">
                             <label for="IsActive" class="form-label">Status</label>
-                            <select class="form-select" id="IsActive">
+                            <select class="form-select" id="IsActive" data-choices>
                                 <option value="true" selected>Active</option>
                                 <option value="false">Inactive</option>
                             </select>
@@ -116,7 +116,7 @@
                         </div>
                         <div class="mb-3">
                             <label for="uIsActive" class="form-label">Status</label>
-                            <select class="form-select" id="uIsActive">
+                            <select class="form-select" id="uIsActive" data-choices>
                                 <option value="true">Active</option>
                                 <option value="false">Inactive</option>
                             </select>
@@ -134,6 +134,14 @@
 
 <script>
     $(document).ready(function () {
+        $("#AddCategory").on("show.bs.modal", function () {
+            $("#CategoryForm")[0].reset();
+            var elStatus = document.getElementById("IsActive");
+            if (elStatus && elStatus.choicesInstance) {
+                elStatus.choicesInstance.setChoiceByValue("true");
+            }
+        });
+
         $("#CategoryForm").on("submit", function (e) {
             e.preventDefault();
             var formData = {
@@ -190,7 +198,14 @@
                     $("#update_id").val(data.IndicatorCategoryId);
                     $("#uCategoryName").val(data.CategoryName);
                     $("#uDescription").val(data.Description);
-                    $("#uIsActive").val(data.IsActive.toString());
+                    
+                    var elStatus = document.getElementById("uIsActive");
+                    if (elStatus && elStatus.choicesInstance) {
+                        elStatus.choicesInstance.setChoiceByValue(data.IsActive.toString());
+                    } else {
+                        $("#uIsActive").val(data.IsActive.toString());
+                    }
+                    
                     $("#UpdateCategoryModal").modal("show");
                 }
             }

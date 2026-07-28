@@ -78,7 +78,7 @@
                     <div class="modal-body">
                         <div class="mb-3">
                             <label for="IndicatorCategoryId" class="form-label">Indicator Category <span class="text-danger">*</span></label>
-                            <select class="form-select" id="IndicatorCategoryId" required>
+                            <select class="form-select" id="IndicatorCategoryId" data-choices required>
                                 <option value="">Select Category</option>
                             </select>
                         </div>
@@ -100,7 +100,7 @@
                         </div>
                         <div class="mb-3">
                             <label for="IsActive" class="form-label">Status</label>
-                            <select class="form-select" id="IsActive">
+                            <select class="form-select" id="IsActive" data-choices>
                                 <option value="true" selected>Active</option>
                                 <option value="false">Inactive</option>
                             </select>
@@ -128,7 +128,7 @@
                         <input type="hidden" id="update_id" />
                         <div class="mb-3">
                             <label for="uIndicatorCategoryId" class="form-label">Indicator Category <span class="text-danger">*</span></label>
-                            <select class="form-select" id="uIndicatorCategoryId" required>
+                            <select class="form-select" id="uIndicatorCategoryId" data-choices required>
                                 <option value="">Select Category</option>
                             </select>
                         </div>
@@ -150,7 +150,7 @@
                         </div>
                         <div class="mb-3">
                             <label for="uIsActive" class="form-label">Status</label>
-                            <select class="form-select" id="uIsActive">
+                            <select class="form-select" id="uIsActive" data-choices>
                                 <option value="true">Active</option>
                                 <option value="false">Inactive</option>
                             </select>
@@ -169,6 +169,18 @@
 <script>
     $(document).ready(function () {
         LoadCategories();
+
+        $("#AddIndicator").on("show.bs.modal", function () {
+            $("#IndicatorForm")[0].reset();
+            var elCategory = document.getElementById("IndicatorCategoryId");
+            if (elCategory && elCategory.choicesInstance) {
+                elCategory.choicesInstance.setChoiceByValue("");
+            }
+            var elStatus = document.getElementById("IsActive");
+            if (elStatus && elStatus.choicesInstance) {
+                elStatus.choicesInstance.setChoiceByValue("true");
+            }
+        });
 
         $("#IndicatorForm").on("submit", function (e) {
             e.preventDefault();
@@ -250,12 +262,25 @@
             success: function (data) {
                 if (data) {
                     $("#update_id").val(data.IndicatorId);
-                    $("#uIndicatorCategoryId").val(data.IndicatorCategoryId);
                     $("#uIndicatorName").val(data.IndicatorName);
                     $("#uMeasurementUnit").val(data.MeasurementUnit);
                     $("#uTargetValue").val(data.TargetValue);
                     $("#uDescription").val(data.Description);
-                    $("#uIsActive").val(data.IsActive.toString());
+                    
+                    var elCategory = document.getElementById("uIndicatorCategoryId");
+                    if (elCategory && elCategory.choicesInstance) {
+                        elCategory.choicesInstance.setChoiceByValue(data.IndicatorCategoryId.toString());
+                    } else {
+                        $("#uIndicatorCategoryId").val(data.IndicatorCategoryId);
+                    }
+                    
+                    var elStatus = document.getElementById("uIsActive");
+                    if (elStatus && elStatus.choicesInstance) {
+                        elStatus.choicesInstance.setChoiceByValue(data.IsActive.toString());
+                    } else {
+                        $("#uIsActive").val(data.IsActive.toString());
+                    }
+
                     $("#UpdateIndicatorModal").modal("show");
                 }
             }

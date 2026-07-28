@@ -1,4 +1,4 @@
-﻿@model zentoraHRMS.Models.RolePageViewModel
+@model zentoraHRMS.Models.RolePageViewModel
 @{
     ViewBag.Title = "Roles";
 }
@@ -79,7 +79,7 @@
                         <h4 class="modal-title"> Add Role Details </h4>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <div class="modal-body">
+                    <div class="modal-body modal-body-static">
                         <ul class="nav nav-pills mb-3 justify-content-center" id="RoleTab" role="tablist">
                             <li class="nav-item" role="presentation">
                                 <button class="btn btn-sm btn-soft-secondary me-1 mb-1 rounded-1 active" data-bs-toggle="tab" data-bs-target="#RoleInfo" type="button" role="tab"> Role Info </button>
@@ -189,7 +189,7 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="reset" id="reset-add-form" class="btn btn-soft-warning"> Reset </button>
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
                         <button type="submit" class="btn btn-soft-primary"> Save Role </button>
                     </div>
                 </form>
@@ -206,7 +206,7 @@
                         <h4 class="modal-title"> Update Role Details </h4>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <div class="modal-body">
+                    <div class="modal-body modal-body-static">
                         <ul class="nav nav-pills mb-3 justify-content-center" role="tablist">
                             <li class="nav-item" role="presentation">
                                 <button class="btn btn-sm btn-soft-secondary me-1 mb-1 rounded-1 active" data-bs-toggle="tab" data-bs-target="#UpdateRoleInfo" type="button" role="tab"> Role Info </button>
@@ -316,7 +316,7 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-soft-secondary" data-bs-dismiss="modal"> Cancel </button>
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
                         <button type="submit" class="btn btn-soft-primary"> Update Role </button>
                     </div>
                 </form>

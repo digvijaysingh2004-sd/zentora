@@ -31,7 +31,7 @@
     <!-- Icon css -->
     <script src="~/assets/plugins/lucide/lucide.min.js"></script>
 
-    <!-- Choices Validation Styling -->
+    <!-- Choices Validation & Premium Glassmorphic Badge Styling -->
     <style>
         select.is-invalid + .choices .choices__inner {
             border-color: #dc3545 !important;
@@ -41,6 +41,78 @@
         }
         select.is-invalid ~ .invalid-feedback {
             display: block !important;
+        }
+
+        /* Global Glassmorphic Badge Customization */
+        .badge {
+            font-size: 0.70em !important;
+            padding: 0.35em 0.6em !important;
+            font-weight: 600 !important;
+            border-radius: 4px !important;
+            backdrop-filter: blur(4px) !important;
+            display: inline-block !important;
+            text-transform: capitalize !important;
+        }
+
+        /* Success Status Badges */
+        .badge.bg-success, 
+        .badge.badge-soft-success, 
+        .badge.bg-success-subtle,
+        .badge.badge-success,
+        .glass-badge-success {
+            border: 1px solid rgba(46, 204, 113, 0.4) !important;
+            background-color: rgba(46, 204, 113, 0.15) !important;
+            color: #1b7a43 !important;
+        }
+
+        /* Danger Status Badges */
+        .badge.bg-danger, 
+        .badge.badge-soft-danger, 
+        .badge.bg-danger-subtle,
+        .badge.badge-danger,
+        .glass-badge-danger {
+            border: 1px solid rgba(231, 76, 60, 0.4) !important;
+            background-color: rgba(231, 76, 60, 0.15) !important;
+            color: #b02a1e !important;
+        }
+
+        /* Warning Status Badges */
+        .badge.bg-warning, 
+        .badge.badge-soft-warning, 
+        .badge.bg-warning-subtle,
+        .badge.badge-warning {
+            border: 1px solid rgba(241, 196, 15, 0.4) !important;
+            background-color: rgba(241, 196, 15, 0.15) !important;
+            color: #9a7d0a !important;
+        }
+
+        /* Info Status Badges */
+        .badge.bg-info, 
+        .badge.badge-soft-info, 
+        .badge.bg-info-subtle,
+        .badge.badge-info {
+            border: 1px solid rgba(52, 152, 219, 0.4) !important;
+            background-color: rgba(52, 152, 219, 0.15) !important;
+            color: #1f618d !important;
+        }
+
+        /* Primary & Default Badges */
+        .badge.bg-primary, 
+        .badge.badge-soft-primary, 
+        .badge.bg-primary-subtle,
+        .badge.badge-primary,
+        .badge.badge-default {
+            border: 1px solid rgba(155, 89, 182, 0.4) !important;
+            background-color: rgba(155, 89, 182, 0.15) !important;
+            color: #6c3483 !important;
+        }
+
+        /* Static Sizing and Scroll for Large Tabbed Modals */
+        .modal-body-static {
+            min-height: 400px !important;
+            max-height: 60vh !important;
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
         }
     </style>
 </head>
