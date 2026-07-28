@@ -1,14 +1,428 @@
+using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Data;
+using System.Data.SqlClient;
 using System.Web.Mvc;
+using zentoraHRMS.Models;
 
 namespace zentoraHRMS.Controllers
 {
     public class PerformanceController : Controller
     {
-        public ActionResult IndicatorCategories() { return View(); }
-        public ActionResult Indicators() { return View(); }
+        private string connectionString = ConfigurationManager.ConnectionStrings["Zentora"].ConnectionString;
+
+        protected override void OnActionExecuting(ActionExecutingContext filterContext)
+        {
+            Response.Cache.SetExpires(DateTime.UtcNow.AddDays(-1));
+            Response.Cache.SetCacheability(System.Web.HttpCacheability.NoCache);
+            Response.Cache.SetNoStore();
+
+            EnsureTablesExist();
+
+            base.OnActionExecuting(filterContext);
+        }
+
+        private void EnsureTablesExist()
+        {
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                con.Open();
+
+                // 1. Create IndicatorCategories Table if not exists
+                string createCategoriesQuery = @"
+                    IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'IndicatorCategories')
+                    BEGIN
+                        CREATE TABLE dbo.IndicatorCategories (
+                            IndicatorCategoryId INT IDENTITY(1,1) PRIMARY KEY,
+                            CategoryName NVARCHAR(100) NOT NULL,
+                            Description NVARCHAR(MAX) NULL,
+                            IsActive BIT NOT NULL DEFAULT 1,
+                            CreatedAt DATETIME NULL DEFAULT GETDATE(),
+                            UpdatedAt DATETIME NULL,
+                            CreatedBy NVARCHAR(100) NULL,
+                            UpdatedBy NVARCHAR(100) NULL
+                        );
+                        
+                        -- Seed some initial data
+                        INSERT INTO dbo.IndicatorCategories (CategoryName, Description, IsActive, CreatedBy) VALUES
+                        (N'Technical Skills', N'Indicators related to programming, technical competence, and system knowledge.', 1, N'System'),
+                        (N'Soft Skills', N'Indicators related to communication, teamwork, and interpersonal skills.', 1, N'System'),
+                        (N'Leadership & Management', N'Indicators related to project planning, team leading, and decision making.', 1, N'System');
+                    END";
+
+                using (SqlCommand cmd = new SqlCommand(createCategoriesQuery, con))
+                {
+                    cmd.ExecuteNonQuery();
+                }
+
+                // 2. Create Indicators Table if not exists
+                string createIndicatorsQuery = @"
+                    IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Indicators')
+                    BEGIN
+                        CREATE TABLE dbo.Indicators (
+                            IndicatorId INT IDENTITY(1,1) PRIMARY KEY,
+                            IndicatorCategoryId INT NOT NULL,
+                            IndicatorName NVARCHAR(100) NOT NULL,
+                            Description NVARCHAR(MAX) NULL,
+                            IsActive BIT NOT NULL DEFAULT 1,
+                            CreatedAt DATETIME NULL DEFAULT GETDATE(),
+                            UpdatedAt DATETIME NULL,
+                            CreatedBy NVARCHAR(100) NULL,
+                            UpdatedBy NVARCHAR(100) NULL,
+                            CONSTRAINT FK_Indicators_IndicatorCategories FOREIGN KEY (IndicatorCategoryId) 
+                                REFERENCES dbo.IndicatorCategories (IndicatorCategoryId) ON DELETE CASCADE
+                        );
+                        
+                        -- Seed some initial data
+                        INSERT INTO dbo.Indicators (IndicatorCategoryId, IndicatorName, Description, IsActive, CreatedBy) VALUES
+                        (1, N'Coding Quality', N'Adherence to programming standards and code review practices.', 1, N'System'),
+                        (1, N'Problem Solving', N'Ability to analyze issues and implement efficient technical solutions.', 1, N'System'),
+                        (2, N'Communication', N'Effective verbal and written communication with peers and clients.', 1, N'System'),
+                        (2, N'Team Collaboration', N'Supporting other team members and contributing to team goals.', 1, N'System'),
+                        (3, N'Project Planning', N'Estimation accuracy and task coordination.', 1, N'System');
+                    END";
+
+                using (SqlCommand cmd = new SqlCommand(createIndicatorsQuery, con))
+                {
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+        #region Indicator Categories
+        public ActionResult IndicatorCategories()
+        {
+            if (Session["RoleType"] == null || Session["UserId"] == null) 
+                return RedirectToAction("Login", "Auth");
+
+            List<IndicatorCategoryModel> list = new List<IndicatorCategoryModel>();
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                string query = "SELECT IndicatorCategoryId, CategoryName, Description, IsActive, CreatedAt, UpdatedAt, CreatedBy, UpdatedBy FROM IndicatorCategories ORDER BY IndicatorCategoryId DESC";
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+                    con.Open();
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            list.Add(new IndicatorCategoryModel
+                            {
+                                IndicatorCategoryId = Convert.ToInt32(reader["IndicatorCategoryId"]),
+                                CategoryName = reader["CategoryName"].ToString(),
+                                Description = reader["Description"].ToString(),
+                                IsActive = Convert.ToBoolean(reader["IsActive"]),
+                                CreatedAt = reader["CreatedAt"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(reader["CreatedAt"]) : null,
+                                UpdatedAt = reader["UpdatedAt"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(reader["UpdatedAt"]) : null,
+                                CreatedBy = reader["CreatedBy"].ToString(),
+                                UpdatedBy = reader["UpdatedBy"].ToString()
+                            });
+                        }
+                    }
+                }
+            }
+            return View(list);
+        }
+
+        [HttpPost]
+        public JsonResult SaveIndicatorCategory(IndicatorCategoryModel model)
+        {
+            try
+            {
+                string creator = Session["UserName"]?.ToString() ?? "System";
+                using (SqlConnection con = new SqlConnection(connectionString))
+                {
+                    string query = @"INSERT INTO IndicatorCategories (CategoryName, Description, IsActive, CreatedAt, CreatedBy) 
+                                     VALUES (@CategoryName, @Description, @IsActive, GETDATE(), @CreatedBy)";
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        cmd.Parameters.AddWithValue("@CategoryName", model.CategoryName ?? "");
+                        cmd.Parameters.AddWithValue("@Description", model.Description ?? "");
+                        cmd.Parameters.AddWithValue("@IsActive", model.IsActive);
+                        cmd.Parameters.AddWithValue("@CreatedBy", creator);
+                        con.Open();
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+                return Json(new { success = true, message = "Indicator Category saved successfully!" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        public JsonResult GetIndicatorCategoryById(int id)
+        {
+            IndicatorCategoryModel model = null;
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                string query = "SELECT IndicatorCategoryId, CategoryName, Description, IsActive FROM IndicatorCategories WHERE IndicatorCategoryId = @IndicatorCategoryId";
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+                    cmd.Parameters.AddWithValue("@IndicatorCategoryId", id);
+                    con.Open();
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            model = new IndicatorCategoryModel
+                            {
+                                IndicatorCategoryId = Convert.ToInt32(reader["IndicatorCategoryId"]),
+                                CategoryName = reader["CategoryName"].ToString(),
+                                Description = reader["Description"].ToString(),
+                                IsActive = Convert.ToBoolean(reader["IsActive"])
+                            };
+                        }
+                    }
+                }
+            }
+            return Json(model, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpPost]
+        public JsonResult UpdateIndicatorCategory(IndicatorCategoryModel model)
+        {
+            try
+            {
+                string updater = Session["UserName"]?.ToString() ?? "System";
+                using (SqlConnection con = new SqlConnection(connectionString))
+                {
+                    string query = @"UPDATE IndicatorCategories 
+                                     SET CategoryName = @CategoryName, Description = @Description, IsActive = @IsActive, 
+                                         UpdatedAt = GETDATE(), UpdatedBy = @UpdatedBy 
+                                     WHERE IndicatorCategoryId = @IndicatorCategoryId";
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        cmd.Parameters.AddWithValue("@IndicatorCategoryId", model.IndicatorCategoryId);
+                        cmd.Parameters.AddWithValue("@CategoryName", model.CategoryName ?? "");
+                        cmd.Parameters.AddWithValue("@Description", model.Description ?? "");
+                        cmd.Parameters.AddWithValue("@IsActive", model.IsActive);
+                        cmd.Parameters.AddWithValue("@UpdatedBy", updater);
+                        con.Open();
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+                return Json(new { success = true, message = "Indicator Category updated successfully!" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult DeleteIndicatorCategory(int id)
+        {
+            try
+            {
+                using (SqlConnection con = new SqlConnection(connectionString))
+                {
+                    string query = "DELETE FROM IndicatorCategories WHERE IndicatorCategoryId = @IndicatorCategoryId";
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        cmd.Parameters.AddWithValue("@IndicatorCategoryId", id);
+                        con.Open();
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+                return Json(new { success = true, message = "Indicator Category deleted successfully!" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+        #endregion
+
+        #region Indicators
+        public ActionResult Indicators()
+        {
+            if (Session["RoleType"] == null || Session["UserId"] == null) 
+                return RedirectToAction("Login", "Auth");
+
+            List<IndicatorModel> list = new List<IndicatorModel>();
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                string query = @"SELECT I.IndicatorId, I.IndicatorCategoryId, C.CategoryName, I.IndicatorName, I.Description, 
+                                        I.IsActive, I.CreatedAt, I.UpdatedAt, I.CreatedBy, I.UpdatedBy 
+                                 FROM Indicators I
+                                 INNER JOIN IndicatorCategories C ON I.IndicatorCategoryId = C.IndicatorCategoryId
+                                 ORDER BY I.IndicatorId DESC";
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+                    con.Open();
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            list.Add(new IndicatorModel
+                            {
+                                IndicatorId = Convert.ToInt32(reader["IndicatorId"]),
+                                IndicatorCategoryId = Convert.ToInt32(reader["IndicatorCategoryId"]),
+                                CategoryName = reader["CategoryName"].ToString(),
+                                IndicatorName = reader["IndicatorName"].ToString(),
+                                Description = reader["Description"].ToString(),
+                                IsActive = Convert.ToBoolean(reader["IsActive"]),
+                                CreatedAt = reader["CreatedAt"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(reader["CreatedAt"]) : null,
+                                UpdatedAt = reader["UpdatedAt"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(reader["UpdatedAt"]) : null,
+                                CreatedBy = reader["CreatedBy"].ToString(),
+                                UpdatedBy = reader["UpdatedBy"].ToString()
+                            });
+                        }
+                    }
+                }
+            }
+            return View(list);
+        }
+
+        [HttpPost]
+        public JsonResult SaveIndicator(IndicatorModel model)
+        {
+            try
+            {
+                string creator = Session["UserName"]?.ToString() ?? "System";
+                using (SqlConnection con = new SqlConnection(connectionString))
+                {
+                    string query = @"INSERT INTO Indicators (IndicatorCategoryId, IndicatorName, Description, IsActive, CreatedAt, CreatedBy) 
+                                     VALUES (@IndicatorCategoryId, @IndicatorName, @Description, @IsActive, GETDATE(), @CreatedBy)";
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        cmd.Parameters.AddWithValue("@IndicatorCategoryId", model.IndicatorCategoryId);
+                        cmd.Parameters.AddWithValue("@IndicatorName", model.IndicatorName ?? "");
+                        cmd.Parameters.AddWithValue("@Description", model.Description ?? "");
+                        cmd.Parameters.AddWithValue("@IsActive", model.IsActive);
+                        cmd.Parameters.AddWithValue("@CreatedBy", creator);
+                        con.Open();
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+                return Json(new { success = true, message = "Indicator saved successfully!" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        public JsonResult GetIndicatorById(int id)
+        {
+            IndicatorModel model = null;
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                string query = "SELECT IndicatorId, IndicatorCategoryId, IndicatorName, Description, IsActive FROM Indicators WHERE IndicatorId = @IndicatorId";
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+                    cmd.Parameters.AddWithValue("@IndicatorId", id);
+                    con.Open();
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            model = new IndicatorModel
+                            {
+                                IndicatorId = Convert.ToInt32(reader["IndicatorId"]),
+                                IndicatorCategoryId = Convert.ToInt32(reader["IndicatorCategoryId"]),
+                                IndicatorName = reader["IndicatorName"].ToString(),
+                                Description = reader["Description"].ToString(),
+                                IsActive = Convert.ToBoolean(reader["IsActive"])
+                            };
+                        }
+                    }
+                }
+            }
+            return Json(model, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpPost]
+        public JsonResult UpdateIndicator(IndicatorModel model)
+        {
+            try
+            {
+                string updater = Session["UserName"]?.ToString() ?? "System";
+                using (SqlConnection con = new SqlConnection(connectionString))
+                {
+                    string query = @"UPDATE Indicators 
+                                     SET IndicatorCategoryId = @IndicatorCategoryId, IndicatorName = @IndicatorName, 
+                                         Description = @Description, IsActive = @IsActive, 
+                                         UpdatedAt = GETDATE(), UpdatedBy = @UpdatedBy 
+                                     WHERE IndicatorId = @IndicatorId";
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        cmd.Parameters.AddWithValue("@IndicatorId", model.IndicatorId);
+                        cmd.Parameters.AddWithValue("@IndicatorCategoryId", model.IndicatorCategoryId);
+                        cmd.Parameters.AddWithValue("@IndicatorName", model.IndicatorName ?? "");
+                        cmd.Parameters.AddWithValue("@Description", model.Description ?? "");
+                        cmd.Parameters.AddWithValue("@IsActive", model.IsActive);
+                        cmd.Parameters.AddWithValue("@UpdatedBy", updater);
+                        con.Open();
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+                return Json(new { success = true, message = "Indicator updated successfully!" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult DeleteIndicator(int id)
+        {
+            try
+            {
+                using (SqlConnection con = new SqlConnection(connectionString))
+                {
+                    string query = "DELETE FROM Indicators WHERE IndicatorId = @IndicatorId";
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        cmd.Parameters.AddWithValue("@IndicatorId", id);
+                        con.Open();
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+                return Json(new { success = true, message = "Indicator deleted successfully!" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public JsonResult GetIndicatorCategoriesList()
+        {
+            List<IndicatorCategoryModel> list = new List<IndicatorCategoryModel>();
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                string query = "SELECT IndicatorCategoryId, CategoryName FROM IndicatorCategories WHERE IsActive = 1 ORDER BY CategoryName";
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+                    con.Open();
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            list.Add(new IndicatorCategoryModel
+                            {
+                                IndicatorCategoryId = Convert.ToInt32(reader["IndicatorCategoryId"]),
+                                CategoryName = reader["CategoryName"].ToString()
+                            });
+                        }
+                    }
+                }
+            }
+            return Json(list, JsonRequestBehavior.AllowGet);
+        }
+        #endregion
+
+        #region Boilerplate Actions
         public ActionResult GoalTypes() { return View(); }
         public ActionResult EmployeeGoals() { return View(); }
         public ActionResult ReviewCycles() { return View(); }
         public ActionResult EmployeeReviews() { return View(); }
+        #endregion
     }
 }

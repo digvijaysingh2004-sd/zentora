@@ -149,6 +149,8 @@
     <Compile Include="Models\ProjectModel.cs" />
     <Compile Include="Models\ModuleActionModel.cs" />
     <Compile Include="Models\CoreFeatureModels.cs" />
+    <Compile Include="Models\IndicatorCategoryModel.cs" />
+    <Compile Include="Models\IndicatorModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
