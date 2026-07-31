@@ -1,6 +1,75 @@
 @model zentoraHRMS.Models.SidebarViewModel
 
-<div class="scrollbar" data-simplebar>
+<!-- Sidebar Search Start -->
+<div class="px-3 py-2 border-bottom border-light-subtle sidebar-search-wrapper">
+    <div class="position-relative">
+        <i data-lucide="search" class="sidebar-search-icon" style="width: 15px; height: 15px;"></i>
+        <input type="text" id="sidebarSearch" class="form-control sidebar-search-input" placeholder="Search menu..." autocomplete="off">
+        <button class="sidebar-clear-btn d-none" id="clearSidebarSearch" type="button"><i data-lucide="x" style="width: 14px; height: 14px;"></i></button>
+    </div>
+    <!-- Inline No Match indicator -->
+    <div id="noSearchMatches" class="text-muted p-3 text-center fs-xs fw-medium d-none">
+        <i data-lucide="info" style="width: 14px; height: 14px;" class="me-1 d-inline-block align-middle"></i>
+        <span class="align-middle">Search result was not found</span>
+    </div>
+</div>
+
+<style>
+    .sidebar-search-wrapper {
+        background: var(--ins-sidenav-bg) !important;
+        position: relative;
+        z-index: 1010; /* Ensure it stays on top of scrolling menu items */
+    }
+    .sidebar-search-input {
+        background-color: transparent !important;
+        border: 1px solid rgba(0, 0, 0, 0.15);
+        color: var(--bs-body-color);
+        font-size: 13px;
+        border-radius: 6px !important;
+        padding-left: 32px !important;
+        padding-right: 32px !important;
+        height: 38px;
+        transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    }
+    [data-bs-theme=dark] .sidebar-search-input {
+        border-color: rgba(255, 255, 255, 0.15);
+    }
+    .sidebar-search-input:focus {
+        border-color: #10b981 !important;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15) !important;
+        outline: none !important;
+    }
+    .sidebar-search-icon {
+        position: absolute;
+        left: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 5;
+        color: var(--bs-secondary-color, #6c757d);
+        pointer-events: none;
+    }
+    .sidebar-clear-btn {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 5;
+        padding: 0;
+        border: none;
+        background: transparent;
+        color: var(--bs-secondary-color, #6c757d);
+        line-height: 1;
+    }
+    .sidebar-clear-btn:hover {
+        color: var(--bs-body-color);
+    }
+    html[data-sidenav-size=collapse] .sidenav-menu:not(:hover) .sidebar-search-wrapper {
+        display: none !important;
+    }
+</style>
+<!-- Sidebar Search End -->
+
+<div class="scrollbar" data-simplebar style="height: calc(100% - 100px); overflow-y: auto;">
     <ul class="side-nav">
         @if (Model != null && Model.ParentModules != null)
         {
@@ -72,3 +141,111 @@
         <i data-lucide="square-chevron-left" class="align-middle flex-shrink-0"></i> <span>Collapse Menu</span>
     </button>
 </div>
+
+<script>
+    $(document).ready(function () {
+        var $search = $('#sidebarSearch');
+        var $clearBtn = $('#clearSidebarSearch');
+        var $sideNav = $('.side-nav');
+
+        if (typeof lucide !== 'undefined' && lucide.createIcons) {
+            lucide.createIcons();
+        }
+
+        // Store the initial collapse state of all collapses
+        $sideNav.find('.collapse').each(function () {
+            var isShow = $(this).hasClass('show');
+            $(this).attr('data-was-show', isShow);
+        });
+
+        $search.on('input', function () {
+            var query = $(this).val().toLowerCase().trim();
+
+            if (query.length === 0) {
+                $clearBtn.addClass('d-none');
+                $('#noSearchMatches').addClass('d-none');
+                
+                // Show all elements and restore their collapse states
+                $sideNav.find('li.side-nav-item').removeClass('d-none');
+                $sideNav.find('.collapse').each(function () {
+                    var wasShow = $(this).attr('data-was-show') === 'true';
+                    if (wasShow) {
+                        $(this).addClass('show');
+                        var trigger = $sideNav.find('a[href="#' + this.id + '"]');
+                        trigger.attr('aria-expanded', 'true').removeClass('collapsed');
+                    } else {
+                        $(this).removeClass('show');
+                        var trigger = $sideNav.find('a[href="#' + this.id + '"]');
+                        trigger.attr('aria-expanded', 'false').addClass('collapsed');
+                    }
+                });
+                return;
+            }
+
+            $clearBtn.removeClass('d-none');
+
+            // Hide all list items and collapse everything by default
+            $sideNav.find('li.side-nav-item').addClass('d-none');
+            $sideNav.find('.collapse').removeClass('show');
+            $sideNav.find('a[data-bs-toggle="collapse"]').attr('aria-expanded', 'false').addClass('collapsed');
+
+            var matchedAny = false;
+
+            // Loop through all anchor links in the sidebar
+            $sideNav.find('a.side-nav-link').each(function () {
+                var $link = $(this);
+                var text = $link.find('.menu-text').text().toLowerCase().trim();
+
+                if (text.indexOf(query) > -1) {
+                    matchedAny = true;
+                    
+                    var isCollapseTrigger = $link.attr('data-bs-toggle') === 'collapse';
+                    if (isCollapseTrigger) {
+                        // It's a header trigger - show it and show all its descendants
+                        var $parentLi = $link.closest('li.side-nav-item');
+                        $parentLi.removeClass('d-none');
+                        
+                        var targetId = $link.attr('href');
+                        var $collapseDiv = $(targetId);
+                        if ($collapseDiv.length > 0) {
+                            $collapseDiv.addClass('show');
+                            $link.attr('aria-expanded', 'true').removeClass('collapsed');
+                            
+                            // Show all nested list items inside this collapse
+                            $collapseDiv.find('li.side-nav-item').removeClass('d-none');
+                            $collapseDiv.find('.collapse').addClass('show');
+                            $collapseDiv.find('a[data-bs-toggle="collapse"]').attr('aria-expanded', 'true').removeClass('collapsed');
+                        }
+                    } else {
+                        // It's a leaf node - show it
+                        var $leafLi = $link.closest('li.side-nav-item');
+                        $leafLi.removeClass('d-none');
+                    }
+
+                    // Traverse up to show and expand all ancestor collapses
+                    var $parentCollapse = $link.closest('.collapse');
+                    while ($parentCollapse.length > 0) {
+                        $parentCollapse.addClass('show');
+                        
+                        var triggerId = $parentCollapse.attr('id');
+                        var $triggerLink = $sideNav.find('a[href="#' + triggerId + '"]');
+                        $triggerLink.attr('aria-expanded', 'true').removeClass('collapsed');
+                        $triggerLink.closest('li.side-nav-item').removeClass('d-none');
+                        
+                        $parentCollapse = $triggerLink.closest('.collapse');
+                    }
+                }
+            });
+
+            if (matchedAny) {
+                $('#noSearchMatches').addClass('d-none');
+            } else {
+                $('#noSearchMatches').removeClass('d-none');
+            }
+        });
+
+        $clearBtn.on('click', function () {
+            $search.val('').trigger('input').focus();
+        });
+    });
+</script>
