@@ -101,6 +101,34 @@ namespace zentoraHRMS.Controllers
                 {
                     cmd.ExecuteNonQuery();
                 }
+
+                // 3. Create GoalTypes Table if not exists
+                string createGoalTypesQuery = @"
+                    IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'GoalTypes')
+                    BEGIN
+                        CREATE TABLE dbo.GoalTypes (
+                            GoalTypeId INT IDENTITY(1,1) PRIMARY KEY,
+                            GoalTypeName NVARCHAR(100) NOT NULL,
+                            Description NVARCHAR(MAX) NULL,
+                            Status NVARCHAR(50) NULL DEFAULT 'Active',
+                            CreatedBy NVARCHAR(100) NULL,
+                            CreateDate DATETIME NULL DEFAULT GETDATE(),
+                            UpdatedBy NVARCHAR(100) NULL,
+                            UpdateDate DATETIME NULL,
+                            SystemAddon BIT NOT NULL DEFAULT 0
+                        );
+                        
+                        -- Seed some initial data
+                        INSERT INTO dbo.GoalTypes (GoalTypeName, Description, Status, CreatedBy, CreateDate, SystemAddon) VALUES
+                        (N'Technical Goal', N'Goals related to improving technical skills, architecture, and coding quality.', N'Active', N'System', GETDATE(), 1),
+                        (N'Behavioral Goal', N'Goals related to communication, leadership, teamwork, and ownership.', N'Active', N'System', GETDATE(), 1),
+                        (N'Project Delivery Goal', N'Goals related to project milestones, delivery timelines, and client satisfaction.', N'Active', N'System', GETDATE(), 1);
+                    END";
+
+                using (SqlCommand cmd = new SqlCommand(createGoalTypesQuery, con))
+                {
+                    cmd.ExecuteNonQuery();
+                }
             }
         }
 
@@ -441,8 +469,174 @@ namespace zentoraHRMS.Controllers
         }
         #endregion
 
+        #region Goal Types
+        public ActionResult GoalTypes()
+        {
+            if (Session["RoleType"] == null || Session["UserId"] == null) 
+                return RedirectToAction("Login", "Auth");
+
+            List<GoalTypeModel> list = new List<GoalTypeModel>();
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                string query = "SELECT GoalTypeId, GoalTypeName, Description, Status, CreatedBy, CreateDate, UpdatedBy, UpdateDate, SystemAddon FROM GoalTypes ORDER BY GoalTypeId DESC";
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+                    con.Open();
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            list.Add(new GoalTypeModel
+                            {
+                                GoalTypeId = Convert.ToInt32(reader["GoalTypeId"]),
+                                GoalTypeName = reader["GoalTypeName"].ToString(),
+                                Description = reader["Description"].ToString(),
+                                Status = reader["Status"].ToString(),
+                                CreatedBy = reader["CreatedBy"].ToString(),
+                                CreateDate = reader["CreateDate"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(reader["CreateDate"]) : null,
+                                UpdatedBy = reader["UpdatedBy"].ToString(),
+                                UpdateDate = reader["UpdateDate"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(reader["UpdateDate"]) : null,
+                                SystemAddon = Convert.ToBoolean(reader["SystemAddon"])
+                            });
+                        }
+                    }
+                }
+            }
+            return View(list);
+        }
+
+        [HttpPost]
+        public JsonResult SaveGoalType(GoalTypeModel model)
+        {
+            try
+            {
+                string creator = Session["UserName"]?.ToString() ?? "System";
+                using (SqlConnection con = new SqlConnection(connectionString))
+                {
+                    string query = @"INSERT INTO GoalTypes (GoalTypeName, Description, Status, CreatedBy, CreateDate, SystemAddon) 
+                                     VALUES (@GoalTypeName, @Description, @Status, @CreatedBy, GETDATE(), 0)";
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        cmd.Parameters.AddWithValue("@GoalTypeName", model.GoalTypeName ?? "");
+                        cmd.Parameters.AddWithValue("@Description", model.Description ?? "");
+                        cmd.Parameters.AddWithValue("@Status", model.Status ?? "Active");
+                        cmd.Parameters.AddWithValue("@CreatedBy", creator);
+                        con.Open();
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+                return Json(new { success = true, message = "Goal Type saved successfully!" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        public JsonResult GetGoalTypeById(int id)
+        {
+            GoalTypeModel model = null;
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                string query = "SELECT GoalTypeId, GoalTypeName, Description, Status, SystemAddon FROM GoalTypes WHERE GoalTypeId = @GoalTypeId";
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+                    cmd.Parameters.AddWithValue("@GoalTypeId", id);
+                    con.Open();
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            model = new GoalTypeModel
+                            {
+                                GoalTypeId = Convert.ToInt32(reader["GoalTypeId"]),
+                                GoalTypeName = reader["GoalTypeName"].ToString(),
+                                Description = reader["Description"].ToString(),
+                                Status = reader["Status"].ToString(),
+                                SystemAddon = Convert.ToBoolean(reader["SystemAddon"])
+                            };
+                        }
+                    }
+                }
+            }
+            return Json(model, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpPost]
+        public JsonResult UpdateGoalType(GoalTypeModel model)
+        {
+            try
+            {
+                string updater = Session["UserName"]?.ToString() ?? "System";
+                using (SqlConnection con = new SqlConnection(connectionString))
+                {
+                    string query = @"UPDATE GoalTypes 
+                                     SET GoalTypeName = @GoalTypeName, Description = @Description, Status = @Status, 
+                                         UpdatedBy = @UpdatedBy, UpdateDate = GETDATE() 
+                                     WHERE GoalTypeId = @GoalTypeId";
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        cmd.Parameters.AddWithValue("@GoalTypeId", model.GoalTypeId);
+                        cmd.Parameters.AddWithValue("@GoalTypeName", model.GoalTypeName ?? "");
+                        cmd.Parameters.AddWithValue("@Description", model.Description ?? "");
+                        cmd.Parameters.AddWithValue("@Status", model.Status ?? "Active");
+                        cmd.Parameters.AddWithValue("@UpdatedBy", updater);
+                        con.Open();
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+                return Json(new { success = true, message = "Goal Type updated successfully!" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult DeleteGoalType(int id)
+        {
+            try
+            {
+                using (SqlConnection con = new SqlConnection(connectionString))
+                {
+                    string checkQuery = "SELECT SystemAddon FROM GoalTypes WHERE GoalTypeId = @GoalTypeId";
+                    bool isSystemAddon = false;
+                    using (SqlCommand cmdCheck = new SqlCommand(checkQuery, con))
+                    {
+                        cmdCheck.Parameters.AddWithValue("@GoalTypeId", id);
+                        con.Open();
+                        var res = cmdCheck.ExecuteScalar();
+                        if (res != null)
+                        {
+                            isSystemAddon = Convert.ToBoolean(res);
+                        }
+                        con.Close();
+                    }
+
+                    if (isSystemAddon)
+                    {
+                        return Json(new { success = false, message = "System Goal Types cannot be deleted." });
+                    }
+
+                    string query = "DELETE FROM GoalTypes WHERE GoalTypeId = @GoalTypeId";
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        cmd.Parameters.AddWithValue("@GoalTypeId", id);
+                        con.Open();
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+                return Json(new { success = true, message = "Goal Type deleted successfully!" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+        #endregion
+
         #region Boilerplate Actions
-        public ActionResult GoalTypes() { return View(); }
         public ActionResult EmployeeGoals() { return View(); }
         public ActionResult ReviewCycles() { return View(); }
         public ActionResult EmployeeReviews() { return View(); }

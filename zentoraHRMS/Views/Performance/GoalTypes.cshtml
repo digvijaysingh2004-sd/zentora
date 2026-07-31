@@ -1,12 +1,291 @@
+@model IEnumerable<zentoraHRMS.Models.GoalTypeModel>
 @{
-    ViewBag.Title = "GoalTypes";
+    ViewBag.Title = "Goal Types";
 }
 
 <div class="container-fluid">
     <div class="row justify-content-center py-5">
         <div class="col-xxl-5 col-xl-7 text-center">
-            <h3 class="fw-bold">@ViewBag.Title</h3>
-            <p class="text-muted">This module is currently under development.</p>
+            <a href="@Url.Action("Index","Home")" class="badge badge-default fw-normal shadow px-2 py-1 mb-2 fst-italic fs-xxs">
+                <i data-lucide="square-check" class="fs-sm me-1"></i> DashBoard
+            </a>
+            <h3 class="fw-bold">Goal Types</h3>
+            <p class="text-muted">Manage goal types used for setting employee goals and tracking performance metrics.</p>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-xxl-12">
+            <div class="card rounded-2">
+                <div class="card-header justify-content-between align-items-center d-flex">
+                    <h5 class="card-title mb-0">Goal Type Details</h5>
+                    <button type="button" class="btn btn-sm btn-soft-primary" data-bs-toggle="modal" data-bs-target="#AddGoalTypeModal">
+                        <i class="me-1" data-lucide="plus"></i> Add Goal Type
+                    </button>
+                </div>
+
+                <div class="card-body">
+                    <table id="checkbox-select-data" class="table table-striped dt-responsive checkbox-select-datatable align-middle mb-0">
+                        <thead class="thead-sm text-uppercase fs-xxs">
+                            <tr>
+                                <th class="fs-sm" style="width: 1%;"></th>
+                                <th>Goal Type ID</th>
+                                <th>Goal Type Name</th>
+                                <th>Description</th>
+                                <th>Status</th>
+                                <th>Origin</th>
+                                <th>Created Info</th>
+                                <th>Updated Info</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var c in Model)
+                            {
+                                <tr>
+                                    <td class="fs-sm" style="width: 1%;"></td>
+                                    <td>@c.GoalTypeId</td>
+                                    <td class="fw-semibold">@c.GoalTypeName</td>
+                                    <td>@c.Description</td>
+                                    <td>
+                                        @if (c.Status == "Active")
+                                        {
+                                            <span class="badge bg-success-subtle text-success">Active</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger-subtle text-danger">@c.Status</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (c.SystemAddon)
+                                        {
+                                            <span class="badge bg-info-subtle text-info"><i class="me-1 fs-sm" data-lucide="shield-alert"></i>System</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary-subtle text-secondary"><i class="me-1 fs-sm" data-lucide="user"></i>Custom</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="fs-xs">
+                                            <span class="text-dark fw-medium">@c.CreatedBy</span><br/>
+                                            <span class="text-muted fs-xxs">@(c.CreateDate.HasValue ? c.CreateDate.Value.ToString("g") : "-")</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="fs-xs">
+                                            <span class="text-dark fw-medium">@(string.IsNullOrEmpty(c.UpdatedBy) ? "-" : c.UpdatedBy)</span><br/>
+                                            <span class="text-muted fs-xxs">@(c.UpdateDate.HasValue ? c.UpdateDate.Value.ToString("g") : "-")</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <button onclick="UpdateGoalType(@c.GoalTypeId)" class="btn btn-sm btn-soft-info mt-1" title="Update"><i data-lucide="square-pen"></i></button>
+                                        @if (c.SystemAddon)
+                                        {
+                                            <button disabled class="btn btn-sm btn-soft-secondary mt-1" title="System items cannot be deleted"><i data-lucide="trash-2"></i></button>
+                                        }
+                                        else
+                                        {
+                                            <button onclick="DeleteGoalType(@c.GoalTypeId)" class="btn btn-sm btn-soft-danger mt-1" title="Delete"><i data-lucide="trash-2"></i></button>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AddGoalType Modal -->
+    <div id="AddGoalTypeModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form id="GoalTypeForm" class="needs-validation" novalidate method="post">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Add Goal Type</h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="GoalTypeName" class="form-label">Goal Type Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="GoalTypeName" required placeholder="Enter goal type name">
+                        </div>
+                        <div class="mb-3">
+                            <label for="Description" class="form-label">Description</label>
+                            <textarea class="form-control" id="Description" rows="3" placeholder="Enter description of goal type"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="Status" class="form-label">Status</label>
+                            <select class="form-select" id="Status" data-choices>
+                                <option value="Active" selected>Active</option>
+                                <option value="Inactive">Inactive</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-soft-primary">Save changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- UpdateGoalType Modal -->
+    <div id="UpdateGoalTypeModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form id="UpdateGoalTypeForm" class="needs-validation" novalidate method="post">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Update Goal Type</h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="update_id" />
+                        <div class="mb-3">
+                            <label for="uGoalTypeName" class="form-label">Goal Type Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="uGoalTypeName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="uDescription" class="form-label">Description</label>
+                            <textarea class="form-control" id="uDescription" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="uStatus" class="form-label">Status</label>
+                            <select class="form-select" id="uStatus" data-choices>
+                                <option value="Active">Active</option>
+                                <option value="Inactive">Inactive</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-soft-primary">Save changes</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </div>
+
+<script>
+    $(document).ready(function () {
+        $("#AddGoalTypeModal").on("show.bs.modal", function () {
+            $("#GoalTypeForm")[0].reset();
+            var elStatus = document.getElementById("Status");
+            if (elStatus && elStatus.choicesInstance) {
+                elStatus.choicesInstance.setChoiceByValue("Active");
+            }
+        });
+
+        $("#GoalTypeForm").on("submit", function (e) {
+            e.preventDefault();
+            if (!this.checkValidity()) {
+                e.stopPropagation();
+                $(this).addClass('was-validated');
+                return;
+            }
+
+            var formData = {
+                GoalTypeName: $("#GoalTypeName").val(),
+                Description: $("#Description").val(),
+                Status: $("#Status").val()
+            };
+
+            $.ajax({
+                url: '/Performance/SaveGoalType',
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(formData),
+                success: function (res) {
+                    if (res.success) {
+                        location.reload();
+                    } else {
+                        alert("Error: " + res.message);
+                    }
+                }
+            });
+        });
+
+        $("#UpdateGoalTypeForm").on("submit", function (e) {
+            e.preventDefault();
+            if (!this.checkValidity()) {
+                e.stopPropagation();
+                $(this).addClass('was-validated');
+                return;
+            }
+
+            var formData = {
+                GoalTypeId: $("#update_id").val(),
+                GoalTypeName: $("#uGoalTypeName").val(),
+                Description: $("#uDescription").val(),
+                Status: $("#uStatus").val()
+            };
+
+            $.ajax({
+                url: '/Performance/UpdateGoalType',
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(formData),
+                success: function (res) {
+                    if (res.success) {
+                        location.reload();
+                    } else {
+                        alert("Error: " + res.message);
+                    }
+                }
+            });
+        });
+    });
+
+    function UpdateGoalType(id) {
+        $.ajax({
+            url: '/Performance/GetGoalTypeById',
+            type: 'GET',
+            data: { id: id },
+            success: function (data) {
+                if (data) {
+                    $("#update_id").val(data.GoalTypeId);
+                    $("#uGoalTypeName").val(data.GoalTypeName);
+                    $("#uDescription").val(data.Description);
+                    
+                    var elStatus = document.getElementById("uStatus");
+                    if (elStatus && elStatus.choicesInstance) {
+                        elStatus.choicesInstance.setChoiceByValue(data.Status);
+                    } else {
+                        $("#uStatus").val(data.Status);
+                    }
+                    
+                    // If it is a system addon, disable renaming to protect integrity
+                    if (data.SystemAddon) {
+                        $("#uGoalTypeName").attr("readonly", true);
+                    } else {
+                        $("#uGoalTypeName").removeAttr("readonly");
+                    }
+                    
+                    $("#UpdateGoalTypeModal").modal("show");
+                }
+            }
+        });
+    }
+
+    function DeleteGoalType(id) {
+        if (confirm("Are you sure you want to delete this Goal Type?")) {
+            $.ajax({
+                url: '/Performance/DeleteGoalType',
+                type: "POST",
+                data: { id: id },
+                success: function (res) {
+                    if (res.success) {
+                        location.reload();
+                    } else {
+                        alert("Error: " + res.message);
+                    }
+                }
+            });
+        }
+    }
+</script>
