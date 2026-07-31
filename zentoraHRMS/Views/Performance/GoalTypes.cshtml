@@ -29,13 +29,8 @@
                         <thead class="thead-sm text-uppercase fs-xxs">
                             <tr>
                                 <th class="fs-sm" style="width: 1%;"></th>
-                                <th>Goal Type ID</th>
-                                <th>Goal Type Name</th>
-                                <th>Description</th>
+                                <th>Goal Type</th>
                                 <th>Status</th>
-                                <th>Origin</th>
-                                <th>Created Info</th>
-                                <th>Updated Info</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -44,9 +39,25 @@
                             {
                                 <tr>
                                     <td class="fs-sm" style="width: 1%;"></td>
-                                    <td>@c.GoalTypeId</td>
-                                    <td class="fw-semibold">@c.GoalTypeName</td>
-                                    <td>@c.Description</td>
+                                    <td>
+                                        <div class="fw-semibold text-dark fs-sm">@c.GoalTypeName</div>
+                                        <div class="text-muted fs-xs mt-1 desc-container">
+                                            @if (string.IsNullOrEmpty(c.Description))
+                                            {
+                                                <span>-</span>
+                                            }
+                                            else if (c.Description.Length > 100)
+                                            {
+                                                <span class="desc-short">@c.Description.Substring(0, 100)...</span>
+                                                <span class="desc-full d-none">@c.Description</span>
+                                                <a href="javascript:void(0);" class="text-primary ms-1 toggle-desc fs-xxs fw-medium" onclick="ToggleDescription(this)">Show More</a>
+                                            }
+                                            else
+                                            {
+                                                <span>@c.Description</span>
+                                            }
+                                        </div>
+                                    </td>
                                     <td>
                                         @if (c.Status == "Active")
                                         {
@@ -58,37 +69,8 @@
                                         }
                                     </td>
                                     <td>
-                                        @if (c.SystemAddon)
-                                        {
-                                            <span class="badge bg-info-subtle text-info"><i class="me-1 fs-sm" data-lucide="shield-alert"></i>System</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="badge bg-secondary-subtle text-secondary"><i class="me-1 fs-sm" data-lucide="user"></i>Custom</span>
-                                        }
-                                    </td>
-                                    <td>
-                                        <div class="fs-xs">
-                                            <span class="text-dark fw-medium">@c.CreatedBy</span><br/>
-                                            <span class="text-muted fs-xxs">@(c.CreateDate.HasValue ? c.CreateDate.Value.ToString("g") : "-")</span>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="fs-xs">
-                                            <span class="text-dark fw-medium">@(string.IsNullOrEmpty(c.UpdatedBy) ? "-" : c.UpdatedBy)</span><br/>
-                                            <span class="text-muted fs-xxs">@(c.UpdateDate.HasValue ? c.UpdateDate.Value.ToString("g") : "-")</span>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <button onclick="UpdateGoalType(@c.GoalTypeId)" class="btn btn-sm btn-soft-info mt-1" title="Update"><i data-lucide="square-pen"></i></button>
-                                        @if (c.SystemAddon)
-                                        {
-                                            <button disabled class="btn btn-sm btn-soft-secondary mt-1" title="System items cannot be deleted"><i data-lucide="trash-2"></i></button>
-                                        }
-                                        else
-                                        {
-                                            <button onclick="DeleteGoalType(@c.GoalTypeId)" class="btn btn-sm btn-soft-danger mt-1" title="Delete"><i data-lucide="trash-2"></i></button>
-                                        }
+                                        <a href="javascript:void(0);" onclick="UpdateGoalType(@c.GoalTypeId)" class="btn btn-sm btn-soft-info mt-1" title="Update"><i data-lucide="square-pen"></i></a>
+                                        <a href="javascript:void(0);" onclick="DeleteGoalType(@c.GoalTypeId)" class="btn btn-sm btn-soft-danger mt-1" title="Delete"><i data-lucide="trash-2"></i></a>
                                     </td>
                                 </tr>
                             }
@@ -286,6 +268,22 @@
                     }
                 }
             });
+        }
+    }
+
+    function ToggleDescription(btn) {
+        var container = $(btn).closest('.desc-container');
+        var shortText = container.find('.desc-short');
+        var fullText = container.find('.desc-full');
+        
+        if (fullText.hasClass('d-none')) {
+            fullText.removeClass('d-none');
+            shortText.addClass('d-none');
+            $(btn).text('Show Less');
+        } else {
+            fullText.addClass('d-none');
+            shortText.removeClass('d-none');
+            $(btn).text('Show More');
         }
     }
 </script>

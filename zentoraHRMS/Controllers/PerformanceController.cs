@@ -600,25 +600,6 @@ namespace zentoraHRMS.Controllers
             {
                 using (SqlConnection con = new SqlConnection(connectionString))
                 {
-                    string checkQuery = "SELECT SystemAddon FROM GoalTypes WHERE GoalTypeId = @GoalTypeId";
-                    bool isSystemAddon = false;
-                    using (SqlCommand cmdCheck = new SqlCommand(checkQuery, con))
-                    {
-                        cmdCheck.Parameters.AddWithValue("@GoalTypeId", id);
-                        con.Open();
-                        var res = cmdCheck.ExecuteScalar();
-                        if (res != null)
-                        {
-                            isSystemAddon = Convert.ToBoolean(res);
-                        }
-                        con.Close();
-                    }
-
-                    if (isSystemAddon)
-                    {
-                        return Json(new { success = false, message = "System Goal Types cannot be deleted." });
-                    }
-
                     string query = "DELETE FROM GoalTypes WHERE GoalTypeId = @GoalTypeId";
                     using (SqlCommand cmd = new SqlCommand(query, con))
                     {
