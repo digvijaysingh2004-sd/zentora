@@ -1,145 +1,149 @@
 @model zentoraHRMS.Models.SidebarViewModel
 
-<!-- Sidebar Search Start -->
-<div class="px-3 py-2 border-bottom border-light-subtle sidebar-search-wrapper">
-    <div class="position-relative">
-        <i data-lucide="search" class="sidebar-search-icon" style="width: 15px; height: 15px;"></i>
-        <input type="text" id="sidebarSearch" class="form-control sidebar-search-input" placeholder="Search menu..." autocomplete="off">
-        <button class="sidebar-clear-btn d-none" id="clearSidebarSearch" type="button"><i data-lucide="x" style="width: 14px; height: 14px;"></i></button>
+<div class="d-flex flex-column h-100 sidebar-flex-container" style="height: 100%; display: flex; flex-direction: column;">
+    <!-- Sidebar Search Start (flex: 0 0 auto) -->
+    <div class="px-3 py-2 border-bottom border-light-subtle sidebar-search-wrapper" style="flex: 0 0 auto;">
+        <div class="position-relative">
+            <i data-lucide="search" class="sidebar-search-icon" style="width: 15px; height: 15px;"></i>
+            <input type="text" id="sidebarSearch" class="form-control sidebar-search-input" placeholder="Search menu..." autocomplete="off">
+            <button class="sidebar-clear-btn d-none" id="clearSidebarSearch" type="button"><i data-lucide="x" style="width: 14px; height: 14px;"></i></button>
+        </div>
+        <!-- Inline No Match indicator -->
+        <div id="noSearchMatches" class="text-muted p-3 text-center fs-xs fw-medium d-none">
+            <i data-lucide="info" style="width: 14px; height: 14px;" class="me-1 d-inline-block align-middle"></i>
+            <span class="align-middle">Search result was not found</span>
+        </div>
     </div>
-    <!-- Inline No Match indicator -->
-    <div id="noSearchMatches" class="text-muted p-3 text-center fs-xs fw-medium d-none">
-        <i data-lucide="info" style="width: 14px; height: 14px;" class="me-1 d-inline-block align-middle"></i>
-        <span class="align-middle">Search result was not found</span>
-    </div>
-</div>
-
-<style>
-    .sidebar-search-wrapper {
-        background: var(--ins-sidenav-bg) !important;
-        position: relative;
-        z-index: 1010; /* Ensure it stays on top of scrolling menu items */
-    }
-    .sidebar-search-input {
-        background-color: transparent !important;
-        border: 1px solid rgba(0, 0, 0, 0.15);
-        color: var(--bs-body-color);
-        font-size: 13px;
-        border-radius: 6px !important;
-        padding-left: 32px !important;
-        padding-right: 32px !important;
-        height: 38px;
-        transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-    }
-    [data-bs-theme=dark] .sidebar-search-input {
-        border-color: rgba(255, 255, 255, 0.15);
-    }
-    .sidebar-search-input:focus {
-        border-color: #10b981 !important;
-        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15) !important;
-        outline: none !important;
-    }
-    .sidebar-search-icon {
-        position: absolute;
-        left: 10px;
-        top: 50%;
-        transform: translateY(-50%);
-        z-index: 5;
-        color: var(--bs-secondary-color, #6c757d);
-        pointer-events: none;
-    }
-    .sidebar-clear-btn {
-        position: absolute;
-        right: 10px;
-        top: 50%;
-        transform: translateY(-50%);
-        z-index: 5;
-        padding: 0;
-        border: none;
-        background: transparent;
-        color: var(--bs-secondary-color, #6c757d);
-        line-height: 1;
-    }
-    .sidebar-clear-btn:hover {
-        color: var(--bs-body-color);
-    }
-    html[data-sidenav-size=collapse] .sidenav-menu:not(:hover) .sidebar-search-wrapper {
-        display: none !important;
-    }
-</style>
-<!-- Sidebar Search End -->
-
-<div class="scrollbar" data-simplebar style="height: calc(100% - 100px); overflow-y: auto;">
-    <ul class="side-nav">
-        @if (Model != null && Model.ParentModules != null)
-        {
-            foreach (var parent in Model.ParentModules)
-            {
-                var targetId = "sidebar" + parent.ParentModuleId;
-
-                <li class="side-nav-item mb-1">
-                    @if (parent.Children != null && parent.Children.Any())
-                    {
-                        <a data-bs-toggle="collapse" href="#@(targetId)" aria-expanded="false" aria-controls="@targetId" class="side-nav-link">
-                            <span class="menu-icon"><i data-lucide="@parent.IconClass"></i></span>
-                            <span class="menu-text"> @parent.ModuleName </span>
-                            <span class="menu-arrow"></span>
-                        </a>
-
-                        <div class="collapse" id="@targetId">
-                            <ul class="sub-menu">
-                                @foreach (var child in parent.Children)
-                                {
-                                    var subTargetId = "subSidebar" + child.ChildModuleId;
-
-                                    <li class="side-nav-item mt-1">
-                                        @if (child.SubChildren != null && child.SubChildren.Any())
-                                        {
-                                            <a data-bs-toggle="collapse" href="#@(subTargetId)" aria-expanded="false" aria-controls="@subTargetId" class="side-nav-link">
-                                                <span class="menu-text">@child.ModuleName</span>
-                                                <span class="menu-arrow"></span>
-                                            </a>
-                                            <div class="collapse" id="@subTargetId">
-                                                <ul class="sub-menu">
-                                                    @foreach (var sub in child.SubChildren)
-                                                    {
-                                                        <li class="side-nav-item mt-1">
-                                                            <a href="@(sub.RouteUrl == "#" ? "javascript:void(0);" : sub.RouteUrl)" class="side-nav-link">
-                                                                <span class="menu-text">@sub.ModuleName</span>
-                                                            </a>
-                                                        </li>
-                                                    }
-                                                </ul>
-                                            </div>
-                                        }
-                                        else
-                                        {
-                                            <a href="@(child.RouteUrl == "#" ? "javascript:void(0);" : child.RouteUrl)" class="side-nav-link">
-                                                <span class="menu-text">@child.ModuleName</span>
-                                            </a>
-                                        }
-                                    </li>
-                                }
-                            </ul>
-                        </div>
-                    }
-                    else
-                    {
-                        <a href="@(parent.RouteUrl == "#" ? "javascript:void(0);" : parent.RouteUrl)" class="side-nav-link">
-                            <span class="menu-icon"><i data-lucide="@parent.IconClass"></i></span>
-                            <span class="menu-text">@parent.ModuleName</span>
-                        </a>
-                    }
-                </li>
-            }
+    
+    <style>
+        .sidebar-search-wrapper {
+            background: var(--ins-sidenav-bg) !important;
+            position: relative;
+            z-index: 1010;
         }
-    </ul>
-</div>
+        .sidebar-search-input {
+            background-color: var(--bs-body-bg, #fff) !important;
+            border: 1px solid var(--bs-border-color, rgba(0, 0, 0, 0.15)) !important;
+            color: var(--bs-body-color, #2b2b2b) !important;
+            font-size: 13px;
+            border-radius: 6px !important;
+            padding-left: 32px !important;
+            padding-right: 32px !important;
+            height: 38px;
+            transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        [data-bs-theme=dark] .sidebar-search-input {
+            border-color: rgba(255, 255, 255, 0.15) !important;
+        }
+        .sidebar-search-input:focus {
+            border-color: #10b981 !important;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15) !important;
+            outline: none !important;
+        }
+        .sidebar-search-icon {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 5;
+            color: var(--bs-secondary-color, #6c757d);
+            pointer-events: none;
+        }
+        .sidebar-clear-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 5;
+            padding: 0;
+            border: none;
+            background: transparent;
+            color: var(--bs-secondary-color, #6c757d);
+            line-height: 1;
+        }
+        .sidebar-clear-btn:hover {
+            color: var(--bs-body-color);
+        }
+        html[data-sidenav-size=collapse] .sidenav-menu:not(:hover) .sidebar-search-wrapper {
+            display: none !important;
+        }
+    </style>
+    <!-- Sidebar Search End -->
 
-<div class="menu-collapse-box d-none d-xl-block">
-    <button class="button-collapse-toggle">
-        <i data-lucide="square-chevron-left" class="align-middle flex-shrink-0"></i> <span>Collapse Menu</span>
-    </button>
+    <!-- Scrollable content (flex: 1 1 auto) -->
+    <div class="scrollbar flex-grow-1" data-simplebar style="flex: 1 1 auto; min-height: 0; overflow-y: auto;">
+        <ul class="side-nav">
+            @if (Model != null && Model.ParentModules != null)
+            {
+                foreach (var parent in Model.ParentModules)
+                {
+                    var targetId = "sidebar" + parent.ParentModuleId;
+
+                    <li class="side-nav-item mb-1">
+                        @if (parent.Children != null && parent.Children.Any())
+                        {
+                            <a data-bs-toggle="collapse" href="#@(targetId)" aria-expanded="false" aria-controls="@targetId" class="side-nav-link">
+                                <span class="menu-icon"><i data-lucide="@parent.IconClass"></i></span>
+                                <span class="menu-text"> @parent.ModuleName </span>
+                                <span class="menu-arrow"></span>
+                            </a>
+
+                            <div class="collapse" id="@targetId">
+                                <ul class="sub-menu">
+                                    @foreach (var child in parent.Children)
+                                    {
+                                        var subTargetId = "subSidebar" + child.ChildModuleId;
+
+                                        <li class="side-nav-item mt-1">
+                                            @if (child.SubChildren != null && child.SubChildren.Any())
+                                            {
+                                                <a data-bs-toggle="collapse" href="#@(subTargetId)" aria-expanded="false" aria-controls="@subTargetId" class="side-nav-link">
+                                                    <span class="menu-text">@child.ModuleName</span>
+                                                    <span class="menu-arrow"></span>
+                                                </a>
+                                                <div class="collapse" id="@subTargetId">
+                                                    <ul class="sub-menu">
+                                                        @foreach (var sub in child.SubChildren)
+                                                        {
+                                                            <li class="side-nav-item mt-1">
+                                                                <a href="@(sub.RouteUrl == "#" ? "javascript:void(0);" : sub.RouteUrl)" class="side-nav-link">
+                                                                    <span class="menu-text">@sub.ModuleName</span>
+                                                                </a>
+                                                            </li>
+                                                        }
+                                                    </ul>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <a href="@(child.RouteUrl == "#" ? "javascript:void(0);" : child.RouteUrl)" class="side-nav-link">
+                                                    <span class="menu-text">@child.ModuleName</span>
+                                                </a>
+                                            }
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
+                        }
+                        else
+                        {
+                            <a href="@(parent.RouteUrl == "#" ? "javascript:void(0);" : parent.RouteUrl)" class="side-nav-link">
+                                <span class="menu-icon"><i data-lucide="@parent.IconClass"></i></span>
+                                <span class="menu-text">@parent.ModuleName</span>
+                            </a>
+                        }
+                    </li>
+                }
+            }
+        </ul>
+    </div>
+
+    <!-- Collapse Menu Box (flex: 0 0 auto) -->
+    <div class="menu-collapse-box d-none d-xl-block" style="flex: 0 0 auto;">
+        <button class="button-collapse-toggle">
+            <i data-lucide="square-chevron-left" class="align-middle flex-shrink-0"></i> <span>Collapse Menu</span>
+        </button>
+    </div>
 </div>
 
 <script>
