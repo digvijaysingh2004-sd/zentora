@@ -114,6 +114,67 @@
             overflow-y: auto !important;
             overflow-x: hidden !important;
         }
+
+        /* Dark Mode Compatibility Overrides */
+        [data-bs-theme=dark] .card.bg-white, 
+        [data-bs-theme=dark] .card-header.bg-white,
+        [data-bs-theme=dark] .bg-white.rounded-3 {
+            background-color: #1e2029 !important; /* matches the dark card background in the theme */
+            border-color: rgba(255, 255, 255, 0.08) !important;
+        }
+
+        [data-bs-theme=dark] .text-dark,
+        [data-bs-theme=dark] .fw-bold.text-dark,
+        [data-bs-theme=dark] h3.text-dark,
+        [data-bs-theme=dark] h4.text-dark,
+        [data-bs-theme=dark] h5.text-dark,
+        [data-bs-theme=dark] strong.text-dark,
+        [data-bs-theme=dark] span.text-dark {
+            color: #e2e8f0 !important; /* matches body text color in dark theme */
+        }
+
+        [data-bs-theme=dark] .border-light {
+            border-color: rgba(255, 255, 255, 0.08) !important;
+        }
+
+        /* Align Notification Badge & Bell Icon */
+        .topbar-item .dropdown {
+            position: relative;
+        }
+        .topbar-link {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .topbar-badge {
+            position: absolute !important;
+            top: 4px !important;
+            right: 4px !important;
+            transform: translate(35%, -35%) !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            min-width: 15px !important;
+            height: 15px !important;
+            padding: 0 !important;
+            border-radius: 50% !important; /* Sleek circle style */
+            font-size: 9px !important;
+            font-weight: 700 !important;
+            line-height: 1 !important;
+            border: 1.5px solid var(--bs-body-bg, #fff) !important;
+            z-index: 10;
+        }
+
+        /* Glassmorphic Modal Backdrop & Light blending overlay */
+        .modal-backdrop {
+            backdrop-filter: blur(5px) !important;
+            background-color: rgba(255, 255, 255, 0.3) !important; /* Light translucent overlay */
+            transition: all 0.3s ease-in-out;
+        }
+        [data-bs-theme=dark] .modal-backdrop {
+            background-color: rgba(15, 17, 23, 0.5) !important; /* Sleek dark translucent overlay */
+        }
     </style>
 </head>
 <body>
@@ -139,7 +200,7 @@
                 <div class="container-fluid">
                     <div class="row">
                         <div class="col-md-6 text-center text-md-start">
-                            ©
+                            &copy;
                             <script>document.write(new Date().getFullYear())</script> Zentora By <a href="https://github.com/digvijaysingh2004-sd" target="_blank" class="fw-semibold">digvijaysingh2004-sd</a>
                         </div>
                         <div class="col-md-6">
@@ -316,16 +377,18 @@
                     var headerHtml = `
                         <div class="row mb-4 mt-3">
                             <div class="col-12">
-                                <div class="d-flex align-items-center justify-content-between p-3 bg-white rounded-3 shadow-sm border border-light">
-                                    <div>
-                                        <h4 class="mb-1 fw-bold text-dark fs-5">${pageTitle || "Page Title"}</h4>
-                                        <p class="text-muted mb-0 fs-xxs" style="font-size: 11px;">Configure and manage ${pageTitle || "settings"}</p>
+                                <div class="card p-3 rounded-3 shadow-sm mb-0">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div>
+                                            <h4 class="mb-1 fw-bold fs-5">${pageTitle || "Page Title"}</h4>
+                                            <p class="text-muted mb-0 fs-xxs" style="font-size: 11px;">Configure and manage ${pageTitle || "settings"}</p>
+                                        </div>
+                                        <nav aria-label="breadcrumb">
+                                            <ol class="breadcrumb mb-0 bg-transparent p-0" style="font-size: 13px;">
+                                                ${breadcrumbHtml}
+                                            </ol>
+                                        </nav>
                                     </div>
-                                    <nav aria-label="breadcrumb">
-                                        <ol class="breadcrumb mb-0 bg-transparent p-0" style="font-size: 13px;">
-                                            ${breadcrumbHtml}
-                                        </ol>
-                                    </nav>
                                 </div>
                             </div>
                         </div>

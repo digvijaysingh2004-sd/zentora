@@ -22,27 +22,34 @@
             z-index: 1010;
         }
         .sidebar-search-input {
-            background-color: var(--bs-body-bg, #fff) !important;
-            border: 1px solid var(--bs-border-color, rgba(0, 0, 0, 0.15)) !important;
+            background-color: rgba(0, 0, 0, 0.05) !important;
+            border: 1px solid rgba(0, 0, 0, 0.1) !important;
             color: var(--bs-body-color, #2b2b2b) !important;
             font-size: 13px;
-            border-radius: 6px !important;
-            padding-left: 32px !important;
+            border-radius: 30px !important;
+            padding-left: 36px !important;
             padding-right: 32px !important;
             height: 38px;
-            transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            transition: all 0.2s ease-in-out;
         }
         [data-bs-theme=dark] .sidebar-search-input {
-            border-color: rgba(255, 255, 255, 0.15) !important;
+            background-color: rgba(255, 255, 255, 0.07) !important;
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
+            color: #fff !important;
         }
         .sidebar-search-input:focus {
+            background-color: rgba(0, 0, 0, 0.02) !important;
             border-color: #10b981 !important;
             box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15) !important;
             outline: none !important;
         }
+        [data-bs-theme=dark] .sidebar-search-input:focus {
+            background-color: rgba(255, 255, 255, 0.1) !important;
+            border-color: #10b981 !important;
+        }
         .sidebar-search-icon {
             position: absolute;
-            left: 10px;
+            left: 14px;
             top: 50%;
             transform: translateY(-50%);
             z-index: 5;
@@ -51,7 +58,7 @@
         }
         .sidebar-clear-btn {
             position: absolute;
-            right: 10px;
+            right: 14px;
             top: 50%;
             transform: translateY(-50%);
             z-index: 5;
