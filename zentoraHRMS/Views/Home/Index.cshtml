@@ -18,29 +18,74 @@
     var totalCandidates = ViewBag.DbTotalCandidates != null ? ViewBag.DbTotalCandidates.ToString() : "48";
 }
 
-<!-- Inline Custom Premium Dashboard Styles -->
+<!-- Inline Custom Premium Dashboard Styles (Zoho HRMS theme) -->
 <style>
-    .dashboard-card {
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        border: 1px solid rgba(226, 232, 240, 0.8) !important;
+    :root {
+        --hrms-card-border-radius: 12px;
     }
+
+    .dashboard-card {
+        border-radius: var(--hrms-card-border-radius) !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid rgba(226, 232, 240, 0.7) !important;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.01) !important;
+    }
+    
     .dashboard-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05) !important;
+        transform: translateY(-4px);
+        box-shadow: 0 10px 20px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.03) !important;
         border-color: rgba(59, 130, 246, 0.3) !important;
     }
+
+    /* Clean Card BG and header overrides */
+    .card.bg-white {
+        background-color: var(--bs-card-bg, #ffffff) !important;
+        border: 1px solid var(--bs-border-color, rgba(0, 0, 0, 0.08)) !important;
+        border-radius: var(--hrms-card-border-radius) !important;
+    }
+    .card-header.bg-white {
+        background-color: transparent !important;
+        border-bottom: 1px solid var(--bs-border-color, rgba(0, 0, 0, 0.06)) !important;
+    }
+
+    /* Dynamic element spacing & color variables */
     .text-gradient {
-        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
     }
     .quick-action-btn {
-        transition: all 0.2s ease-in-out;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid var(--bs-border-color, rgba(0, 0, 0, 0.08)) !important;
+        font-weight: 550 !important;
+        background-color: var(--bs-tertiary-bg, #f8f9fa) !important;
     }
     .quick-action-btn:hover {
-        background-color: #3b82f6 !important;
-        color: #fff !important;
+        background-color: rgba(59, 130, 246, 0.08) !important;
+        border-color: #3b82f6 !important;
+        color: #3b82f6 !important;
+        transform: translateX(4px);
     }
+    [data-bs-theme=dark] .quick-action-btn {
+        background-color: #1a1c24 !important;
+    }
+    [data-bs-theme=dark] .quick-action-btn:hover {
+        background-color: rgba(59, 130, 246, 0.15) !important;
+        color: #60a5fa !important;
+    }
+
+    /* Fallback bg-light container adjustments */
+    .bg-light, .p-3.bg-light {
+        background-color: var(--bs-tertiary-bg, rgba(0,0,0,0.02)) !important;
+        border-color: var(--bs-border-color, rgba(0,0,0,0.06)) !important;
+    }
+    [data-bs-theme=dark] .bg-light, 
+    [data-bs-theme=dark] .p-3.bg-light {
+        background-color: rgba(255, 255, 255, 0.02) !important;
+        border-color: rgba(255, 255, 255, 0.06) !important;
+    }
+
+    /* Pulsing session badge effect */
     .pulse-btn {
         position: relative;
     }
@@ -676,12 +721,22 @@
                         <h5 class="card-title mb-0 fw-semibold text-dark">Work Session Recorder</h5>
                     </div>
                     <div class="card-body text-center d-flex flex-column justify-content-center align-items-center py-4">
+                        <div class="mb-3">
+                            <span class="badge bg-secondary-subtle text-secondary py-1 px-3 fs-xs rounded-pill" style="letter-spacing: 0.5px;">
+                                <i data-lucide="clock" class="fs-xs me-1 align-middle" style="width:12px;height:12px;display:inline-block;"></i> LIVE CLOCK: <span id="current-live-time" style="font-family: monospace; font-weight: 700;">--:--:-- --</span>
+                            </span>
+                        </div>
                         <span class="text-muted fs-xxs d-block mb-2">Shift: Day Shift (09:00 AM - 06:00 PM)</span>
-                        <h2 class="fw-bold mb-4 text-dark" style="font-size: 32px; font-family: monospace;">04:12:45 <small class="fs-xxs text-muted">Hrs</small></h2>
+                        <h2 class="fw-bold mb-4 text-dark" id="session-timer" style="font-size: 34px; font-family: monospace; letter-spacing: 1px;">04:12:45 <small class="fs-xs text-muted">Hrs</small></h2>
                         
-                        <!-- Toggle Button Mock -->
-                        <button class="btn btn-success py-3 px-5 rounded-pill shadow pulse-btn fw-semibold mb-3 d-inline-flex align-items-center"><i data-lucide="play" class="me-2" style="width:18px;height:18px;"></i> Clock Out Now</button>
-                        <span class="fs-xxs text-muted mt-1"><i data-lucide="info" class="me-1 align-text-bottom" style="width:12px;height:12px;display:inline-block;"></i> You logged in at @checkInTime today.</span>
+                        <!-- Dynamic Clock In/Out Toggle Button -->
+                        <button id="clock-btn" class="btn btn-success py-2.5 px-4 rounded-pill shadow-sm pulse-btn fw-semibold mb-3 d-inline-flex align-items-center" data-status="checked-in">
+                            <i data-lucide="log-out" class="me-2" style="width:16px;height:16px;"></i> <span>Clock Out Now</span>
+                        </button>
+                        <br />
+                        <span class="fs-xxs text-muted mt-1" id="clock-in-info">
+                            <i data-lucide="info" class="me-1 align-text-bottom" style="width:12px;height:12px;display:inline-block;"></i> You logged in at <strong class="text-success">@checkInTime</strong> today.
+                        </span>
                     </div>
                 </div>
             </div>
@@ -771,6 +826,109 @@
                     </div>
                 </div>
             </div>
+        </div>
+    }
+
+</div>
+
+<!-- Interactive Zoho-Style Dashboard Scripts -->
+<script>
+    $(document).ready(function () {
+        // --- 1. Live Current Time Clock ---
+        function updateLiveTime() {
+            var now = new Date();
+            var timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            $('#current-live-time').text(timeStr);
+        }
+        updateLiveTime();
+        setInterval(updateLiveTime, 1000);
+
+        // --- 2. Active Session Work Timer (real-time ticking) ---
+        var sessionSeconds = 4 * 3600 + 12 * 60 + 45; // Start value: 04:12:45
+        var timerInterval;
+        var isClockedIn = true;
+
+        function startTimer() {
+            timerInterval = setInterval(function () {
+                sessionSeconds++;
+                var h = Math.floor(sessionSeconds / 3600).toString().padStart(2, '0');
+                var m = Math.floor((sessionSeconds % 3600) / 60).toString().padStart(2, '0');
+                var s = (sessionSeconds % 60).toString().padStart(2, '0');
+                $('#session-timer').html(h + ':' + m + ':' + s + ' <small class="fs-xs text-muted">Hrs</small>');
+            }, 1000);
+        }
+
+        if ($('#clock-btn').length > 0 && isClockedIn) {
+            startTimer();
+        }
+
+        // --- 3. Dynamic Clock In/Out button interaction ---
+        $('#clock-btn').on('click', function () {
+            var $btn = $(this);
+            var status = $btn.attr('data-status');
+
+            if (status === 'checked-in') {
+                // Clock out action
+                clearInterval(timerInterval);
+                isClockedIn = false;
+                $btn.attr('data-status', 'checked-out')
+                    .removeClass('btn-success')
+                    .addClass('btn-primary')
+                    .html('<i data-lucide="log-in" class="me-2" style="width:16px;height:16px;"></i> <span>Clock In Now</span>');
+                
+                $btn.removeClass('pulse-btn');
+                $('#clock-in-info').html('<i data-lucide="info" class="me-1 align-text-bottom" style="width:12px;height:12px;display:inline-block;"></i> You clocked out at <strong>' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + '</strong> today.');
+                toastr.info("You have successfully clocked out from your work session.");
+            } else {
+                // Clock in action
+                isClockedIn = true;
+                $btn.attr('data-status', 'checked-in')
+                    .removeClass('btn-primary')
+                    .addClass('btn-success')
+                    .html('<i data-lucide="log-out" class="me-2" style="width:16px;height:16px;"></i> <span>Clock Out Now</span>');
+                
+                $btn.addClass('pulse-btn');
+                startTimer();
+                var newCheckIn = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                $('#clock-in-info').html('<i data-lucide="info" class="me-1 align-text-bottom" style="width:12px;height:12px;display:inline-block;"></i> You logged in at <strong class="text-success">' + newCheckIn + '</strong> today.');
+                toastr.success("Welcome back! Your work session has started.");
+            }
+
+            // Re-initialize Lucide icons to draw new icons inside the button
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        });
+
+        // --- 4. Interactive Manager Approval Panel ---
+        $(document).on('click', '.btn-success, .btn-outline-danger', function (e) {
+            var $btn = $(this);
+            
+            // Ignore click if it's the Work clock button
+            if ($btn.attr('id') === 'clock-btn') return;
+
+            e.preventDefault();
+            var isApprove = $btn.hasClass('btn-success');
+            var $panel = $btn.closest('.p-3.border');
+
+            if (isApprove) {
+                toastr.success("Leave request approved successfully.");
+            } else {
+                toastr.warning("Leave request rejected.");
+            }
+
+            // Fade out and remove the panel smoothly
+            $panel.fadeOut(400, function () {
+                $panel.remove();
+                // If no pending elements are left, append placeholder text
+                var parentBody = $btn.closest('.card-body');
+                if (parentBody.find('.p-3.border').length === 0) {
+                    parentBody.append('<p class="text-muted text-center py-4 my-0">No pending leave requests left to approve.</p>');
+                }
+            });
+        });
+    });
+</script>
         </div>
     }
 
