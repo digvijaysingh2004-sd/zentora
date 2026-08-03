@@ -729,7 +729,7 @@ namespace zentoraHRMS.Controllers
             return Json(list, JsonRequestBehavior.AllowGet);
         }
         #endregion
-            public ActionResult Resignations() { return View(); }
+        public ActionResult Resignations() { return View(); }
         public ActionResult Terminations() { return View(); }
         public ActionResult Warnings() { return View(); }
         public ActionResult Trips() { return View(); }

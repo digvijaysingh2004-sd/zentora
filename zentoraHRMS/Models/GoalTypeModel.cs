@@ -12,6 +12,6 @@ namespace zentoraHRMS.Models
         public DateTime? CreateDate { get; set; }
         public string UpdatedBy { get; set; }
         public DateTime? UpdateDate { get; set; }
-        public bool SystemAddon { get; set; }
+        public DateTime? SystemAddon { get; set; }
     }
 }

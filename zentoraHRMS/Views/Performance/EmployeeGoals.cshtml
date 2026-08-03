@@ -52,7 +52,29 @@
                                     </td>
                                     <td>
                                         <div class="d-flex align-items-center">
-                                            <img src="@(string.IsNullOrEmpty(g.ProfileImage) ? "/assets/images/users/user-1.jpg" : g.ProfileImage)" alt="avatar" class="rounded-circle me-2" style="width: 32px; height: 32px; object-fit: cover;" onerror="this.src='/assets/images/users/user-1.jpg';" />
+                                            @if (!string.IsNullOrEmpty(g.ProfileImage))
+                                            {
+                                                <img src="@g.ProfileImage" alt="avatar" class="rounded-circle me-2" style="width: 32px; height: 32px; object-fit: cover;" onerror="this.onerror=null; this.src='/assets/images/users/user-1.jpg';" />
+                                            }
+                                            else
+                                            {
+                                                string initials = "";
+                                                if (!string.IsNullOrEmpty(g.EmployeeName))
+                                                {
+                                                    var parts = g.EmployeeName.Trim().Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                                                    if (parts.Length > 0)
+                                                    {
+                                                        initials += parts[0][0];
+                                                        if (parts.Length > 1)
+                                                        {
+                                                            initials += parts[parts.Length - 1][0];
+                                                        }
+                                                    }
+                                                }
+                                                <div class="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center shadow-sm fw-semibold me-2" style="width: 32px; height: 32px; font-size: 10px; min-width: 32px;">
+                                                    @initials.ToUpper()
+                                                </div>
+                                            }
                                             <div>
                                                 <div class="fw-semibold text-dark fs-sm">@g.EmployeeName</div>
                                                 <div class="text-muted fs-xxs">@(string.IsNullOrEmpty(g.Email) ? "no-email@example.org" : g.Email)</div>
@@ -286,34 +308,34 @@
                     <div class="row g-3 mb-2">
                         <!-- Left Column -->
                         <div class="col-md-6">
-                            <div class="mb-3.5">
-                                <span class="fs-xxs text-uppercase text-muted fw-semibold d-flex align-items-center gap-1.5 mb-1">
-                                    <i data-lucide="target" class="text-muted" style="width: 14px; height: 14px; vertical-align: middle;"></i> Goal Title
+                            <div style="margin-bottom: 24px;">
+                                <span class="fs-xxs text-uppercase text-muted fw-semibold d-flex align-items-center mb-2">
+                                    <i data-lucide="target" class="text-muted" style="width: 14px; height: 14px; vertical-align: middle; margin-right: 6px;"></i>&nbsp;Goal Title
                                 </span>
-                                <div class="fw-bold text-dark fs-sm" id="vGoalTitle">-</div>
+                                <div class="fw-bold fs-sm" id="vGoalTitle" style="margin-top: 4px;">-</div>
                             </div>
                             
-                            <div class="mb-3.5">
-                                <span class="fs-xxs text-uppercase text-muted fw-semibold d-flex align-items-center gap-1.5 mb-1">
-                                    <i data-lucide="tag" class="text-muted" style="width: 14px; height: 14px; vertical-align: middle;"></i> Goal Type
+                            <div style="margin-bottom: 24px;">
+                                <span class="fs-xxs text-uppercase text-muted fw-semibold d-flex align-items-center mb-2">
+                                    <i data-lucide="tag" class="text-muted" style="width: 14px; height: 14px; vertical-align: middle; margin-right: 6px;"></i>&nbsp;Goal Type
                                 </span>
-                                <div>
+                                <div style="margin-top: 6px;">
                                     <span class="badge bg-light text-secondary border border-light-subtle rounded-pill px-2.5 py-1" id="vGoalTypeName">-</span>
                                 </div>
                             </div>
 
-                            <div class="mb-3.5">
-                                <span class="fs-xxs text-uppercase text-muted fw-semibold d-flex align-items-center gap-1.5 mb-1">
-                                    <i data-lucide="calendar" class="text-muted" style="width: 14px; height: 14px; vertical-align: middle;"></i> Start Date
+                            <div style="margin-bottom: 24px;">
+                                <span class="fs-xxs text-uppercase text-muted fw-semibold d-flex align-items-center mb-2">
+                                    <i data-lucide="calendar" class="text-muted" style="width: 14px; height: 14px; vertical-align: middle; margin-right: 6px;"></i>&nbsp;Start Date
                                 </span>
-                                <div class="fs-sm text-dark fw-bold" id="vStartDate">-</div>
+                                <div class="fs-sm fw-bold" id="vStartDate" style="margin-top: 4px;">-</div>
                             </div>
 
-                            <div class="mb-0">
-                                <span class="fs-xxs text-uppercase text-muted fw-semibold d-flex align-items-center gap-1.5 mb-1">
-                                    <i data-lucide="info" class="text-muted" style="width: 14px; height: 14px; vertical-align: middle;"></i> Status
+                            <div style="margin-bottom: 24px;">
+                                <span class="fs-xxs text-uppercase text-muted fw-semibold d-flex align-items-center mb-2">
+                                    <i data-lucide="info" class="text-muted" style="width: 14px; height: 14px; vertical-align: middle; margin-right: 6px;"></i>&nbsp;Status
                                 </span>
-                                <div class="d-flex align-items-center gap-2">
+                                <div class="d-flex align-items-center gap-2" style="margin-top: 6px;">
                                     <span class="badge px-2.5 py-1" id="vStatus">-</span>
                                     <span class="badge bg-light text-dark border border-light-subtle px-2.5 py-1 d-none" id="vSystemAddon">System Addon</span>
                                 </div>
@@ -322,53 +344,54 @@
 
                         <!-- Right Column -->
                         <div class="col-md-6">
-                            <div class="mb-3.5">
-                                <span class="fs-xxs text-uppercase text-muted fw-semibold d-flex align-items-center gap-1.5 mb-1">
-                                    <i data-lucide="user" class="text-muted" style="width: 14px; height: 14px; vertical-align: middle;"></i> Employee
+                            <div style="margin-bottom: 24px;">
+                                <span class="fs-xxs text-uppercase text-muted fw-semibold d-flex align-items-center mb-2">
+                                    <i data-lucide="user" class="text-muted" style="width: 14px; height: 14px; vertical-align: middle; margin-right: 6px;"></i>&nbsp;Employee
                                 </span>
-                                <div class="d-flex align-items-center gap-2">
-                                    <img id="vAvatar" src="/assets/images/users/user-1.jpg" alt="avatar" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;" onerror="this.src='/assets/images/users/user-1.jpg';" />
+                                <div class="d-flex align-items-center gap-2" style="margin-top: 6px;">
+                                    <img id="vAvatar" src="/assets/images/users/user-1.jpg" alt="avatar" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;" onerror="this.onerror=null; this.src='/assets/images/users/user-1.jpg';" />
+                                    <div id="vAvatarInitials" class="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center shadow-sm fw-semibold d-none" style="width: 32px; height: 32px; font-size: 10px; min-width: 32px;"></div>
                                     <div>
-                                        <div class="fw-bold text-dark fs-sm mb-0" id="vEmployeeName">-</div>
+                                        <div class="fw-bold fs-sm mb-0" id="vEmployeeName">-</div>
                                         <div class="text-muted fs-xxs" id="vEmployeeEmail" style="font-size: 10px; margin-top: -2px;">-</div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="mb-3.5">
-                                <span class="fs-xxs text-uppercase text-muted fw-semibold d-flex align-items-center gap-1.5 mb-1">
-                                    <i data-lucide="compass" class="text-muted" style="width: 14px; height: 14px; vertical-align: middle;"></i> Target
+                            <div style="margin-bottom: 24px;">
+                                <span class="fs-xxs text-uppercase text-muted fw-semibold d-flex align-items-center mb-2">
+                                    <i data-lucide="compass" class="text-muted" style="width: 14px; height: 14px; vertical-align: middle; margin-right: 6px;"></i>&nbsp;Target
                                 </span>
-                                <div class="fs-sm text-dark fw-bold" id="vTarget">-</div>
+                                <div class="fs-sm fw-bold" id="vTarget" style="margin-top: 4px;">-</div>
                             </div>
 
-                            <div class="mb-3.5">
-                                <span class="fs-xxs text-uppercase text-muted fw-semibold d-flex align-items-center gap-1.5 mb-1">
-                                    <i data-lucide="calendar" class="text-muted" style="width: 14px; height: 14px; vertical-align: middle;"></i> End Date
+                            <div style="margin-bottom: 24px;">
+                                <span class="fs-xxs text-uppercase text-muted fw-semibold d-flex align-items-center mb-2">
+                                    <i data-lucide="calendar" class="text-muted" style="width: 14px; height: 14px; vertical-align: middle; margin-right: 6px;"></i>&nbsp;End Date
                                 </span>
-                                <div class="fs-sm text-dark fw-bold" id="vEndDate">-</div>
+                                <div class="fs-sm fw-bold" id="vEndDate" style="margin-top: 4px;">-</div>
                             </div>
 
-                            <div class="mb-0">
-                                <span class="fs-xxs text-uppercase text-muted fw-semibold d-flex align-items-center gap-1.5 mb-1">
-                                    <i data-lucide="percent" class="text-muted" style="width: 14px; height: 14px; vertical-align: middle;"></i> Progress
+                            <div style="margin-bottom: 24px;">
+                                <span class="fs-xxs text-uppercase text-muted fw-semibold d-flex align-items-center mb-2">
+                                    <i data-lucide="percent" class="text-muted" style="width: 14px; height: 14px; vertical-align: middle; margin-right: 6px;"></i>&nbsp;Progress
                                 </span>
-                                <div class="d-flex align-items-center gap-2 mt-1.5" style="min-width: 120px;">
-                                    <div class="progress progress-sm rounded-pill flex-grow-1" style="height: 6px; background-color: #f0f0f5; margin-bottom: 0;">
+                                <div class="d-flex align-items-center gap-2" style="margin-top: 6px; min-width: 120px;">
+                                    <div class="progress progress-sm rounded-pill flex-grow-1" style="height: 6px; background-color: var(--ins-border-color); border: 1px solid var(--ins-border-color); margin-bottom: 0;">
                                         <div id="vProgressBar" class="progress-bar bg-success" role="progressbar" style="width: 0%"></div>
                                     </div>
-                                    <span class="fw-bold text-dark fs-xs" id="vProgress">0%</span>
+                                    <span class="fw-bold fs-xs" id="vProgress">0%</span>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Description spanning full width -->
-                    <div class="border-top pt-3 mt-3">
-                        <span class="fs-xxs text-uppercase text-muted fw-semibold d-flex align-items-center gap-1.5 mb-1">
-                            <i data-lucide="align-left" class="text-muted" style="width: 14px; height: 14px; vertical-align: middle;"></i> Description
+                    <div class="border-top pt-4 mt-3">
+                        <span class="fs-xxs text-uppercase text-muted fw-semibold d-flex align-items-center mb-2">
+                            <i data-lucide="align-left" class="text-muted" style="width: 14px; height: 14px; vertical-align: middle; margin-right: 6px;"></i>&nbsp;Description
                         </span>
-                        <div class="fs-sm text-dark fw-medium bg-light p-2.5 rounded border border-light-subtle" id="vDescription" style="white-space: pre-wrap; max-height: 150px; overflow-y: auto;">-</div>
+                        <div class="fs-sm fw-medium" id="vDescription" style="white-space: pre-wrap; max-height: 150px; overflow-y: auto;">-</div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -588,7 +611,23 @@
                 if (data) {
                     $("#vEmployeeName").text(data.EmployeeName);
                     $("#vEmployeeEmail").text(data.Email || "no-email@example.org");
-                    $("#vAvatar").attr("src", data.ProfileImage || "/assets/images/users/user-1.jpg");
+                    if (data.ProfileImage && data.ProfileImage.trim() !== '') {
+                        $("#vAvatar").attr("src", data.ProfileImage).removeClass("d-none");
+                        $("#vAvatarInitials").addClass("d-none");
+                    } else {
+                        $("#vAvatar").addClass("d-none");
+                        var initials = "";
+                        if (data.EmployeeName) {
+                            var parts = data.EmployeeName.trim().split(/\s+/);
+                            if (parts.length > 0) {
+                                initials += parts[0].charAt(0);
+                                if (parts.length > 1) {
+                                    initials += parts[parts.length - 1].charAt(0);
+                                }
+                            }
+                        }
+                        $("#vAvatarInitials").text(initials.toUpperCase()).removeClass("d-none");
+                    }
                     $("#vGoalTitle").text(data.GoalTitle);
                     $("#vGoalTypeName").text(data.GoalTypeName);
                     $("#vDescription").text(data.Description || "-");

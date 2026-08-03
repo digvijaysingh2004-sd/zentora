@@ -29,6 +29,48 @@ namespace zentoraHRMS.Controllers
             {
                 con.Open();
 
+                // 0. Run Migration: Convert SystemAddon from BIT to DATETIME if it exists as BIT
+                // This must run before table checks to avoid parser implicit conversion compile errors.
+                string migrateGoalTypes = @"
+                    IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'GoalTypes' AND COLUMN_NAME = 'SystemAddon' AND DATA_TYPE = 'bit')
+                    BEGIN
+                        DECLARE @ConstraintNameGT NVARCHAR(255);
+                        SELECT @ConstraintNameGT = dc.name 
+                        FROM sys.default_constraints dc
+                        JOIN sys.columns c ON dc.parent_column_id = c.column_id AND dc.parent_object_id = c.object_id
+                        WHERE c.name = 'SystemAddon' AND OBJECT_NAME(dc.parent_object_id) = 'GoalTypes';
+                        
+                        IF @ConstraintNameGT IS NOT NULL
+                            EXEC('ALTER TABLE dbo.GoalTypes DROP CONSTRAINT ' + @ConstraintNameGT);
+                            
+                        ALTER TABLE dbo.GoalTypes DROP COLUMN SystemAddon;
+                        ALTER TABLE dbo.GoalTypes ADD SystemAddon DATETIME NULL DEFAULT GETDATE();
+                    END";
+                using (SqlCommand cmd = new SqlCommand(migrateGoalTypes, con))
+                {
+                    cmd.ExecuteNonQuery();
+                }
+
+                string migrateEmployeeGoals = @"
+                    IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'EmployeeGoals' AND COLUMN_NAME = 'SystemAddon' AND DATA_TYPE = 'bit')
+                    BEGIN
+                        DECLARE @ConstraintNameEG NVARCHAR(255);
+                        SELECT @ConstraintNameEG = dc.name 
+                        FROM sys.default_constraints dc
+                        JOIN sys.columns c ON dc.parent_column_id = c.column_id AND dc.parent_object_id = c.object_id
+                        WHERE c.name = 'SystemAddon' AND OBJECT_NAME(dc.parent_object_id) = 'EmployeeGoals';
+                        
+                        IF @ConstraintNameEG IS NOT NULL
+                            EXEC('ALTER TABLE dbo.EmployeeGoals DROP CONSTRAINT ' + @ConstraintNameEG);
+                            
+                        ALTER TABLE dbo.EmployeeGoals DROP COLUMN SystemAddon;
+                        ALTER TABLE dbo.EmployeeGoals ADD SystemAddon DATETIME NULL DEFAULT GETDATE();
+                    END";
+                using (SqlCommand cmd = new SqlCommand(migrateEmployeeGoals, con))
+                {
+                    cmd.ExecuteNonQuery();
+                }
+
                 // 1. Create IndicatorCategories Table if not exists
                 string createCategoriesQuery = @"
                     IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'IndicatorCategories')
@@ -115,14 +157,14 @@ namespace zentoraHRMS.Controllers
                             CreateDate DATETIME NULL DEFAULT GETDATE(),
                             UpdatedBy NVARCHAR(100) NULL,
                             UpdateDate DATETIME NULL,
-                            SystemAddon BIT NOT NULL DEFAULT 0
+                            SystemAddon DATETIME NULL DEFAULT GETDATE()
                         );
                         
                         -- Seed some initial data
                         INSERT INTO dbo.GoalTypes (GoalTypeName, Description, Status, CreatedBy, CreateDate, SystemAddon) VALUES
-                        (N'Technical Goal', N'Goals related to improving technical skills, architecture, and coding quality.', N'Active', N'System', GETDATE(), 1),
-                        (N'Behavioral Goal', N'Goals related to communication, leadership, teamwork, and ownership.', N'Active', N'System', GETDATE(), 1),
-                        (N'Project Delivery Goal', N'Goals related to project milestones, delivery timelines, and client satisfaction.', N'Active', N'System', GETDATE(), 1);
+                        (N'Technical Goal', N'Goals related to improving technical skills, architecture, and coding quality.', N'Active', N'System', GETDATE(), GETDATE()),
+                        (N'Behavioral Goal', N'Goals related to communication, leadership, teamwork, and ownership.', N'Active', N'System', GETDATE(), GETDATE()),
+                        (N'Project Delivery Goal', N'Goals related to project milestones, delivery timelines, and client satisfaction.', N'Active', N'System', GETDATE(), GETDATE());
                     END";
 
                 using (SqlCommand cmd = new SqlCommand(createGoalTypesQuery, con))
@@ -149,7 +191,7 @@ namespace zentoraHRMS.Controllers
                             CreateBy NVARCHAR(100) NULL,
                             UpdateDate DATETIME NULL,
                             UpdateBy NVARCHAR(100) NULL,
-                            SystemAddon BIT NOT NULL DEFAULT 0,
+                            SystemAddon DATETIME NULL DEFAULT GETDATE(),
                             CONSTRAINT FK_EmployeeGoals_EmployeeDetails FOREIGN KEY (EmployeeId) REFERENCES dbo.EmployeeDetails(Id) ON DELETE CASCADE,
                             CONSTRAINT FK_EmployeeGoals_GoalTypes FOREIGN KEY (GoalTypeId) REFERENCES dbo.GoalTypes(GoalTypeId) ON DELETE CASCADE
                         );
@@ -526,7 +568,7 @@ namespace zentoraHRMS.Controllers
                                 CreateDate = reader["CreateDate"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(reader["CreateDate"]) : null,
                                 UpdatedBy = reader["UpdatedBy"].ToString(),
                                 UpdateDate = reader["UpdateDate"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(reader["UpdateDate"]) : null,
-                                SystemAddon = Convert.ToBoolean(reader["SystemAddon"])
+                                SystemAddon = reader["SystemAddon"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(reader["SystemAddon"]) : null
                             });
                         }
                     }
@@ -544,7 +586,7 @@ namespace zentoraHRMS.Controllers
                 using (SqlConnection con = new SqlConnection(connectionString))
                 {
                     string query = @"INSERT INTO GoalTypes (GoalTypeName, Description, Status, CreatedBy, CreateDate, SystemAddon) 
-                                     VALUES (@GoalTypeName, @Description, @Status, @CreatedBy, GETDATE(), 0)";
+                                     VALUES (@GoalTypeName, @Description, @Status, @CreatedBy, GETDATE(), GETDATE())";
                     using (SqlCommand cmd = new SqlCommand(query, con))
                     {
                         cmd.Parameters.AddWithValue("@GoalTypeName", model.GoalTypeName ?? "");
@@ -583,7 +625,7 @@ namespace zentoraHRMS.Controllers
                                 GoalTypeName = reader["GoalTypeName"].ToString(),
                                 Description = reader["Description"].ToString(),
                                 Status = reader["Status"].ToString(),
-                                SystemAddon = Convert.ToBoolean(reader["SystemAddon"])
+                                SystemAddon = reader["SystemAddon"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(reader["SystemAddon"]) : null
                             };
                         }
                     }
@@ -695,7 +737,7 @@ namespace zentoraHRMS.Controllers
                                 CreateDate = reader["CreateDate"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(reader["CreateDate"]) : null,
                                 UpdateBy = reader["UpdateBy"] != DBNull.Value ? reader["UpdateBy"].ToString() : "",
                                 UpdateDate = reader["UpdateDate"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(reader["UpdateDate"]) : null,
-                                SystemAddon = Convert.ToBoolean(reader["SystemAddon"])
+                                SystemAddon = reader["SystemAddon"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(reader["SystemAddon"]) : null
                             });
                         }
                     }
@@ -718,7 +760,7 @@ namespace zentoraHRMS.Controllers
                     string query = @"INSERT INTO EmployeeGoals 
                                      (EmployeeId, GoalTypeId, GoalTitle, Description, StartDate, EndDate, Target, Progress, Status, CreateBy, CreateDate, SystemAddon) 
                                      VALUES 
-                                     (@EmployeeId, @GoalTypeId, @GoalTitle, @Description, @StartDate, @EndDate, @Target, @Progress, @Status, @CreateBy, GETDATE(), 0)";
+                                     (@EmployeeId, @GoalTypeId, @GoalTitle, @Description, @StartDate, @EndDate, @Target, @Progress, @Status, @CreateBy, GETDATE(), GETDATE())";
                     using (SqlCommand cmd = new SqlCommand(query, con))
                     {
                         cmd.Parameters.AddWithValue("@EmployeeId", model.EmployeeId);
@@ -784,7 +826,7 @@ namespace zentoraHRMS.Controllers
                                 Target = reader["Target"] != DBNull.Value ? reader["Target"].ToString() : "",
                                 Progress = reader["Progress"] != DBNull.Value ? Convert.ToInt32(reader["Progress"]) : 0,
                                 Status = reader["Status"] != DBNull.Value ? reader["Status"].ToString() : "Active",
-                                SystemAddon = Convert.ToBoolean(reader["SystemAddon"])
+                                SystemAddon = reader["SystemAddon"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(reader["SystemAddon"]) : null
                             };
                         }
                     }
