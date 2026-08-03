@@ -49,22 +49,6 @@
                                         <span class="badge bg-light text-secondary border border-light-subtle rounded-pill px-2 py-0.5" style="font-size: 10px;">
                                             <i data-lucide="tag" class="fs-xxs me-1" style="width: 10px; height: 10px; vertical-align: middle;"></i>@g.GoalTypeName
                                         </span>
-                                        <div class="text-muted fs-xs mt-1.5 desc-container">
-                                            @if (string.IsNullOrEmpty(g.Description))
-                                            {
-                                                <span>-</span>
-                                            }
-                                            else if (g.Description.Length > 80)
-                                            {
-                                                <span class="desc-short">@g.Description.Substring(0, 80)...</span>
-                                                <span class="desc-full d-none">@g.Description</span>
-                                                <a href="javascript:void(0);" class="text-primary ms-1 toggle-desc fs-xxs fw-medium" onclick="ToggleDescription(this)">Show More</a>
-                                            }
-                                            else
-                                            {
-                                                <span>@g.Description</span>
-                                            }
-                                        </div>
                                     </td>
                                     <td>
                                         <div class="d-flex align-items-center">
@@ -148,6 +132,7 @@
                                         }
                                     </td>
                                     <td>
+                                        <a href="javascript:void(0);" onclick="ViewGoal(@g.EmployeeGoalId)" class="btn btn-sm btn-soft-primary mt-1" title="View"><i data-lucide="eye"></i></a>
                                         <a href="javascript:void(0);" onclick="UpdateGoal(@g.EmployeeGoalId)" class="btn btn-sm btn-soft-info mt-1" title="Update"><i data-lucide="square-pen"></i></a>
                                         <a href="javascript:void(0);" onclick="DeleteGoal(@g.EmployeeGoalId)" class="btn btn-sm btn-soft-danger mt-1" title="Delete"><i data-lucide="trash-2"></i></a>
                                     </td>
@@ -163,7 +148,7 @@
 
     <!-- Add Employee Goal Modal -->
     <div id="AddEmployeeGoalModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
                 <form id="AddGoalForm" class="needs-validation" novalidate method="post">
                     <div class="modal-header">
@@ -173,7 +158,7 @@
                     <div class="modal-body">
                         <div class="mb-3">
                             <label for="EmployeeId" class="form-label">Employee <span class="text-danger">*</span></label>
-                            <select class="form-select select-employee" id="EmployeeId" data-choices required>
+                            <select class="form-select select-employee" id="EmployeeId" required>
                                 <option value="">Select Employee</option>
                             </select>
                         </div>
@@ -229,7 +214,7 @@
 
     <!-- Update Employee Goal Modal -->
     <div id="UpdateEmployeeGoalModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
                 <form id="UpdateGoalForm" class="needs-validation" novalidate method="post">
                     <div class="modal-header">
@@ -240,7 +225,7 @@
                         <input type="hidden" id="update_goal_id" />
                         <div class="mb-3">
                             <label for="uEmployeeId" class="form-label">Employee <span class="text-danger">*</span></label>
-                            <select class="form-select select-employee" id="uEmployeeId" data-choices required>
+                            <select class="form-select select-employee" id="uEmployeeId" required>
                                 <option value="">Select Employee</option>
                             </select>
                         </div>
@@ -293,6 +278,76 @@
             </div>
         </div>
     </div>
+
+    <!-- View Employee Goal Modal -->
+    <div id="ViewEmployeeGoalModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Employee Goal Details</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="text-center mb-4">
+                        <img id="vAvatar" src="/assets/images/users/user-1.jpg" alt="avatar" class="rounded-circle mb-2" style="width: 70px; height: 70px; object-fit: cover; border: 3px solid #f5f3ff;" onerror="this.src='/assets/images/users/user-1.jpg';" />
+                        <h5 class="fw-bold text-dark mb-0" id="vEmployeeName">-</h5>
+                        <p class="text-muted fs-xs" id="vEmployeeEmail">-</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <span class="fs-xxs text-uppercase text-muted fw-bold d-block mb-1">Goal Title</span>
+                        <div class="fw-semibold text-dark fs-sm" id="vGoalTitle">-</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <span class="fs-xxs text-uppercase text-muted fw-bold d-block mb-1">Goal Type</span>
+                        <span class="badge bg-light text-secondary border border-light-subtle rounded-pill px-2.5 py-1" id="vGoalTypeName">-</span>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <span class="fs-xxs text-uppercase text-muted fw-bold d-block mb-1">Description</span>
+                        <div class="fs-sm text-dark bg-light p-2.5 rounded border border-light-subtle" id="vDescription" style="white-space: pre-wrap; max-height: 150px; overflow-y: auto;">-</div>
+                    </div>
+                    
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <span class="fs-xxs text-uppercase text-muted fw-bold d-block mb-1">Start Date</span>
+                            <div class="fs-sm text-dark fw-medium" id="vStartDate">-</div>
+                        </div>
+                        <div class="col-6">
+                            <span class="fs-xxs text-uppercase text-muted fw-bold d-block mb-1">End Date</span>
+                            <div class="fs-sm text-dark fw-medium" id="vEndDate">-</div>
+                        </div>
+                    </div>
+                    
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <span class="fs-xxs text-uppercase text-muted fw-bold d-block mb-1">Target</span>
+                            <div class="fs-sm text-dark fw-medium" id="vTarget">-</div>
+                        </div>
+                        <div class="col-6">
+                            <span class="fs-xxs text-uppercase text-muted fw-bold d-block mb-1">Progress</span>
+                            <div class="fs-sm text-dark fw-bold" id="vProgress">-</div>
+                        </div>
+                    </div>
+                    
+                    <div class="row g-2 mb-2">
+                        <div class="col-6">
+                            <span class="fs-xxs text-uppercase text-muted fw-bold d-block mb-1">Status</span>
+                            <span class="badge px-2.5 py-1 mt-0.5" id="vStatus">-</span>
+                        </div>
+                        <div class="col-6">
+                            <span class="fs-xxs text-uppercase text-muted fw-bold d-block mb-1">System Addon</span>
+                            <span class="badge bg-light text-dark border px-2.5 py-1 mt-0.5" id="vSystemAddon">-</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -301,7 +356,7 @@
         LoadDropdownData();
 
         // Refresh icons when modals open
-        $("#AddEmployeeGoalModal, #UpdateEmployeeGoalModal").on("shown.bs.modal", function () {
+        $("#AddEmployeeGoalModal, #UpdateEmployeeGoalModal, #ViewEmployeeGoalModal").on("shown.bs.modal", function () {
             if (window.lucide) {
                 lucide.createIcons();
             }
@@ -412,15 +467,23 @@
             url: '/Performance/GetActiveEmployees',
             type: 'GET',
             success: function (data) {
-                var selectEmp = $('.select-employee');
+                var selectEmpAdd = $('#EmployeeId');
+                var selectEmpEdit = $('#uEmployeeId');
+                
                 var s = '<option value="">Select Employee</option>';
                 if (data && data.length > 0) {
                     $.each(data, function (index, emp) {
                         var fullName = emp.FirstName + ' ' + emp.LastName;
-                        s += '<option value="' + emp.Id + '">' + fullName.trim() + " (" + emp.Username + ")</option>";
+                        var avatarUrl = emp.ProfileImage || "/assets/images/users/user-1.jpg";
+                        s += '<option value="' + emp.Id + '" data-custom-properties=\'{"avatar": "' + avatarUrl + '"}\'>' + fullName.trim() + '</option>';
                     });
                 }
-                selectEmp.html(s);
+                selectEmpAdd.html(s);
+                selectEmpEdit.html(s);
+
+                // Initialize Choices.js manually with custom template
+                initEmployeeChoices(document.getElementById("EmployeeId"));
+                initEmployeeChoices(document.getElementById("uEmployeeId"));
             }
         });
 
@@ -437,6 +500,48 @@
                     });
                 }
                 selectGt.html(s);
+            }
+        });
+    }
+
+    function initEmployeeChoices(el) {
+        if (!el) return;
+        if (el.choicesInstance) {
+            el.choicesInstance.destroy();
+        }
+        el.choicesInstance = new Choices(el, {
+            searchEnabled: true,
+            shouldSort: false,
+            placeholder: true,
+            placeholderValue: "Select Employee",
+            removeItemButton: false,
+            callbackOnCreateTemplates: function(template) {
+                return {
+                    item: (classNames, data) => {
+                        var avatar = "/assets/images/users/user-1.jpg";
+                        if (data.customProperties && data.customProperties.avatar) {
+                            avatar = data.customProperties.avatar;
+                        }
+                        return template(`
+                            <div class="${classNames.item} ${data.highlighted ? classNames.highlightedState : classNames.itemSelectable}" data-item data-id="${data.id}" data-value="${data.value}" ${data.active ? 'aria-selected="true"' : ''} ${data.disabled ? 'aria-disabled="true"' : ''}>
+                                <img src="${avatar}" class="rounded-circle me-2" style="width: 20px; height: 20px; object-fit: cover; vertical-align: middle;" onerror="this.src='/assets/images/users/user-1.jpg';" />
+                                <span style="vertical-align: middle;">${data.label}</span>
+                            </div>
+                        `);
+                    },
+                    choice: (classNames, data) => {
+                        var avatar = "/assets/images/users/user-1.jpg";
+                        if (data.customProperties && data.customProperties.avatar) {
+                            avatar = data.customProperties.avatar;
+                        }
+                        return template(`
+                            <div class="${classNames.item} ${classNames.itemChoice} ${data.disabled ? classNames.itemDisabled : classNames.itemSelectable}" data-select-option data-id="${data.id}" data-value="${data.value}" ${data.disabled ? 'aria-disabled="true"' : ''}>
+                                <img src="${avatar}" class="rounded-circle me-2" style="width: 20px; height: 20px; object-fit: cover; vertical-align: middle;" onerror="this.src='/assets/images/users/user-1.jpg';" />
+                                <span style="vertical-align: middle;">${data.label}</span>
+                            </div>
+                        `);
+                    }
+                };
             }
         });
     }
@@ -464,7 +569,7 @@
                         $("#uGoalTypeId").val(data.GoalTypeId);
                     }
 
-                    $("#uGoalTitle").val(data.uGoalTitle || data.GoalTitle);
+                    $("#uGoalTitle").val(data.GoalTitle);
                     $("#uDescription").val(data.Description);
                     $("#uStartDate").val(formatJsonDate(data.StartDate));
                     $("#uEndDate").val(formatJsonDate(data.EndDate));
@@ -480,6 +585,51 @@
 
                     $("#UpdateGoalForm").removeClass('was-validated');
                     $("#UpdateEmployeeGoalModal").modal("show");
+                }
+            },
+            error: function (xhr, status, error) {
+                alert("Failed to retrieve goal data: " + error);
+            }
+        });
+    }
+
+    function ViewGoal(id) {
+        $.ajax({
+            url: '/Performance/GetEmployeeGoalById',
+            type: 'GET',
+            data: { id: id },
+            success: function (data) {
+                if (data) {
+                    $("#vEmployeeName").text(data.EmployeeName);
+                    $("#vEmployeeEmail").text(data.Email || "no-email@example.org");
+                    $("#vAvatar").attr("src", data.ProfileImage || "/assets/images/users/user-1.jpg");
+                    $("#vGoalTitle").text(data.GoalTitle);
+                    $("#vGoalTypeName").text(data.GoalTypeName);
+                    $("#vDescription").text(data.Description || "-");
+                    $("#vStartDate").text(data.StartDate ? displayDate(data.StartDate) : "-");
+                    $("#vEndDate").text(data.EndDate ? displayDate(data.EndDate) : "-");
+                    $("#vTarget").text(data.Target || "-");
+                    $("#vProgress").text(data.Progress + "%");
+                    
+                    var statusEl = $("#vStatus");
+                    statusEl.removeClass().addClass("badge");
+                    if (data.Status === "Completed" || data.Status === "Achieved") {
+                        statusEl.addClass("bg-success-subtle text-success");
+                    } else if (data.Status === "In Progress") {
+                        statusEl.addClass("bg-primary-subtle text-primary");
+                    } else if (data.Status === "Deferred") {
+                        statusEl.addClass("bg-warning-subtle text-warning");
+                    } else if (data.Status === "Cancelled") {
+                        statusEl.addClass("bg-danger-subtle text-danger");
+                    } else {
+                        statusEl.addClass("bg-info-subtle text-info");
+                    }
+                    statusEl.text(data.Status);
+
+                    var addonEl = $("#vSystemAddon");
+                    addonEl.text(data.SystemAddon ? "Yes" : "No");
+
+                    $("#ViewEmployeeGoalModal").modal("show");
                 }
             },
             error: function (xhr, status, error) {
@@ -526,6 +676,18 @@
         if (day.length < 2) day = '0' + day;
 
         return [year, month, day].join('-');
+    }
+
+    function displayDate(jsonDate) {
+        if (!jsonDate) return "-";
+        var date;
+        if (typeof jsonDate === 'string' && jsonDate.indexOf('/Date(') !== -1) {
+            date = new Date(parseInt(jsonDate.replace(/\/Date\((\d+)\)\//, '$1')));
+        } else {
+            date = new Date(jsonDate);
+        }
+        if (isNaN(date.getTime())) return "-";
+        return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
     }
 
     function ToggleDescription(btn) {

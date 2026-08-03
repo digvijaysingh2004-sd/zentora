@@ -748,8 +748,18 @@ namespace zentoraHRMS.Controllers
             EmployeeGoalModel model = null;
             using (SqlConnection con = new SqlConnection(connectionString))
             {
-                string query = @"SELECT EmployeeGoalId, EmployeeId, GoalTypeId, GoalTitle, Description, StartDate, EndDate, Target, Progress, Status, SystemAddon 
-                                 FROM EmployeeGoals WHERE EmployeeGoalId = @EmployeeGoalId";
+                string query = @"
+                    SELECT eg.EmployeeGoalId, eg.EmployeeId, 
+                           (emp.FirstName + ' ' + ISNULL(emp.LastName, '')) AS EmployeeName, 
+                           emp.ProfileImage, emp.Email,
+                           eg.GoalTypeId, gt.GoalTypeName, eg.GoalTitle, eg.Description, 
+                           eg.StartDate, eg.EndDate, eg.Target, eg.Progress, eg.Status, 
+                           eg.SystemAddon 
+                    FROM EmployeeGoals eg
+                    INNER JOIN EmployeeDetails emp ON eg.EmployeeId = emp.Id
+                    INNER JOIN GoalTypes gt ON eg.GoalTypeId = gt.GoalTypeId
+                    WHERE eg.EmployeeGoalId = @EmployeeGoalId";
+                
                 using (SqlCommand cmd = new SqlCommand(query, con))
                 {
                     cmd.Parameters.AddWithValue("@EmployeeGoalId", id);
@@ -762,7 +772,11 @@ namespace zentoraHRMS.Controllers
                             {
                                 EmployeeGoalId = Convert.ToInt32(reader["EmployeeGoalId"]),
                                 EmployeeId = Convert.ToInt32(reader["EmployeeId"]),
+                                EmployeeName = reader["EmployeeName"].ToString(),
+                                ProfileImage = reader["ProfileImage"] != DBNull.Value ? reader["ProfileImage"].ToString() : "",
+                                Email = reader["Email"] != DBNull.Value ? reader["Email"].ToString() : "",
                                 GoalTypeId = Convert.ToInt32(reader["GoalTypeId"]),
+                                GoalTypeName = reader["GoalTypeName"].ToString(),
                                 GoalTitle = reader["GoalTitle"].ToString(),
                                 Description = reader["Description"] != DBNull.Value ? reader["Description"].ToString() : "",
                                 StartDate = reader["StartDate"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(reader["StartDate"]) : null,
@@ -879,7 +893,7 @@ namespace zentoraHRMS.Controllers
             List<EmployeeModel> list = new List<EmployeeModel>();
             using (SqlConnection con = new SqlConnection(connectionString))
             {
-                string query = "SELECT Id, FirstName, LastName, Username FROM EmployeeDetails WHERE IsDeleted = 0 AND IsActive = 1";
+                string query = "SELECT Id, FirstName, LastName, Username, ProfileImage FROM EmployeeDetails WHERE IsDeleted = 0 AND IsActive = 1";
                 using (SqlCommand cmd = new SqlCommand(query, con))
                 {
                     con.Open();
@@ -891,7 +905,8 @@ namespace zentoraHRMS.Controllers
                             {
                                 Id = Convert.ToInt32(reader["Id"]),
                                 FirstName = reader["FirstName"].ToString(),
-                                LastName = reader["LastName"] != DBNull.Value ? reader["LastName"].ToString() : ""
+                                LastName = reader["LastName"] != DBNull.Value ? reader["LastName"].ToString() : "",
+                                ProfileImage = reader["ProfileImage"] != DBNull.Value ? reader["ProfileImage"].ToString() : ""
                             });
                         }
                     }
