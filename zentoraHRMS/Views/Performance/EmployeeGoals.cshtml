@@ -93,14 +93,7 @@
                                     <td>
                                         <div class="d-flex align-items-center gap-2" style="min-width: 130px;">
                                             <div class="progress progress-sm rounded-pill flex-grow-1" style="height: 6px; background-color: #f0f0f5; margin-bottom: 0;">
-                                                @{
-                                                    string progressBg = "bg-primary";
-                                                    if (g.Progress >= 100) { progressBg = "bg-success"; }
-                                                    else if (g.Progress >= 75) { progressBg = "bg-info"; }
-                                                    else if (g.Progress >= 35) { progressBg = "bg-warning"; }
-                                                    else { progressBg = "bg-danger"; }
-                                                }
-                                                <div class="progress-bar @progressBg" role="progressbar" style="width: @g.Progress%"></div>
+                                                <div class="progress-bar bg-success" role="progressbar" style="width: @g.Progress%"></div>
                                             </div>
                                             <span class="fw-medium text-dark fs-xxs">@g.Progress%</span>
                                         </div>
@@ -277,65 +270,105 @@
 
     <!-- View Employee Goal Modal -->
     <div id="ViewEmployeeGoalModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" style="max-width: 650px;">
             <div class="modal-content border border-light-subtle" style="border-radius: 6px; box-shadow: 0 5px 15px rgba(0,0,0,0.08);">
-                <div class="modal-header">
-                    <h4 class="modal-title">Employee Goal Details</h4>
+                <div class="modal-header d-flex align-items-center">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="bg-success-subtle p-2 rounded-3 text-success d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
+                            <i data-lucide="target" class="fs-md" style="width: 20px; height: 20px;"></i>
+                        </div>
+                        <h4 class="modal-title mb-0" style="font-weight: 600;">Employee Goal Details</h4>
+                    </div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body p-4">
-                    <div class="text-center mb-4">
-                        <img id="vAvatar" src="/assets/images/users/user-1.jpg" alt="avatar" class="rounded-circle mb-2" style="width: 70px; height: 70px; object-fit: cover; border: 3px solid #f5f3ff;" onerror="this.src='/assets/images/users/user-1.jpg';" />
-                        <h5 class="fw-bold text-dark mb-0" id="vEmployeeName">-</h5>
-                        <p class="text-muted fs-xs" id="vEmployeeEmail">-</p>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <span class="fs-xxs text-uppercase text-muted fw-bold d-block mb-1">Goal Title</span>
-                        <div class="fw-semibold text-dark fs-sm" id="vGoalTitle">-</div>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <span class="fs-xxs text-uppercase text-muted fw-bold d-block mb-1">Goal Type</span>
-                        <span class="badge bg-light text-secondary border border-light-subtle rounded-pill px-2.5 py-1" id="vGoalTypeName">-</span>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <span class="fs-xxs text-uppercase text-muted fw-bold d-block mb-1">Description</span>
-                        <div class="fs-sm text-dark bg-light p-2.5 rounded border border-light-subtle" id="vDescription" style="white-space: pre-wrap; max-height: 150px; overflow-y: auto;">-</div>
-                    </div>
-                    
-                    <div class="row g-2 mb-3">
-                        <div class="col-6">
-                            <span class="fs-xxs text-uppercase text-muted fw-bold d-block mb-1">Start Date</span>
-                            <div class="fs-sm text-dark fw-medium" id="vStartDate">-</div>
+                    <!-- Two column grid layout matching screenshot -->
+                    <div class="row g-3 mb-2">
+                        <!-- Left Column -->
+                        <div class="col-md-6">
+                            <div class="mb-3.5">
+                                <span class="fs-xxs text-uppercase text-muted fw-semibold d-flex align-items-center gap-1.5 mb-1">
+                                    <i data-lucide="target" class="text-muted" style="width: 14px; height: 14px; vertical-align: middle;"></i> Goal Title
+                                </span>
+                                <div class="fw-bold text-dark fs-sm" id="vGoalTitle">-</div>
+                            </div>
+                            
+                            <div class="mb-3.5">
+                                <span class="fs-xxs text-uppercase text-muted fw-semibold d-flex align-items-center gap-1.5 mb-1">
+                                    <i data-lucide="tag" class="text-muted" style="width: 14px; height: 14px; vertical-align: middle;"></i> Goal Type
+                                </span>
+                                <div>
+                                    <span class="badge bg-light text-secondary border border-light-subtle rounded-pill px-2.5 py-1" id="vGoalTypeName">-</span>
+                                </div>
+                            </div>
+
+                            <div class="mb-3.5">
+                                <span class="fs-xxs text-uppercase text-muted fw-semibold d-flex align-items-center gap-1.5 mb-1">
+                                    <i data-lucide="calendar" class="text-muted" style="width: 14px; height: 14px; vertical-align: middle;"></i> Start Date
+                                </span>
+                                <div class="fs-sm text-dark fw-bold" id="vStartDate">-</div>
+                            </div>
+
+                            <div class="mb-0">
+                                <span class="fs-xxs text-uppercase text-muted fw-semibold d-flex align-items-center gap-1.5 mb-1">
+                                    <i data-lucide="info" class="text-muted" style="width: 14px; height: 14px; vertical-align: middle;"></i> Status
+                                </span>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="badge px-2.5 py-1" id="vStatus">-</span>
+                                    <span class="badge bg-light text-dark border border-light-subtle px-2.5 py-1 d-none" id="vSystemAddon">System Addon</span>
+                                </div>
+                            </div>
                         </div>
-                        <div class="col-6">
-                            <span class="fs-xxs text-uppercase text-muted fw-bold d-block mb-1">End Date</span>
-                            <div class="fs-sm text-dark fw-medium" id="vEndDate">-</div>
+
+                        <!-- Right Column -->
+                        <div class="col-md-6">
+                            <div class="mb-3.5">
+                                <span class="fs-xxs text-uppercase text-muted fw-semibold d-flex align-items-center gap-1.5 mb-1">
+                                    <i data-lucide="user" class="text-muted" style="width: 14px; height: 14px; vertical-align: middle;"></i> Employee
+                                </span>
+                                <div class="d-flex align-items-center gap-2">
+                                    <img id="vAvatar" src="/assets/images/users/user-1.jpg" alt="avatar" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;" onerror="this.src='/assets/images/users/user-1.jpg';" />
+                                    <div>
+                                        <div class="fw-bold text-dark fs-sm mb-0" id="vEmployeeName">-</div>
+                                        <div class="text-muted fs-xxs" id="vEmployeeEmail" style="font-size: 10px; margin-top: -2px;">-</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3.5">
+                                <span class="fs-xxs text-uppercase text-muted fw-semibold d-flex align-items-center gap-1.5 mb-1">
+                                    <i data-lucide="compass" class="text-muted" style="width: 14px; height: 14px; vertical-align: middle;"></i> Target
+                                </span>
+                                <div class="fs-sm text-dark fw-bold" id="vTarget">-</div>
+                            </div>
+
+                            <div class="mb-3.5">
+                                <span class="fs-xxs text-uppercase text-muted fw-semibold d-flex align-items-center gap-1.5 mb-1">
+                                    <i data-lucide="calendar" class="text-muted" style="width: 14px; height: 14px; vertical-align: middle;"></i> End Date
+                                </span>
+                                <div class="fs-sm text-dark fw-bold" id="vEndDate">-</div>
+                            </div>
+
+                            <div class="mb-0">
+                                <span class="fs-xxs text-uppercase text-muted fw-semibold d-flex align-items-center gap-1.5 mb-1">
+                                    <i data-lucide="percent" class="text-muted" style="width: 14px; height: 14px; vertical-align: middle;"></i> Progress
+                                </span>
+                                <div class="d-flex align-items-center gap-2 mt-1.5" style="min-width: 120px;">
+                                    <div class="progress progress-sm rounded-pill flex-grow-1" style="height: 6px; background-color: #f0f0f5; margin-bottom: 0;">
+                                        <div id="vProgressBar" class="progress-bar bg-success" role="progressbar" style="width: 0%"></div>
+                                    </div>
+                                    <span class="fw-bold text-dark fs-xs" id="vProgress">0%</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    
-                    <div class="row g-2 mb-3">
-                        <div class="col-6">
-                            <span class="fs-xxs text-uppercase text-muted fw-bold d-block mb-1">Target</span>
-                            <div class="fs-sm text-dark fw-medium" id="vTarget">-</div>
-                        </div>
-                        <div class="col-6">
-                            <span class="fs-xxs text-uppercase text-muted fw-bold d-block mb-1">Progress</span>
-                            <div class="fs-sm text-dark fw-bold" id="vProgress">-</div>
-                        </div>
-                    </div>
-                    
-                    <div class="row g-2 mb-2">
-                        <div class="col-6">
-                            <span class="fs-xxs text-uppercase text-muted fw-bold d-block mb-1">Status</span>
-                            <span class="badge px-2.5 py-1 mt-0.5" id="vStatus">-</span>
-                        </div>
-                        <div class="col-6">
-                            <span class="fs-xxs text-uppercase text-muted fw-bold d-block mb-1">System Addon</span>
-                            <span class="badge bg-light text-dark border px-2.5 py-1 mt-0.5" id="vSystemAddon">-</span>
-                        </div>
+
+                    <!-- Description spanning full width -->
+                    <div class="border-top pt-3 mt-3">
+                        <span class="fs-xxs text-uppercase text-muted fw-semibold d-flex align-items-center gap-1.5 mb-1">
+                            <i data-lucide="align-left" class="text-muted" style="width: 14px; height: 14px; vertical-align: middle;"></i> Description
+                        </span>
+                        <div class="fs-sm text-dark fw-medium bg-light p-2.5 rounded border border-light-subtle" id="vDescription" style="white-space: pre-wrap; max-height: 150px; overflow-y: auto;">-</div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -563,6 +596,7 @@
                     $("#vEndDate").text(data.EndDate ? displayDate(data.EndDate) : "-");
                     $("#vTarget").text(data.Target || "-");
                     $("#vProgress").text(data.Progress + "%");
+                    $("#vProgressBar").css("width", data.Progress + "%");
                     
                     var statusEl = $("#vStatus");
                     statusEl.removeClass().addClass("badge");
@@ -580,7 +614,11 @@
                     statusEl.text(data.Status);
 
                     var addonEl = $("#vSystemAddon");
-                    addonEl.text(data.SystemAddon ? "Yes" : "No");
+                    if (data.SystemAddon) {
+                        addonEl.removeClass("d-none");
+                    } else {
+                        addonEl.addClass("d-none");
+                    }
 
                     $("#ViewEmployeeGoalModal").modal("show");
                 }
