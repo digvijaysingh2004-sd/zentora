@@ -175,6 +175,65 @@
         [data-bs-theme=dark] .modal-backdrop {
             background-color: rgba(15, 17, 23, 0.5) !important; /* Sleek dark translucent overlay */
         }
+
+        /* Global Centered & Scrollable Modals styling */
+        .modal-dialog {
+            display: flex !important;
+            align-items: center !important;
+            min-height: calc(100% - 3.5rem) !important;
+        }
+        .modal-dialog-scrollable {
+            height: calc(100% - 3.5rem) !important;
+        }
+        .modal-dialog-scrollable .modal-content {
+            max-height: 100% !important;
+            overflow: hidden !important;
+        }
+        .modal-content {
+            border: 1px solid var(--bs-border-color) !important;
+            border-radius: 6px !important;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08) !important;
+        }
+        
+        /* Flex Form Fix for Scrollable Modals wrapping body in form */
+        .modal-dialog-scrollable .modal-content form,
+        .modal-dialog-scrollable .modal-content > form {
+            display: flex !important;
+            flex-direction: column !important;
+            overflow: hidden !important;
+            height: 100% !important;
+            width: 100% !important;
+            margin-bottom: 0 !important;
+        }
+        .modal-dialog-scrollable .modal-body {
+            overflow-y: auto !important;
+        }
+
+        /* Webkit scrollbar for modal body to match sidebar scrollbar styling */
+        .modal-body::-webkit-scrollbar {
+            width: 6px !important;
+            height: 6px !important;
+        }
+        .modal-body::-webkit-scrollbar-track {
+            background: transparent !important;
+        }
+        .modal-body::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.2) !important;
+            border-radius: 10px !important;
+        }
+        .modal-body::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, 0.35) !important;
+        }
+        
+        /* Dark mode scrollbars */
+        [data-bs-theme=dark] .modal-body::-webkit-scrollbar-thumb,
+        [data-layout-mode="dark"] .modal-body::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.15) !important;
+        }
+        [data-bs-theme=dark] .modal-body::-webkit-scrollbar-thumb:hover,
+        [data-layout-mode="dark"] .modal-body::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.25) !important;
+        }
     </style>
 </head>
 <body>
@@ -415,6 +474,9 @@
                     $('.btn-delete, .delete-btn, [onclick^="Delete"], [title="Delete"]').hide(); 
                 }
             }
+
+            // Dynamically force all modal dialogs in the app to be centered and scrollable
+            $('.modal-dialog').addClass('modal-dialog-centered modal-dialog-scrollable');
         });
 
         // Global Validator for forms (supporting Choices.js validation state)
