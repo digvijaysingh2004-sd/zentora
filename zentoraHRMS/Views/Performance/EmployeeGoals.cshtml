@@ -149,13 +149,12 @@
     <!-- Add Employee Goal Modal -->
     <div id="AddEmployeeGoalModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-            <div class="modal-content">
-                <form id="AddGoalForm" class="needs-validation" novalidate method="post">
-                    <div class="modal-header">
-                        <h4 class="modal-title">Add Employee Goal</h4>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
+            <form id="AddGoalForm" class="modal-content border border-light-subtle" style="border-radius: 6px; box-shadow: 0 5px 15px rgba(0,0,0,0.08);" novalidate method="post">
+                <div class="modal-header">
+                    <h4 class="modal-title">Add Employee Goal</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
                         <div class="mb-3">
                             <label for="EmployeeId" class="form-label">Employee <span class="text-danger">*</span></label>
                             <select class="form-select select-employee" id="EmployeeId" data-choices required>
@@ -207,22 +206,20 @@
                         <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
                         <button type="submit" class="btn btn-soft-primary">Save Changes</button>
                     </div>
-                </form>
-            </div>
+            </form>
         </div>
     </div>
 
     <!-- Update Employee Goal Modal -->
     <div id="UpdateEmployeeGoalModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-            <div class="modal-content">
-                <form id="UpdateGoalForm" class="needs-validation" novalidate method="post">
-                    <div class="modal-header">
-                        <h4 class="modal-title">Update Employee Goal</h4>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <input type="hidden" id="update_goal_id" />
+            <form id="UpdateGoalForm" class="modal-content border border-light-subtle" style="border-radius: 6px; box-shadow: 0 5px 15px rgba(0,0,0,0.08);" novalidate method="post">
+                <div class="modal-header">
+                    <h4 class="modal-title">Update Employee Goal</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="update_goal_id" />
                         <div class="mb-3">
                             <label for="uEmployeeId" class="form-label">Employee <span class="text-danger">*</span></label>
                             <select class="form-select select-employee" id="uEmployeeId" data-choices required>
@@ -274,15 +271,14 @@
                         <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
                         <button type="submit" class="btn btn-soft-primary">Save Changes</button>
                     </div>
-                </form>
-            </div>
+            </form>
         </div>
     </div>
 
     <!-- View Employee Goal Modal -->
     <div id="ViewEmployeeGoalModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-            <div class="modal-content">
+            <div class="modal-content border border-light-subtle" style="border-radius: 6px; box-shadow: 0 5px 15px rgba(0,0,0,0.08);">
                 <div class="modal-header">
                     <h4 class="modal-title">Employee Goal Details</h4>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
