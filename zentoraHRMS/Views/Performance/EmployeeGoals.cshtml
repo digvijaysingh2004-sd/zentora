@@ -5,211 +5,222 @@
 
 <div class="container-fluid">
     <div class="row justify-content-center py-5">
-        <div class="col-xxl-6 col-xl-8 text-center">
+        <div class="col-xxl-5 col-xl-7 text-center">
             <a href="@Url.Action("Index","Home")" class="badge badge-default fw-normal shadow px-2 py-1 mb-2 fst-italic fs-xxs">
                 <i data-lucide="square-check" class="fs-sm me-1"></i> DashBoard
             </a>
-            <h3 class="fw-bold text-gradient">Employee Goals Management</h3>
-            <p class="text-muted">Establish targets, monitor key results, track progress percentage, and align company objectives with employee accomplishments.</p>
+            <h3 class="fw-bold">Employee Goals</h3>
+            <p class="text-muted">Manage employee goals, set targets, track progress, and review completion status.</p>
         </div>
     </div>
 
     <div class="row justify-content-center">
         <div class="col-xxl-12">
-            <div class="card rounded-3 border-0 shadow-sm">
-                <div class="card-header justify-content-between align-items-center d-flex bg-white py-3">
-                    <h5 class="card-title mb-0 fw-semibold text-dark">Employee Goals</h5>
-                    <button type="button" class="btn btn-sm btn-soft-primary px-3 py-1.5 rounded-2 d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#AddEmployeeGoalModal">
-                        <i class="me-1" data-lucide="plus" style="width: 16px; height: 16px;"></i> Add Goal
+            <div class="card rounded-2">
+                <div class="card-header justify-content-between align-items-center d-flex">
+                    <h5 class="card-title mb-0">Employee Goal Details</h5>
+                    <button type="button" class="btn btn-sm btn-soft-primary" data-bs-toggle="modal" data-bs-target="#AddEmployeeGoalModal">
+                        <i class="me-1" data-lucide="plus"></i> Add Employee Goal
                     </button>
                 </div>
 
                 <div class="card-body">
-                    <div class="table-responsive">
-                        <table id="employee-goals-table" class="table table-hover dt-responsive align-middle mb-0">
-                            <thead class="thead-sm text-uppercase fs-xxs text-muted bg-light">
+                    <table id="checkbox-select-data" class="table table-striped dt-responsive checkbox-select-datatable align-middle mb-0">
+                        <thead class="thead-sm text-uppercase fs-xxs">
+                            <tr>
+                                <th class="fs-sm" style="width: 1%;">#</th>
+                                <th>Title</th>
+                                <th>Employee</th>
+                                <th>Duration</th>
+                                <th>Days</th>
+                                <th>Progress</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{ int index = 1; }
+                            @foreach (var g in Model)
+                            {
                                 <tr>
-                                    <th>Employee</th>
-                                    <th>Goal Type</th>
-                                    <th>Goal Title</th>
-                                    <th>Timeline</th>
-                                    <th>Target & Progress</th>
-                                    <th>Status</th>
-                                    <th style="width: 10%;">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @if (Model == null || !Model.Any())
-                                {
-                                    <tr>
-                                        <td colspan="7" class="text-center py-4 text-muted">
-                                            <i data-lucide="info" class="mb-2 text-warning" style="width: 32px; height: 32px;"></i>
-                                            <p class="mb-0">No goals found. Click "Add Goal" to set one up!</p>
-                                        </td>
-                                    </tr>
-                                }
-                                else
-                                {
-                                    foreach (var g in Model)
-                                    {
-                                        <tr>
-                                            <td>
+                                    <td class="fw-semibold text-muted text-center" style="width: 1%;">@index</td>
+                                    <td>
+                                        <div class="fw-semibold text-dark fs-sm mb-1">@g.GoalTitle</div>
+                                        <span class="badge bg-light text-secondary border border-light-subtle rounded-pill px-2 py-0.5" style="font-size: 10px;">
+                                            <i data-lucide="tag" class="fs-xxs me-1" style="width: 10px; height: 10px; vertical-align: middle;"></i>@g.GoalTypeName
+                                        </span>
+                                        <div class="text-muted fs-xs mt-1.5 desc-container">
+                                            @if (string.IsNullOrEmpty(g.Description))
+                                            {
+                                                <span>-</span>
+                                            }
+                                            else if (g.Description.Length > 80)
+                                            {
+                                                <span class="desc-short">@g.Description.Substring(0, 80)...</span>
+                                                <span class="desc-full d-none">@g.Description</span>
+                                                <a href="javascript:void(0);" class="text-primary ms-1 toggle-desc fs-xxs fw-medium" onclick="ToggleDescription(this)">Show More</a>
+                                            }
+                                            else
+                                            {
+                                                <span>@g.Description</span>
+                                            }
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img src="@(string.IsNullOrEmpty(g.ProfileImage) ? "/assets/images/users/user-1.jpg" : g.ProfileImage)" alt="avatar" class="rounded-circle me-2" style="width: 32px; height: 32px; object-fit: cover;" onerror="this.src='/assets/images/users/user-1.jpg';" />
+                                            <div>
                                                 <div class="fw-semibold text-dark fs-sm">@g.EmployeeName</div>
-                                                <div class="text-muted fs-xxs">ID: #@g.EmployeeId</div>
-                                            </td>
-                                            <td>
-                                                <span class="badge bg-light text-secondary border border-light-subtle rounded-pill px-2.5 py-1">@g.GoalTypeName</span>
-                                            </td>
-                                            <td>
-                                                <div class="fw-semibold text-dark fs-sm">@g.GoalTitle</div>
-                                                <div class="text-muted fs-xs mt-1 desc-container">
-                                                    @if (string.IsNullOrEmpty(g.Description))
-                                                    {
-                                                        <span>-</span>
-                                                    }
-                                                    else if (g.Description.Length > 80)
-                                                    {
-                                                        <span class="desc-short">@g.Description.Substring(0, 80)...</span>
-                                                        <span class="desc-full d-none">@g.Description</span>
-                                                        <a href="javascript:void(0);" class="text-primary ms-1 toggle-desc fs-xxs fw-medium" onclick="ToggleDescription(this)">Show More</a>
-                                                    }
-                                                    else
-                                                    {
-                                                        <span>@g.Description</span>
-                                                    }
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="fs-xs text-dark"><span class="text-muted">Start:</span> @(g.StartDate.HasValue ? g.StartDate.Value.ToString("MMM dd, yyyy") : "-")</div>
-                                                <div class="fs-xs text-dark mt-0.5"><span class="text-muted">End:</span> @(g.EndDate.HasValue ? g.EndDate.Value.ToString("MMM dd, yyyy") : "-")</div>
-                                            </td>
-                                            <td>
-                                                <div class="d-flex justify-content-between align-items-center mb-1">
-                                                    <span class="text-muted fs-xxs fst-italic">Target: @(string.IsNullOrEmpty(g.Target) ? "-" : g.Target)</span>
-                                                    <span class="fw-bold text-dark fs-xxs">@g.Progress%</span>
-                                                </div>
-                                                <div class="progress progress-sm rounded-pill" style="height: 6px; background-color: #f0f0f5;">
-                                                    @{
-                                                        string progressBg = "bg-primary";
-                                                        if (g.Progress >= 100) { progressBg = "bg-success"; }
-                                                        else if (g.Progress >= 75) { progressBg = "bg-info"; }
-                                                        else if (g.Progress >= 35) { progressBg = "bg-warning"; }
-                                                        else { progressBg = "bg-danger"; }
-                                                    }
-                                                    <div class="progress-bar @progressBg rounded-pill progress-bar-striped progress-bar-animated" role="progressbar" style="width: @g.Progress%" aria-valuenow="@g.Progress" aria-valuemin="0" aria-valuemax="100"></div>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                @switch (g.Status)
+                                                <div class="text-muted fs-xxs">@(string.IsNullOrEmpty(g.Email) ? "no-email@example.org" : g.Email)</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="fs-xs text-muted mb-1 d-flex align-items-center">
+                                            <i data-lucide="calendar" class="fs-xxs me-1 text-muted" style="width: 12px; height: 12px;"></i>
+                                            <span class="text-dark">@(g.StartDate.HasValue ? g.StartDate.Value.ToString("yyyy-MM-dd") : "-")</span>
+                                        </div>
+                                        <div class="fs-xs text-muted d-flex align-items-center">
+                                            <i data-lucide="calendar" class="fs-xxs me-1 text-muted" style="width: 12px; height: 12px;"></i>
+                                            <span class="text-dark">@(g.EndDate.HasValue ? g.EndDate.Value.ToString("yyyy-MM-dd") : "-")</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @{
+                                            string daysText = "-";
+                                            if (g.StartDate.HasValue && g.EndDate.HasValue)
+                                            {
+                                                int days = (g.EndDate.Value - g.StartDate.Value).Days;
+                                                if (days >= 0)
                                                 {
-                                                    case "Completed":
-                                                    case "Achieved":
-                                                        <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 rounded">@g.Status</span>
-                                                        break;
-                                                    case "In Progress":
-                                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1 rounded">@g.Status</span>
-                                                        break;
-                                                    case "Deferred":
-                                                        <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1 rounded">@g.Status</span>
-                                                        break;
-                                                    case "Cancelled":
-                                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1 rounded">@g.Status</span>
-                                                        break;
-                                                    default:
-                                                        <span class="badge bg-info-subtle text-info border border-info-subtle px-2 py-1 rounded">@g.Status</span>
-                                                        break;
+                                                    daysText = days + "d";
                                                 }
-                                                @if (g.SystemAddon)
-                                                {
-                                                    <span class="badge bg-secondary-subtle text-secondary ms-1" style="font-size: 9px;">System</span>
+                                            }
+                                        }
+                                        @if (daysText != "-")
+                                        {
+                                            <span class="badge rounded px-2.5 py-1" style="background-color: #f5f3ff; color: #7c3aed; border: 1px solid #ddd6fe; font-size: 11px;">@daysText</span>
+                                        }
+                                        else
+                                        {
+                                            <span>-</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2" style="min-width: 130px;">
+                                            <div class="progress progress-sm rounded-pill flex-grow-1" style="height: 6px; background-color: #f0f0f5; margin-bottom: 0;">
+                                                @{
+                                                    string progressBg = "bg-primary";
+                                                    if (g.Progress >= 100) { progressBg = "bg-success"; }
+                                                    else if (g.Progress >= 75) { progressBg = "bg-info"; }
+                                                    else if (g.Progress >= 35) { progressBg = "bg-warning"; }
+                                                    else { progressBg = "bg-danger"; }
                                                 }
-                                            </td>
-                                            <td>
-                                                <div class="d-flex gap-1">
-                                                    <button type="button" onclick="UpdateGoal(@g.EmployeeGoalId)" class="btn btn-sm btn-soft-info d-inline-flex align-items-center justify-content-center p-1.5" title="Edit">
-                                                        <i data-lucide="square-pen" style="width: 14px; height: 14px;"></i>
-                                                    </button>
-                                                    <button type="button" onclick="DeleteGoal(@g.EmployeeGoalId)" class="btn btn-sm btn-soft-danger d-inline-flex align-items-center justify-content-center p-1.5" title="Delete">
-                                                        <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    }
-                                }
-                            </tbody>
-                        </table>
-                    </div>
+                                                <div class="progress-bar @progressBg" role="progressbar" style="width: @g.Progress%"></div>
+                                            </div>
+                                            <span class="fw-medium text-dark fs-xxs">@g.Progress%</span>
+                                        </div>
+                                        @if (!string.IsNullOrEmpty(g.Target))
+                                        {
+                                            <div class="text-muted fs-xxs mt-1 fst-italic">Target: @g.Target</div>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (g.Status == "Completed" || g.Status == "Achieved")
+                                        {
+                                            <span class="badge bg-success-subtle text-success">@g.Status</span>
+                                        }
+                                        else if (g.Status == "In Progress")
+                                        {
+                                            <span class="badge bg-primary-subtle text-primary">@g.Status</span>
+                                        }
+                                        else if (g.Status == "Deferred")
+                                        {
+                                            <span class="badge bg-warning-subtle text-warning">@g.Status</span>
+                                        }
+                                        else if (g.Status == "Cancelled")
+                                        {
+                                            <span class="badge bg-danger-subtle text-danger">@g.Status</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-info-subtle text-info">@g.Status</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <a href="javascript:void(0);" onclick="UpdateGoal(@g.EmployeeGoalId)" class="btn btn-sm btn-soft-info mt-1" title="Update"><i data-lucide="square-pen"></i></a>
+                                        <a href="javascript:void(0);" onclick="DeleteGoal(@g.EmployeeGoalId)" class="btn btn-sm btn-soft-danger mt-1" title="Delete"><i data-lucide="trash-2"></i></a>
+                                    </td>
+                                </tr>
+                                index++;
+                            }
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Add Employee Goal Modal -->
-    <div id="AddEmployeeGoalModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="AddEmployeeGoalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content border-0 shadow-lg">
+    <div id="AddEmployeeGoalModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
                 <form id="AddGoalForm" class="needs-validation" novalidate method="post">
-                    <div class="modal-header bg-light py-3 border-bottom border-light-subtle">
-                        <h5 class="modal-title fw-bold text-dark" id="AddEmployeeGoalLabel">Add Employee Goal</h5>
+                    <div class="modal-header">
+                        <h4 class="modal-title">Add Employee Goal</h4>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <div class="modal-body p-4">
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label for="EmployeeId" class="form-label fw-medium">Employee <span class="text-danger">*</span></label>
-                                <select class="form-select select-employee" id="EmployeeId" required>
-                                    <option value="" disabled selected>Select Employee...</option>
-                                </select>
-                                <div class="invalid-feedback">Please select an employee.</div>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="GoalTypeId" class="form-label fw-medium">Goal Type <span class="text-danger">*</span></label>
-                                <select class="form-select select-goaltype" id="GoalTypeId" required>
-                                    <option value="" disabled selected>Select Goal Type...</option>
-                                </select>
-                                <div class="invalid-feedback">Please select a goal type.</div>
-                            </div>
-                            <div class="col-12">
-                                <label for="GoalTitle" class="form-label fw-medium">Goal Title <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="GoalTitle" placeholder="e.g., Implement OAuth Authentication System" required>
-                                <div class="invalid-feedback">Please enter a goal title.</div>
-                            </div>
-                            <div class="col-12">
-                                <label for="Description" class="form-label fw-medium">Description</label>
-                                <textarea class="form-control" id="Description" rows="3" placeholder="Provide details about the deliverables, scope, and parameters of the goal..."></textarea>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="StartDate" class="form-label fw-medium">Start Date</label>
-                                <input type="date" class="form-control" id="StartDate">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="EndDate" class="form-label fw-medium">End Date</label>
-                                <input type="date" class="form-control" id="EndDate">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="Target" class="form-label fw-medium">Target / Key Result</label>
-                                <input type="text" class="form-control" id="Target" placeholder="e.g., 98% uptime / 5 modules completed">
-                            </div>
-                            <div class="col-md-3">
-                                <label for="Progress" class="form-label fw-medium">Progress (%)</label>
-                                <input type="number" class="form-control" id="Progress" min="0" max="100" value="0">
-                            </div>
-                            <div class="col-md-3">
-                                <label for="Status" class="form-label fw-medium">Status</label>
-                                <select class="form-select" id="Status">
-                                    <option value="Active" selected>Active</option>
-                                    <option value="In Progress">In Progress</option>
-                                    <option value="Completed">Completed</option>
-                                    <option value="Deferred">Deferred</option>
-                                    <option value="Cancelled">Cancelled</option>
-                                </select>
-                            </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="EmployeeId" class="form-label">Employee <span class="text-danger">*</span></label>
+                            <select class="form-select select-employee" id="EmployeeId" data-choices required>
+                                <option value="">Select Employee</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="GoalTypeId" class="form-label">Goal Type <span class="text-danger">*</span></label>
+                            <select class="form-select select-goaltype" id="GoalTypeId" data-choices required>
+                                <option value="">Select Goal Type</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="GoalTitle" class="form-label">Goal Title <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="GoalTitle" required placeholder="Enter goal title">
+                        </div>
+                        <div class="mb-3">
+                            <label for="Description" class="form-label">Description</label>
+                            <textarea class="form-control" id="Description" rows="3" placeholder="Enter description of goal"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="StartDate" class="form-label">Start Date</label>
+                            <input type="date" class="form-control" id="StartDate">
+                        </div>
+                        <div class="mb-3">
+                            <label for="EndDate" class="form-label">End Date</label>
+                            <input type="date" class="form-control" id="EndDate">
+                        </div>
+                        <div class="mb-3">
+                            <label for="Target" class="form-label">Target</label>
+                            <input type="text" class="form-control" id="Target" placeholder="Enter target metrics">
+                        </div>
+                        <div class="mb-3">
+                            <label for="Progress" class="form-label">Progress (%)</label>
+                            <input type="number" class="form-control" id="Progress" min="0" max="100" value="0">
+                        </div>
+                        <div class="mb-3">
+                            <label for="Status" class="form-label">Status</label>
+                            <select class="form-select" id="Status" data-choices>
+                                <option value="Active" selected>Active</option>
+                                <option value="In Progress">In Progress</option>
+                                <option value="Completed">Completed</option>
+                                <option value="Deferred">Deferred</option>
+                                <option value="Cancelled">Cancelled</option>
+                            </select>
                         </div>
                     </div>
-                    <div class="modal-footer bg-light py-2 border-top border-light-subtle">
-                        <button type="button" class="btn btn-light px-3 py-1.5" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary px-4 py-1.5 shadow-sm">Save Goal</button>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-soft-primary">Save Changes</button>
                     </div>
                 </form>
             </div>
@@ -217,116 +228,72 @@
     </div>
 
     <!-- Update Employee Goal Modal -->
-    <div id="UpdateEmployeeGoalModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="UpdateEmployeeGoalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content border-0 shadow-lg">
+    <div id="UpdateEmployeeGoalModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
                 <form id="UpdateGoalForm" class="needs-validation" novalidate method="post">
-                    <div class="modal-header bg-light py-3 border-bottom border-light-subtle">
-                        <h5 class="modal-title fw-bold text-dark" id="UpdateEmployeeGoalLabel">Update Employee Goal</h5>
+                    <div class="modal-header">
+                        <h4 class="modal-title">Update Employee Goal</h4>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <div class="modal-body p-4">
+                    <div class="modal-body">
                         <input type="hidden" id="update_goal_id" />
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label for="uEmployeeId" class="form-label fw-medium">Employee <span class="text-danger">*</span></label>
-                                <select class="form-select select-employee" id="uEmployeeId" required>
-                                    <option value="" disabled>Select Employee...</option>
-                                </select>
-                                <div class="invalid-feedback">Please select an employee.</div>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="uGoalTypeId" class="form-label fw-medium">Goal Type <span class="text-danger">*</span></label>
-                                <select class="form-select select-goaltype" id="uGoalTypeId" required>
-                                    <option value="" disabled>Select Goal Type...</option>
-                                </select>
-                                <div class="invalid-feedback">Please select a goal type.</div>
-                            </div>
-                            <div class="col-12">
-                                <label for="uGoalTitle" class="form-label fw-medium">Goal Title <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="uGoalTitle" required>
-                                <div class="invalid-feedback">Please enter a goal title.</div>
-                            </div>
-                            <div class="col-12">
-                                <label for="uDescription" class="form-label fw-medium">Description</label>
-                                <textarea class="form-control" id="uDescription" rows="3"></textarea>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="uStartDate" class="form-label fw-medium">Start Date</label>
-                                <input type="date" class="form-control" id="uStartDate">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="uEndDate" class="form-label fw-medium">End Date</label>
-                                <input type="date" class="form-control" id="uEndDate">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="uTarget" class="form-label fw-medium">Target / Key Result</label>
-                                <input type="text" class="form-control" id="uTarget">
-                            </div>
-                            <div class="col-md-3">
-                                <label for="uProgress" class="form-label fw-medium">Progress (%)</label>
-                                <input type="number" class="form-control" id="uProgress" min="0" max="100">
-                            </div>
-                            <div class="col-md-3">
-                                <label for="uStatus" class="form-label fw-medium">Status</label>
-                                <select class="form-select" id="uStatus">
-                                    <option value="Active">Active</option>
-                                    <option value="In Progress">In Progress</option>
-                                    <option value="Completed">Completed</option>
-                                    <option value="Deferred">Deferred</option>
-                                    <option value="Cancelled">Cancelled</option>
-                                </select>
-                            </div>
+                        <div class="mb-3">
+                            <label for="uEmployeeId" class="form-label">Employee <span class="text-danger">*</span></label>
+                            <select class="form-select select-employee" id="uEmployeeId" data-choices required>
+                                <option value="">Select Employee</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="uGoalTypeId" class="form-label">Goal Type <span class="text-danger">*</span></label>
+                            <select class="form-select select-goaltype" id="uGoalTypeId" data-choices required>
+                                <option value="">Select Goal Type</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="uGoalTitle" class="form-label">Goal Title <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="uGoalTitle" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="uDescription" class="form-label">Description</label>
+                            <textarea class="form-control" id="uDescription" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="uStartDate" class="form-label">Start Date</label>
+                            <input type="date" class="form-control" id="uStartDate">
+                        </div>
+                        <div class="mb-3">
+                            <label for="uEndDate" class="form-label">End Date</label>
+                            <input type="date" class="form-control" id="uEndDate">
+                        </div>
+                        <div class="mb-3">
+                            <label for="uTarget" class="form-label">Target</label>
+                            <input type="text" class="form-control" id="uTarget">
+                        </div>
+                        <div class="mb-3">
+                            <label for="uProgress" class="form-label">Progress (%)</label>
+                            <input type="number" class="form-control" id="uProgress" min="0" max="100">
+                        </div>
+                        <div class="mb-3">
+                            <label for="uStatus" class="form-label">Status</label>
+                            <select class="form-select" id="uStatus" data-choices>
+                                <option value="Active">Active</option>
+                                <option value="In Progress">In Progress</option>
+                                <option value="Completed">Completed</option>
+                                <option value="Deferred">Deferred</option>
+                                <option value="Cancelled">Cancelled</option>
+                            </select>
                         </div>
                     </div>
-                    <div class="modal-footer bg-light py-2 border-top border-light-subtle">
-                        <button type="button" class="btn btn-light px-3 py-1.5" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary px-4 py-1.5 shadow-sm">Save Changes</button>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-soft-primary">Save Changes</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 </div>
-
-<style>
-    .text-gradient {
-        background: linear-gradient(135deg, #4f46e5 0%, #06b6d4 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
-    .btn-soft-primary {
-        background-color: rgba(79, 70, 229, 0.1);
-        color: #4f46e5;
-        border: none;
-    }
-    .btn-soft-primary:hover {
-        background-color: #4f46e5;
-        color: white;
-    }
-    .btn-soft-info {
-        background-color: rgba(6, 182, 212, 0.1);
-        color: #06b6d4;
-        border: none;
-    }
-    .btn-soft-info:hover {
-        background-color: #06b6d4;
-        color: white;
-    }
-    .btn-soft-danger {
-        background-color: rgba(239, 68, 68, 0.1);
-        color: #ef4444;
-        border: none;
-    }
-    .btn-soft-danger:hover {
-        background-color: #ef4444;
-        color: white;
-    }
-    .progress-bar-striped {
-        background-image: linear-gradient(45deg,rgba(255,255,255,.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.15) 75%,transparent 75%,transparent);
-        background-size: 1rem 1rem;
-    }
-</style>
 
 <script>
     $(document).ready(function () {
@@ -344,6 +311,19 @@
         $("#AddEmployeeGoalModal").on("show.bs.modal", function () {
             $("#AddGoalForm")[0].reset();
             $("#AddGoalForm").removeClass('was-validated');
+
+            var elEmp = document.getElementById("EmployeeId");
+            if (elEmp && elEmp.choicesInstance) {
+                elEmp.choicesInstance.setChoiceByValue("");
+            }
+            var elGt = document.getElementById("GoalTypeId");
+            if (elGt && elGt.choicesInstance) {
+                elGt.choicesInstance.setChoiceByValue("");
+            }
+            var elStatus = document.getElementById("Status");
+            if (elStatus && elStatus.choicesInstance) {
+                elStatus.choicesInstance.setChoiceByValue("Active");
+            }
         });
 
         // Submit Add Form
@@ -433,17 +413,14 @@
             type: 'GET',
             success: function (data) {
                 var selectEmp = $('.select-employee');
-                // Remove existing options except first placeholder
-                selectEmp.find('option:gt(0)').remove();
+                var s = '<option value="">Select Employee</option>';
                 if (data && data.length > 0) {
                     $.each(data, function (index, emp) {
                         var fullName = emp.FirstName + ' ' + emp.LastName;
-                        selectEmp.append($('<option>', {
-                            value: emp.Id,
-                            text: fullName.trim() + " (" + emp.Username + ")"
-                        }));
+                        s += '<option value="' + emp.Id + '">' + fullName.trim() + " (" + emp.Username + ")</option>";
                     });
                 }
+                selectEmp.html(s);
             }
         });
 
@@ -453,15 +430,13 @@
             type: 'GET',
             success: function (data) {
                 var selectGt = $('.select-goaltype');
-                selectGt.find('option:gt(0)').remove();
+                var s = '<option value="">Select Goal Type</option>';
                 if (data && data.length > 0) {
                     $.each(data, function (index, gt) {
-                        selectGt.append($('<option>', {
-                            value: gt.GoalTypeId,
-                            text: gt.GoalTypeName
-                        }));
+                        s += '<option value="' + gt.GoalTypeId + '">' + gt.GoalTypeName + '</option>';
                     });
                 }
+                selectGt.html(s);
             }
         });
     }
@@ -474,15 +449,34 @@
             success: function (data) {
                 if (data) {
                     $("#update_goal_id").val(data.EmployeeGoalId);
-                    $("#uEmployeeId").val(data.EmployeeId);
-                    $("#uGoalTypeId").val(data.GoalTypeId);
-                    $("#uGoalTitle").val(data.GoalTitle);
+                    
+                    var elEmp = document.getElementById("uEmployeeId");
+                    if (elEmp && elEmp.choicesInstance) {
+                        elEmp.choicesInstance.setChoiceByValue(data.EmployeeId.toString());
+                    } else {
+                        $("#uEmployeeId").val(data.EmployeeId);
+                    }
+
+                    var elGt = document.getElementById("uGoalTypeId");
+                    if (elGt && elGt.choicesInstance) {
+                        elGt.choicesInstance.setChoiceByValue(data.GoalTypeId.toString());
+                    } else {
+                        $("#uGoalTypeId").val(data.GoalTypeId);
+                    }
+
+                    $("#uGoalTitle").val(data.uGoalTitle || data.GoalTitle);
                     $("#uDescription").val(data.Description);
                     $("#uStartDate").val(formatJsonDate(data.StartDate));
                     $("#uEndDate").val(formatJsonDate(data.EndDate));
                     $("#uTarget").val(data.Target);
                     $("#uProgress").val(data.Progress);
-                    $("#uStatus").val(data.Status);
+                    
+                    var elStatus = document.getElementById("uStatus");
+                    if (elStatus && elStatus.choicesInstance) {
+                        elStatus.choicesInstance.setChoiceByValue(data.Status);
+                    } else {
+                        $("#uStatus").val(data.Status);
+                    }
 
                     $("#UpdateGoalForm").removeClass('was-validated');
                     $("#UpdateEmployeeGoalModal").modal("show");

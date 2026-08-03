@@ -7,6 +7,8 @@ namespace zentoraHRMS.Models
         public int EmployeeGoalId { get; set; }
         public int EmployeeId { get; set; }
         public string EmployeeName { get; set; }
+        public string ProfileImage { get; set; }
+        public string Email { get; set; }
         public int GoalTypeId { get; set; }
         public string GoalTypeName { get; set; }
         public string GoalTitle { get; set; }

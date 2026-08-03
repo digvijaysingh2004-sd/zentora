@@ -659,6 +659,7 @@ namespace zentoraHRMS.Controllers
                 string query = @"
                     SELECT eg.EmployeeGoalId, eg.EmployeeId, 
                            (emp.FirstName + ' ' + ISNULL(emp.LastName, '')) AS EmployeeName, 
+                           emp.ProfileImage, emp.Email,
                            eg.GoalTypeId, gt.GoalTypeName, eg.GoalTitle, eg.Description, 
                            eg.StartDate, eg.EndDate, eg.Target, eg.Progress, eg.Status, 
                            eg.CreateDate, eg.CreateBy, eg.UpdateDate, eg.UpdateBy, eg.SystemAddon 
@@ -679,6 +680,8 @@ namespace zentoraHRMS.Controllers
                                 EmployeeGoalId = Convert.ToInt32(reader["EmployeeGoalId"]),
                                 EmployeeId = Convert.ToInt32(reader["EmployeeId"]),
                                 EmployeeName = reader["EmployeeName"].ToString(),
+                                ProfileImage = reader["ProfileImage"] != DBNull.Value ? reader["ProfileImage"].ToString() : "",
+                                Email = reader["Email"] != DBNull.Value ? reader["Email"].ToString() : "",
                                 GoalTypeId = Convert.ToInt32(reader["GoalTypeId"]),
                                 GoalTypeName = reader["GoalTypeName"].ToString(),
                                 GoalTitle = reader["GoalTitle"].ToString(),
