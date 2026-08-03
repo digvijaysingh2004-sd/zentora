@@ -129,6 +129,36 @@ namespace zentoraHRMS.Controllers
                 {
                     cmd.ExecuteNonQuery();
                 }
+
+                // 4. Create EmployeeGoals Table if not exists
+                string createEmployeeGoalsQuery = @"
+                    IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'EmployeeGoals')
+                    BEGIN
+                        CREATE TABLE dbo.EmployeeGoals (
+                            EmployeeGoalId INT IDENTITY(1,1) PRIMARY KEY,
+                            EmployeeId INT NOT NULL,
+                            GoalTypeId INT NOT NULL,
+                            GoalTitle NVARCHAR(255) NOT NULL,
+                            Description NVARCHAR(MAX) NULL,
+                            StartDate DATETIME NULL,
+                            EndDate DATETIME NULL,
+                            Target NVARCHAR(255) NULL,
+                            Progress INT NOT NULL DEFAULT 0,
+                            Status NVARCHAR(50) NULL DEFAULT 'Active',
+                            CreateDate DATETIME NULL DEFAULT GETDATE(),
+                            CreateBy NVARCHAR(100) NULL,
+                            UpdateDate DATETIME NULL,
+                            UpdateBy NVARCHAR(100) NULL,
+                            SystemAddon BIT NOT NULL DEFAULT 0,
+                            CONSTRAINT FK_EmployeeGoals_EmployeeDetails FOREIGN KEY (EmployeeId) REFERENCES dbo.EmployeeDetails(Id) ON DELETE CASCADE,
+                            CONSTRAINT FK_EmployeeGoals_GoalTypes FOREIGN KEY (GoalTypeId) REFERENCES dbo.GoalTypes(GoalTypeId) ON DELETE CASCADE
+                        );
+                    END";
+
+                using (SqlCommand cmd = new SqlCommand(createEmployeeGoalsQuery, con))
+                {
+                    cmd.ExecuteNonQuery();
+                }
             }
         }
 
@@ -617,8 +647,258 @@ namespace zentoraHRMS.Controllers
         }
         #endregion
 
+        #region Employee Goals
+        public ActionResult EmployeeGoals()
+        {
+            if (Session["RoleType"] == null || Session["UserId"] == null) 
+                return RedirectToAction("Login", "Auth");
+
+            List<EmployeeGoalModel> list = new List<EmployeeGoalModel>();
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                string query = @"
+                    SELECT eg.EmployeeGoalId, eg.EmployeeId, 
+                           (emp.FirstName + ' ' + ISNULL(emp.LastName, '')) AS EmployeeName, 
+                           eg.GoalTypeId, gt.GoalTypeName, eg.GoalTitle, eg.Description, 
+                           eg.StartDate, eg.EndDate, eg.Target, eg.Progress, eg.Status, 
+                           eg.CreateDate, eg.CreateBy, eg.UpdateDate, eg.UpdateBy, eg.SystemAddon 
+                    FROM EmployeeGoals eg
+                    INNER JOIN EmployeeDetails emp ON eg.EmployeeId = emp.Id
+                    INNER JOIN GoalTypes gt ON eg.GoalTypeId = gt.GoalTypeId
+                    ORDER BY eg.EmployeeGoalId DESC";
+                
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+                    con.Open();
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            list.Add(new EmployeeGoalModel
+                            {
+                                EmployeeGoalId = Convert.ToInt32(reader["EmployeeGoalId"]),
+                                EmployeeId = Convert.ToInt32(reader["EmployeeId"]),
+                                EmployeeName = reader["EmployeeName"].ToString(),
+                                GoalTypeId = Convert.ToInt32(reader["GoalTypeId"]),
+                                GoalTypeName = reader["GoalTypeName"].ToString(),
+                                GoalTitle = reader["GoalTitle"].ToString(),
+                                Description = reader["Description"] != DBNull.Value ? reader["Description"].ToString() : "",
+                                StartDate = reader["StartDate"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(reader["StartDate"]) : null,
+                                EndDate = reader["EndDate"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(reader["EndDate"]) : null,
+                                Target = reader["Target"] != DBNull.Value ? reader["Target"].ToString() : "",
+                                Progress = reader["Progress"] != DBNull.Value ? Convert.ToInt32(reader["Progress"]) : 0,
+                                Status = reader["Status"] != DBNull.Value ? reader["Status"].ToString() : "Active",
+                                CreateBy = reader["CreateBy"] != DBNull.Value ? reader["CreateBy"].ToString() : "",
+                                CreateDate = reader["CreateDate"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(reader["CreateDate"]) : null,
+                                UpdateBy = reader["UpdateBy"] != DBNull.Value ? reader["UpdateBy"].ToString() : "",
+                                UpdateDate = reader["UpdateDate"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(reader["UpdateDate"]) : null,
+                                SystemAddon = Convert.ToBoolean(reader["SystemAddon"])
+                            });
+                        }
+                    }
+                }
+            }
+            return View(list);
+        }
+
+        [HttpPost]
+        public JsonResult SaveEmployeeGoal(EmployeeGoalModel model)
+        {
+            try
+            {
+                if (Session["RoleType"] == null || Session["UserId"] == null) 
+                    return Json(new { success = false, message = "Unauthorized access" });
+
+                string creator = Session["UserName"]?.ToString() ?? "System";
+                using (SqlConnection con = new SqlConnection(connectionString))
+                {
+                    string query = @"INSERT INTO EmployeeGoals 
+                                     (EmployeeId, GoalTypeId, GoalTitle, Description, StartDate, EndDate, Target, Progress, Status, CreateBy, CreateDate, SystemAddon) 
+                                     VALUES 
+                                     (@EmployeeId, @GoalTypeId, @GoalTitle, @Description, @StartDate, @EndDate, @Target, @Progress, @Status, @CreateBy, GETDATE(), 0)";
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        cmd.Parameters.AddWithValue("@EmployeeId", model.EmployeeId);
+                        cmd.Parameters.AddWithValue("@GoalTypeId", model.GoalTypeId);
+                        cmd.Parameters.AddWithValue("@GoalTitle", model.GoalTitle ?? "");
+                        cmd.Parameters.AddWithValue("@Description", model.Description ?? "");
+                        cmd.Parameters.AddWithValue("@StartDate", model.StartDate.HasValue ? (object)model.StartDate.Value : DBNull.Value);
+                        cmd.Parameters.AddWithValue("@EndDate", model.EndDate.HasValue ? (object)model.EndDate.Value : DBNull.Value);
+                        cmd.Parameters.AddWithValue("@Target", model.Target ?? "");
+                        cmd.Parameters.AddWithValue("@Progress", model.Progress);
+                        cmd.Parameters.AddWithValue("@Status", model.Status ?? "Active");
+                        cmd.Parameters.AddWithValue("@CreateBy", creator);
+                        con.Open();
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+                return Json(new { success = true, message = "Employee Goal saved successfully!" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        public JsonResult GetEmployeeGoalById(int id)
+        {
+            EmployeeGoalModel model = null;
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                string query = @"SELECT EmployeeGoalId, EmployeeId, GoalTypeId, GoalTitle, Description, StartDate, EndDate, Target, Progress, Status, SystemAddon 
+                                 FROM EmployeeGoals WHERE EmployeeGoalId = @EmployeeGoalId";
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+                    cmd.Parameters.AddWithValue("@EmployeeGoalId", id);
+                    con.Open();
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            model = new EmployeeGoalModel
+                            {
+                                EmployeeGoalId = Convert.ToInt32(reader["EmployeeGoalId"]),
+                                EmployeeId = Convert.ToInt32(reader["EmployeeId"]),
+                                GoalTypeId = Convert.ToInt32(reader["GoalTypeId"]),
+                                GoalTitle = reader["GoalTitle"].ToString(),
+                                Description = reader["Description"] != DBNull.Value ? reader["Description"].ToString() : "",
+                                StartDate = reader["StartDate"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(reader["StartDate"]) : null,
+                                EndDate = reader["EndDate"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(reader["EndDate"]) : null,
+                                Target = reader["Target"] != DBNull.Value ? reader["Target"].ToString() : "",
+                                Progress = reader["Progress"] != DBNull.Value ? Convert.ToInt32(reader["Progress"]) : 0,
+                                Status = reader["Status"] != DBNull.Value ? reader["Status"].ToString() : "Active",
+                                SystemAddon = Convert.ToBoolean(reader["SystemAddon"])
+                            };
+                        }
+                    }
+                }
+            }
+            return Json(model, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpPost]
+        public JsonResult UpdateEmployeeGoal(EmployeeGoalModel model)
+        {
+            try
+            {
+                if (Session["RoleType"] == null || Session["UserId"] == null) 
+                    return Json(new { success = false, message = "Unauthorized access" });
+
+                string updater = Session["UserName"]?.ToString() ?? "System";
+                using (SqlConnection con = new SqlConnection(connectionString))
+                {
+                    string query = @"UPDATE EmployeeGoals 
+                                     SET EmployeeId = @EmployeeId, GoalTypeId = @GoalTypeId, GoalTitle = @GoalTitle, 
+                                         Description = @Description, StartDate = @StartDate, EndDate = @EndDate, 
+                                         Target = @Target, Progress = @Progress, Status = @Status, 
+                                         UpdateBy = @UpdateBy, UpdateDate = GETDATE() 
+                                     WHERE EmployeeGoalId = @EmployeeGoalId";
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        cmd.Parameters.AddWithValue("@EmployeeGoalId", model.EmployeeGoalId);
+                        cmd.Parameters.AddWithValue("@EmployeeId", model.EmployeeId);
+                        cmd.Parameters.AddWithValue("@GoalTypeId", model.GoalTypeId);
+                        cmd.Parameters.AddWithValue("@GoalTitle", model.GoalTitle ?? "");
+                        cmd.Parameters.AddWithValue("@Description", model.Description ?? "");
+                        cmd.Parameters.AddWithValue("@StartDate", model.StartDate.HasValue ? (object)model.StartDate.Value : DBNull.Value);
+                        cmd.Parameters.AddWithValue("@EndDate", model.EndDate.HasValue ? (object)model.EndDate.Value : DBNull.Value);
+                        cmd.Parameters.AddWithValue("@Target", model.Target ?? "");
+                        cmd.Parameters.AddWithValue("@Progress", model.Progress);
+                        cmd.Parameters.AddWithValue("@Status", model.Status ?? "Active");
+                        cmd.Parameters.AddWithValue("@UpdateBy", updater);
+                        con.Open();
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+                return Json(new { success = true, message = "Employee Goal updated successfully!" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult DeleteEmployeeGoal(int id)
+        {
+            try
+            {
+                if (Session["RoleType"] == null || Session["UserId"] == null) 
+                    return Json(new { success = false, message = "Unauthorized access" });
+
+                using (SqlConnection con = new SqlConnection(connectionString))
+                {
+                    string query = "DELETE FROM EmployeeGoals WHERE EmployeeGoalId = @EmployeeGoalId";
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        cmd.Parameters.AddWithValue("@EmployeeGoalId", id);
+                        con.Open();
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+                return Json(new { success = true, message = "Employee Goal deleted successfully!" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public JsonResult GetActiveGoalTypes()
+        {
+            List<GoalTypeModel> list = new List<GoalTypeModel>();
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                string query = "SELECT GoalTypeId, GoalTypeName FROM GoalTypes WHERE Status = 'Active'";
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+                    con.Open();
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            list.Add(new GoalTypeModel
+                            {
+                                GoalTypeId = Convert.ToInt32(reader["GoalTypeId"]),
+                                GoalTypeName = reader["GoalTypeName"].ToString()
+                            });
+                        }
+                    }
+                }
+            }
+            return Json(list, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpGet]
+        public JsonResult GetActiveEmployees()
+        {
+            List<EmployeeModel> list = new List<EmployeeModel>();
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                string query = "SELECT Id, FirstName, LastName, Username FROM EmployeeDetails WHERE IsDeleted = 0 AND IsActive = 1";
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+                    con.Open();
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            list.Add(new EmployeeModel
+                            {
+                                Id = Convert.ToInt32(reader["Id"]),
+                                FirstName = reader["FirstName"].ToString(),
+                                LastName = reader["LastName"] != DBNull.Value ? reader["LastName"].ToString() : ""
+                            });
+                        }
+                    }
+                }
+            }
+            return Json(list, JsonRequestBehavior.AllowGet);
+        }
+        #endregion
+
         #region Boilerplate Actions
-        public ActionResult EmployeeGoals() { return View(); }
         public ActionResult ReviewCycles() { return View(); }
         public ActionResult EmployeeReviews() { return View(); }
         #endregion
