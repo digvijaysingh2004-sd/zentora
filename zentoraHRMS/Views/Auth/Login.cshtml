@@ -32,55 +32,55 @@
     <style>
         :root {
             --bg-gradient-start: #faf9ff;
-            --bg-gradient-end: #efebfd;
+            --bg-gradient-end: #f5f3ff;
             --card-bg: #ffffff;
-            --card-border: rgba(155, 89, 182, 0.08);
-            --card-shadow: 0 15px 35px -10px rgba(108, 52, 131, 0.12), 0 1px 3px rgba(108, 52, 131, 0.02);
+            --card-border: rgba(139, 92, 246, 0.08);
+            --card-shadow: 0 15px 35px -10px rgba(139, 92, 246, 0.12), 0 1px 3px rgba(139, 92, 246, 0.02);
             --text-main: #1f1b2d;
             --text-muted: #6b7280;
             --text-muted-custom: #6b7280;
             --input-bg: #fafafc;
             --input-border: #e4e3eb;
-            --input-focus-border: #9b59b6;
-            --input-focus-ring: rgba(155, 89, 182, 0.1);
-            --primary-btn-bg: #9b59b6;
-            --primary-btn-hover: #8e44ad;
+            --input-focus-border: #8b5cf6;
+            --input-focus-ring: rgba(139, 92, 246, 0.18);
+            --primary-btn-bg: #8b5cf6;
+            --primary-btn-hover: #7c3aed;
             --primary-btn-text: #ffffff;
             --google-btn-bg: #ffffff;
             --google-btn-border: #e4e3eb;
             --google-btn-text: #4b5563;
             --google-btn-hover: #fafafc;
-            --accent-blue: #9b59b6;
-            --showcase-bg: linear-gradient(135deg, #2c1654 0%, #6c3483 100%);
-            --card-graphic-bg: rgba(255, 255, 255, 0.06);
-            --card-graphic-border: rgba(255, 255, 255, 0.12);
+            --accent-blue: #8b5cf6;
+            --showcase-bg: linear-gradient(135deg, #4c1d95 0%, #7c3aed 50%, #8b5cf6 100%);
+            --card-graphic-bg: rgba(255, 255, 255, 0.08);
+            --card-graphic-border: rgba(255, 255, 255, 0.15);
             --secondary-custom: #4b5563;
         }
 
         [data-bs-theme=dark] {
-            --bg-gradient-start: #0a0813;
-            --bg-gradient-end: #120e24;
-            --card-bg: #1c1830;
+            --bg-gradient-start: #0a0518;
+            --bg-gradient-end: #120b24;
+            --card-bg: #1b132e;
             --card-border: rgba(255, 255, 255, 0.05);
             --card-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.6), 0 1px 2px rgba(255, 255, 255, 0.01);
             --text-main: #f3f4f6;
             --text-muted: #9ca3af;
             --text-muted-custom: #9ca3af;
-            --input-bg: #25203c;
-            --input-border: #38315a;
-            --input-focus-border: #bb86fc;
-            --input-focus-ring: rgba(187, 134, 252, 0.15);
-            --primary-btn-bg: #9b59b6;
-            --primary-btn-hover: #bb86fc;
+            --input-bg: #221a3a;
+            --input-border: #352a5a;
+            --input-focus-border: #a78bfa;
+            --input-focus-ring: rgba(167, 139, 250, 0.25);
+            --primary-btn-bg: #8b5cf6;
+            --primary-btn-hover: #a78bfa;
             --primary-btn-text: #ffffff;
-            --google-btn-bg: #25203c;
-            --google-btn-border: #38315a;
+            --google-btn-bg: #221a3a;
+            --google-btn-border: #352a5a;
             --google-btn-text: #e5e7eb;
-            --google-btn-hover: #312b50;
-            --accent-blue: #bb86fc;
-            --showcase-bg: linear-gradient(135deg, #130f26 0%, #2f2552 100%);
-            --card-graphic-bg: rgba(0, 0, 0, 0.3);
-            --card-graphic-border: rgba(255, 255, 255, 0.06);
+            --google-btn-hover: #2a2047;
+            --accent-blue: #a78bfa;
+            --showcase-bg: linear-gradient(135deg, #0e051c 0%, #20113b 100%);
+            --card-graphic-bg: rgba(0, 0, 0, 0.4);
+            --card-graphic-border: rgba(255, 255, 255, 0.08);
             --secondary-custom: #9ca3af;
         }
 
@@ -94,7 +94,7 @@
             transition: background 0.3s ease;
         }
 
-        @media (max-width: 991px) {
+        @@media (max-width: 991px) {
             body, html {
                 overflow-y: auto !important; /* enables scrollbar on tablet/mobile if content overflows */
             }
@@ -461,11 +461,10 @@
             font-size: 14px;
             transition: all 0.25s ease;
         }
-
         .input-group-custom .form-control:focus {
             background: var(--card-bg) !important;
             border-color: var(--input-focus-border) !important;
-            box-shadow: 0 0 0 4px var(--input-focus-ring) !important;
+            box-shadow: none !important;
             outline: none;
         }
 
@@ -670,7 +669,7 @@
         }
 
         /* Responsive */
-        @media (max-width: 991px) {
+        @@media (max-width: 991px) {
             .login-card {
                 width: 480px;
                 min-height: auto;
@@ -680,7 +679,7 @@
             }
         }
 
-        @media (max-width: 576px) {
+        @@media (max-width: 576px) {
             .login-card {
                 border-radius: 18px;
             }

@@ -33,6 +33,135 @@
 
     <!-- Choices Validation & Premium Glassmorphic Badge Styling -->
     <style>
+        /* Global Brand Option 1 Theme Overrides (Vibrant Violet & Slate) */
+        :root, [data-bs-theme=light] {
+            --ins-primary: #8b5cf6 !important;
+            --ins-primary-rgb: 139, 92, 246 !important;
+            --ins-primary-text-emphasis: #5b21b6 !important;
+            --ins-primary-bg-subtle: rgba(139, 92, 246, 0.12) !important;
+            --ins-primary-border-subtle: rgba(139, 92, 246, 0.25) !important;
+            --ins-link-color: #8b5cf6 !important;
+            --ins-link-hover-color: #7c3aed !important;
+            
+            --ins-btn-primary-bg: #8b5cf6 !important;
+            --ins-btn-primary-border-color: #8b5cf6 !important;
+            --ins-btn-primary-hover-bg: #7c3aed !important;
+            --ins-btn-primary-hover-border-color: #7c3aed !important;
+            --ins-btn-primary-active-bg: #7c3aed !important;
+            --ins-btn-primary-active-border-color: #7c3aed !important;
+            --ins-focus-ring-color: rgba(139, 92, 246, 0.25) !important;
+
+            --ins-sidenav-item-active-color: #8b5cf6 !important;
+            --ins-sidenav-item-active-bg: transparent !important;
+        }
+
+        [data-bs-theme=dark] {
+            --ins-primary: #a78bfa !important;
+            --ins-primary-rgb: 167, 139, 250 !important;
+            --ins-primary-text-emphasis: #dcbbfc !important;
+            --ins-primary-bg-subtle: rgba(167, 139, 250, 0.15) !important;
+            --ins-primary-border-subtle: rgba(167, 139, 250, 0.3) !important;
+            --ins-link-color: #a78bfa !important;
+            --ins-link-hover-color: #c084fc !important;
+            
+            --ins-btn-primary-bg: #8b5cf6 !important;
+            --ins-btn-primary-border-color: #8b5cf6 !important;
+            --ins-btn-primary-hover-bg: #a78bfa !important;
+            --ins-btn-primary-hover-border-color: #a78bfa !important;
+            --ins-btn-primary-active-bg: #a78bfa !important;
+            --ins-btn-primary-active-border-color: #a78bfa !important;
+            --ins-focus-ring-color: rgba(167, 139, 250, 0.25) !important;
+
+            --ins-sidenav-item-active-color: #a78bfa !important;
+            --ins-sidenav-item-active-bg: transparent !important;
+        }
+
+        /* Button Primary Global Override */
+        .btn-primary {
+            background-color: #8b5cf6 !important;
+            border-color: #8b5cf6 !important;
+            color: #ffffff !important;
+        }
+        .btn-primary:hover, .btn-primary:focus, .btn-primary:active {
+            background-color: #7c3aed !important;
+            border-color: #7c3aed !important;
+            color: #ffffff !important;
+        }
+        
+        [data-bs-theme=dark] .btn-primary {
+            background-color: #8b5cf6 !important;
+            border-color: #8b5cf6 !important;
+            color: #ffffff !important;
+        }
+        [data-bs-theme=dark] .btn-primary:hover, 
+        [data-bs-theme=dark] .btn-primary:focus, 
+        [data-bs-theme=dark] .btn-primary:active {
+            background-color: #a78bfa !important;
+            border-color: #a78bfa !important;
+            color: #120e24 !important;
+        }
+
+        /* Sidebar Navigation Active Text Color Fix (Transparent Active Bg) */
+        .side-nav .side-nav-item.active > a,
+        .side-nav .side-nav-item.active > a i,
+        .side-nav .side-nav-item.active > a .menu-text,
+        .side-nav .side-nav-item.active > a svg {
+            color: #8b5cf6 !important;
+            background-color: transparent !important;
+        }
+
+        [data-bs-theme=dark] .side-nav .side-nav-item.active > a,
+        [data-bs-theme=dark] .side-nav .side-nav-item.active > a i,
+        [data-bs-theme=dark] .side-nav .side-nav-item.active > a .menu-text,
+        [data-bs-theme=dark] .side-nav .side-nav-item.active > a svg {
+            color: #a78bfa !important;
+            background-color: transparent !important;
+        }
+        /* Text primary and borders */
+        .text-primary {
+            color: #8b5cf6 !important;
+        }
+        [data-bs-theme=dark] .text-primary {
+            color: #a78bfa !important;
+        }
+        .border-primary {
+            border-color: #8b5cf6 !important;
+        }
+        [data-bs-theme=dark] .border-primary {
+            border-color: #a78bfa !important;
+        }
+
+        /* Link primary overrides */
+        .link-primary {
+            color: #8b5cf6 !important;
+        }
+        .link-primary:hover {
+            color: #7c3aed !important;
+        }
+        [data-bs-theme=dark] .link-primary {
+            color: #a78bfa !important;
+        }
+        [data-bs-theme=dark] .link-primary:hover {
+            color: #c084fc !important;
+        }
+        /* Input Elements Focus Border Override (No Box-Shadow Focus Rings) */
+        .form-control:focus, 
+        .form-select:focus,
+        textarea:focus,
+        .choices__inner:focus,
+        .choices[is-focused] .choices__inner {
+            border-color: #8b5cf6 !important;
+            box-shadow: none !important;
+        }
+
+        [data-bs-theme=dark] .form-control:focus, 
+        [data-bs-theme=dark] .form-select:focus,
+        [data-bs-theme=dark] textarea:focus,
+        [data-bs-theme=dark] .choices__inner:focus,
+        [data-bs-theme=dark] .choices[is-focused] .choices__inner {
+            border-color: #a78bfa !important;
+            box-shadow: none !important;
+        }
         select.is-invalid + .choices .choices__inner {
             border-color: #dc3545 !important;
         }
@@ -105,6 +234,157 @@
             border: 1px solid rgba(155, 89, 182, 0.4) !important;
             background-color: rgba(155, 89, 182, 0.15) !important;
             color: #6c3483 !important;
+        }
+
+        /* Soft Primary Buttons Custom Border (e.g. Add Save buttons) */
+        .btn-soft-primary {
+            border: 1px solid rgba(139, 92, 246, 0.25) !important;
+        }
+        [data-bs-theme=dark] .btn-soft-primary {
+            border: 1px solid rgba(167, 139, 250, 0.35) !important;
+        }
+
+        /* Premium Table Action Buttons Overrides (Transparent BGs by default, hover effects only) */
+        .table .btn-soft-primary,
+        .table .btn-soft-info,
+        .table .btn-soft-danger,
+        .table .btn-soft-success,
+        .table .btn-soft-warning {
+            background-color: transparent !important;
+            border-color: transparent !important;
+            color: #64748b !important; /* Neutral slate icon color */
+            padding: 6px !important;
+            border-radius: 6px !important;
+            transition: all 0.2s ease !important;
+            border: none !important;
+            box-shadow: none !important;
+            position: relative !important;
+        }
+
+        
+        
+        
+        
+
+        /* Make Action Icons a medium size */
+        .table .btn-soft-primary i,
+        .table .btn-soft-info i,
+        .table .btn-soft-danger i,
+        .table .btn-soft-success i,
+        .table .btn-soft-warning i,
+        .table .btn-soft-primary svg,
+        .table .btn-soft-info svg,
+        .table .btn-soft-danger svg,
+        .table .btn-soft-success svg,
+        .table .btn-soft-warning svg {
+            width: 15px !important;
+            height: 15px !important;
+        }
+
+        /* Custom Tooltip bubble (black and pointing down) upside the icon */
+        .table .btn-soft-primary::after,
+        .table .btn-soft-info::after,
+        .table .btn-soft-danger::after,
+        .table .btn-soft-success::after,
+        .table .btn-soft-warning::after {
+            content: attr(data-tooltip) !important;
+            position: absolute !important;
+            bottom: 125% !important;
+            left: 50% !important;
+            transform: translateX(-50%) translateY(5px) !important;
+            background-color: #111827 !important; /* Black background */
+            color: #ffffff !important;
+            padding: 4px 10px !important;
+            font-size: 11px !important;
+            border-radius: 6px !important;
+            white-space: nowrap !important;
+            opacity: 0 !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
+            transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            font-weight: 600 !important;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12) !important;
+            z-index: 1050 !important;
+        }
+
+        /* Tooltip arrow */
+        .table .btn-soft-primary::before,
+        .table .btn-soft-info::before,
+        .table .btn-soft-danger::before,
+        .table .btn-soft-success::before,
+        .table .btn-soft-warning::before {
+            content: "" !important;
+            position: absolute !important;
+            bottom: 105% !important;
+            left: 50% !important;
+            transform: translateX(-50%) translateY(5px) !important;
+            border-width: 5px !important;
+            border-style: solid !important;
+            border-color: #111827 transparent transparent transparent !important;
+            opacity: 0 !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
+            transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            z-index: 1050 !important;
+        }
+
+        /* Trigger tooltips on hover */
+        .table .btn-soft-primary:hover::after,
+        .table .btn-soft-info:hover::after,
+        .table .btn-soft-danger:hover::after,
+        .table .btn-soft-success:hover::after,
+        .table .btn-soft-warning:hover::after,
+        .table .btn-soft-primary:hover::before,
+        .table .btn-soft-info:hover::before,
+        .table .btn-soft-danger:hover::before,
+        .table .btn-soft-success:hover::before,
+        .table .btn-soft-warning:hover::before {
+            opacity: 1 !important;
+            visibility: visible !important;
+            transform: translateX(-50%) translateY(0) !important;
+        }
+
+        .table .btn-soft-primary:hover,
+        .table .btn-soft-info:hover,
+        .table .btn-soft-danger:hover,
+        .table .btn-soft-success:hover,
+        .table .btn-soft-warning:hover {
+            background-color: rgba(0, 0, 0, 0.05) !important;
+            color: #111827 !important;
+        }
+
+        /* Dark Mode support for action buttons inside tables */
+        [data-bs-theme=dark] .table .btn-soft-primary,
+        [data-bs-theme=dark] .table .btn-soft-info,
+        [data-bs-theme=dark] .table .btn-soft-danger,
+        [data-bs-theme=dark] .table .btn-soft-success,
+        [data-bs-theme=dark] .table .btn-soft-warning {
+            color: #9ca3af !important; /* Muted gray in dark mode */
+            background-color: transparent !important;
+            border: none !important;
+        }
+        
+        [data-bs-theme=dark] .table .btn-soft-primary:hover,
+        [data-bs-theme=dark] .table .btn-soft-info:hover,
+        [data-bs-theme=dark] .table .btn-soft-danger:hover,
+        [data-bs-theme=dark] .table .btn-soft-success:hover,
+        [data-bs-theme=dark] .table .btn-soft-warning:hover {
+            background-color: rgba(255, 255, 255, 0.08) !important;
+            color: #ffffff !important;
+        }
+
+        /* Sidebar hover overrides - remove background and only keep text color */
+        .side-nav .side-nav-item .side-nav-link:hover,
+        .side-nav .side-nav-item .side-nav-link:active,
+        .side-nav .side-nav-item .side-nav-link:focus {
+            background-color: transparent !important;
+            background: transparent !important;
+        }
+        [data-bs-theme=dark] .side-nav .side-nav-item .side-nav-link:hover,
+        [data-bs-theme=dark] .side-nav .side-nav-item .side-nav-link:active,
+        [data-bs-theme=dark] .side-nav .side-nav-item .side-nav-link:focus {
+            background-color: transparent !important;
+            background: transparent !important;
         }
 
         /* Static Sizing and Scroll for Large Tabbed Modals */
@@ -475,6 +755,16 @@
                 }
             }
 
+            // Mouseenter event delegation to convert title tooltips dynamically
+            $(document).on('mouseenter', '.table .btn-soft-primary, .table .btn-soft-info, .table .btn-soft-danger, .table .btn-soft-success, .table .btn-soft-warning', function() {
+                var $this = $(this);
+                var title = $this.attr('title');
+                if (title) {
+                    $this.attr('data-tooltip', title);
+                    $this.removeAttr('title');
+                }
+            });
+
             // Dynamically force all modal dialogs in the app to be centered and scrollable
             $('.modal-dialog').addClass('modal-dialog-centered modal-dialog-scrollable');
         });
@@ -518,7 +808,8 @@
                     }
                 }
             });
-            
+
+
             return isValid;
         }
     </script>
