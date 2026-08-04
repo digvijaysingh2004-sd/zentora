@@ -8,11 +8,12 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Sign In | Zentora </title>
+    <title>Sign In | Zentora HRMS</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="admin dashboard template on Themeforest. Perfect for building CRM, CMS, project management tools, and custom web apps with clean UI, responsive design, and powerful features.">
-    <meta name="keywords" content="Simple, Admin dashboard, Themeforest, HTML template,Shadcn, Bootstrap admin, CRM template, CMS template, responsive admin, web app UI, admin theme, best admin template">
-    <meta name="author" content="Coderthemes">
+    <meta name="description" content="Zentora Human Resource Management System Login">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- App favicon -->
     <link rel="shortcut icon" href="~/assets/images/favicon.ico">
@@ -26,88 +27,974 @@
     <!-- App css -->
     <link href="~/assets/css/app.min.css" rel="stylesheet" type="text/css">
 
+    <!-- Lucide Icons -->
     <script src="~/assets/plugins/lucide/lucide.min.js"></script>
 
+    <style>
+        :root {
+            --bg-gradient-start: #f8fafc;
+            --bg-gradient-end: #e2e8f0;
+            --card-bg: #ffffff;
+            --card-border: rgba(148, 163, 184, 0.12);
+            --card-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.02);
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --text-muted-custom: #64748b;
+            --input-bg: #f8fafc;
+            --input-border: #e2e8f0;
+            --input-focus-border: #3b82f6;
+            --input-focus-ring: rgba(59, 130, 246, 0.1);
+            --primary-btn-bg: #2563eb;
+            --primary-btn-hover: #1d4ed8;
+            --primary-btn-text: #ffffff;
+            --google-btn-bg: #ffffff;
+            --google-btn-border: #e2e8f0;
+            --google-btn-text: #334155;
+            --google-btn-hover: #f8fafc;
+            --accent-blue: #2563eb;
+            --showcase-bg: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+            --card-graphic-bg: rgba(255, 255, 255, 0.07);
+            --card-graphic-border: rgba(255, 255, 255, 0.15);
+            --secondary-custom: #475569;
+        }
+
+        [data-bs-theme=dark] {
+            --bg-gradient-start: #090d16;
+            --bg-gradient-end: #0f172a;
+            --card-bg: #111827;
+            --card-border: rgba(255, 255, 255, 0.05);
+            --card-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5), 0 1px 2px rgba(255, 255, 255, 0.01);
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --text-muted-custom: #9ca3af;
+            --input-bg: #1f2937;
+            --input-border: #374151;
+            --input-focus-border: #60a5fa;
+            --input-focus-ring: rgba(96, 165, 250, 0.15);
+            --primary-btn-bg: #3b82f6;
+            --primary-btn-hover: #60a5fa;
+            --primary-btn-text: #0f172a;
+            --google-btn-bg: #1f2937;
+            --google-btn-border: #374151;
+            --google-btn-text: #e5e7eb;
+            --google-btn-hover: #374151;
+            --accent-blue: #60a5fa;
+            --showcase-bg: linear-gradient(135deg, #0b132b 0%, #1e293b 100%);
+            --card-graphic-bg: rgba(0, 0, 0, 0.25);
+            --card-graphic-border: rgba(255, 255, 255, 0.08);
+            --secondary-custom: #9ca3af;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            height: 100%;
+            background: radial-gradient(circle at top right, var(--bg-gradient-start), var(--bg-gradient-end)) !important;
+            overflow-x: hidden;
+            transition: background 0.3s ease;
+        }
+
+        .login-wrapper {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            z-index: 1;
+        }
+
+        /* Floating Blobs */
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: -1;
+            opacity: 0.45;
+            animation: floatBlob 20s infinite alternate ease-in-out;
+            pointer-events: none;
+        }
+        .blob-1 {
+            width: 300px;
+            height: 300px;
+            background: rgba(59, 130, 246, 0.18);
+            top: 10%;
+            left: 10%;
+        }
+        .blob-2 {
+            width: 250px;
+            height: 250px;
+            background: rgba(244, 63, 94, 0.12);
+            bottom: 15%;
+            right: 15%;
+            animation-delay: -5s;
+        }
+        .blob-3 {
+            width: 200px;
+            height: 200px;
+            background: rgba(234, 179, 8, 0.12);
+            top: 50%;
+            right: 40%;
+            animation-delay: -10s;
+        }
+
+        @keyframes floatBlob {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(45px, 45px) scale(1.15); }
+        }
+
+        /* Main Login Card */
+        .login-card {
+            display: flex;
+            width: 1000px;
+            max-width: 100%;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+            transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        /* Showcase Banner (Left) */
+        .login-showcase {
+            flex: 1.1;
+            background: var(--showcase-bg);
+            padding: 48px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            transition: background 0.3s ease;
+        }
+
+        .login-showcase::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at top right, rgba(255,255,255,0.06), transparent 60%);
+            pointer-events: none;
+        }
+
+        .showcase-content {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            justify-content: space-between;
+        }
+
+        .showcase-slides {
+            position: relative;
+            min-height: 380px;
+        }
+
+        .showcase-slide {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease, transform 0.6s ease, visibility 0.6s;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .showcase-slide.active {
+            position: relative;
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .showcase-graphic {
+            position: relative;
+            height: 220px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Graphic Cards Layout */
+        .graphic-card {
+            background: var(--card-graphic-bg);
+            border: 1px solid var(--card-graphic-border);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            position: absolute;
+            transition: transform 0.5s ease;
+        }
+
+        .card-main {
+            width: 260px;
+            z-index: 3;
+            transform: translate(-10px, -10px);
+            animation: floatGraphic1 6s infinite alternate ease-in-out;
+        }
+
+        .card-secondary {
+            width: 180px;
+            right: 12%;
+            top: 5%;
+            z-index: 2;
+            transform: translate(15px, 0);
+            animation: floatGraphic2 6s infinite alternate ease-in-out;
+            animation-delay: -2s;
+        }
+
+        .card-tertiary {
+            width: 170px;
+            left: 10%;
+            bottom: 0;
+            z-index: 4;
+            transform: translate(-20px, 15px);
+            animation: floatGraphic3 6s infinite alternate ease-in-out;
+            animation-delay: -4s;
+        }
+
+        @keyframes floatGraphic1 {
+            0% { transform: translate(-10px, -15px); }
+            100% { transform: translate(-10px, -25px); }
+        }
+
+        @keyframes floatGraphic2 {
+            0% { transform: translate(15px, 5px); }
+            100% { transform: translate(15px, -5px); }
+        }
+
+        @keyframes floatGraphic3 {
+            0% { transform: translate(-20px, 20px); }
+            100% { transform: translate(-20px, 10px); }
+        }
+
+        .card-header-custom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .avatar-mock {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .avatar-mock i {
+            width: 16px;
+            height: 16px;
+        }
+
+        .avatar-mock-sm {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .showcase-title {
+            color: #ffffff;
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .showcase-desc {
+            color: rgba(255, 255, 255, 0.75);
+            font-size: 14px;
+            line-height: 1.5;
+            margin: 0;
+            max-width: 90%;
+        }
+
+        .showcase-pagination {
+            display: flex;
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        .pagination-dot {
+            width: 20px;
+            height: 4px;
+            border-radius: 2px;
+            background: rgba(255, 255, 255, 0.25);
+            cursor: pointer;
+            transition: background 0.3s ease, width 0.3s ease;
+        }
+
+        .pagination-dot.active {
+            background: #ffffff;
+            width: 32px;
+        }
+
+        /* Form Panel (Right) */
+        .login-form-container {
+            flex: 1;
+            padding: 48px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .theme-toggle-btn {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            color: var(--text-main);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+
+        .theme-toggle-btn:hover {
+            background: var(--google-btn-hover);
+            transform: scale(1.05);
+        }
+
+        .theme-toggle-btn i {
+            width: 18px;
+            height: 18px;
+        }
+
+        .logo-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .logo-icon-atom {
+            width: 22px;
+            height: 22px;
+            animation: rotateAtom 8s linear infinite;
+        }
+
+        @keyframes rotateAtom {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .auth-title {
+            color: var(--text-main);
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .text-description {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        /* Input Controls */
+        .input-group-custom {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 14px;
+            color: var(--text-muted);
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-icon i {
+            width: 18px;
+            height: 18px;
+        }
+
+        .input-group-custom .form-control {
+            background: var(--input-bg) !important;
+            border: 1px solid var(--input-border) !important;
+            color: var(--text-main) !important;
+            border-radius: 12px !important;
+            padding: 12px 14px 12px 42px !important;
+            width: 100%;
+            font-size: 14px;
+            transition: all 0.25s ease;
+        }
+
+        .input-group-custom .form-control:focus {
+            background: var(--card-bg) !important;
+            border-color: var(--input-focus-border) !important;
+            box-shadow: 0 0 0 4px var(--input-focus-ring) !important;
+            outline: none;
+        }
+
+        .input-group-custom .form-control::placeholder {
+            color: var(--text-muted);
+            opacity: 0.6;
+        }
+
+        .password-toggle-btn {
+            position: absolute;
+            right: 14px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .password-toggle-btn:hover {
+            color: var(--text-main);
+        }
+
+        .password-toggle-btn i {
+            width: 18px;
+            height: 18px;
+        }
+
+        .text-secondary-custom {
+            color: var(--text-main);
+            font-size: 13px;
+            margin-bottom: 6px;
+        }
+
+        /* Custom Checkbox */
+        .form-check-custom {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-check-input-custom {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+            border: 1.5px solid var(--input-border);
+            background: var(--input-bg);
+            cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none;
+            position: relative;
+            transition: all 0.2s;
+        }
+
+        .form-check-input-custom:checked {
+            background-color: var(--accent-blue);
+            border-color: var(--accent-blue);
+        }
+
+        .form-check-input-custom:checked::after {
+            content: '';
+            position: absolute;
+            width: 5px;
+            height: 9px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+            top: 1px;
+            left: 4.5px;
+        }
+
+        .form-check-label-custom {
+            font-size: 13px;
+            color: var(--text-muted-custom);
+            cursor: pointer;
+            user-select: none;
+            margin-bottom: 0;
+        }
+
+        .forgot-password-link {
+            font-size: 13px;
+            color: var(--accent-blue);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .forgot-password-link:hover {
+            color: var(--primary-btn-hover);
+        }
+
+        /* Buttons */
+        .btn-primary-custom {
+            background: var(--primary-btn-bg);
+            color: var(--primary-btn-text);
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+        }
+
+        .btn-primary-custom:hover {
+            background: var(--primary-btn-hover);
+            color: var(--primary-btn-text);
+            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.25);
+            transform: translateY(-1px);
+        }
+
+        .btn-primary-custom:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary-custom:disabled {
+            opacity: 0.75;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .divider-custom {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 12px;
+            margin: 20px 0;
+        }
+
+        .divider-custom::before, .divider-custom::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid var(--input-border);
+        }
+
+        .divider-custom:not(:empty)::before {
+            margin-right: .5em;
+        }
+
+        .divider-custom:not(:empty)::after {
+            margin-left: .5em;
+        }
+
+        .btn-google-custom {
+            background: var(--google-btn-bg);
+            border: 1px solid var(--google-btn-border);
+            color: var(--google-btn-text);
+            border-radius: 12px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.25s ease;
+        }
+
+        .btn-google-custom:hover {
+            background: var(--google-btn-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn-google-custom:active {
+            transform: translateY(0);
+        }
+
+        .google-icon {
+            display: block;
+        }
+
+        /* Custom Alert */
+        .alert-error-custom {
+            background: rgba(239, 68, 68, 0.08);
+            border: 1px solid rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            animation: shake 0.4s ease;
+        }
+
+        [data-bs-theme=dark] .alert-error-custom {
+            background: rgba(248, 113, 113, 0.08);
+            border: 1px solid rgba(248, 113, 113, 0.15);
+            color: #f87171;
+        }
+
+        .alert-icon {
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-4px); }
+            75% { transform: translateX(4px); }
+        }
+
+        /* Responsive */
+        @media (max-width: 991px) {
+            .login-card {
+                width: 500px;
+            }
+            .login-showcase {
+                display: none;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .login-card {
+                border-radius: 18px;
+            }
+            .login-form-container {
+                padding: 36px 20px;
+            }
+            .theme-toggle-btn {
+                top: 16px;
+                right: 16px;
+            }
+        }
+    </style>
 </head>
 
 <body onload="noBack();" onpageshow="if (event.persisted) noBack();">
 
-    <div class="auth-box overflow-hidden align-items-center d-flex">
-        <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-xxl-4 col-md-6 col-sm-8">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="auth-brand mb-4">
-                                <a href="index.html" class="logo-dark">
-                                    <span class="d-flex align-items-center gap-1">
-                                        <span class="avatar avatar-xs rounded-1 text-bg-dark">
-                                            <span class="avatar-title">
-                                                <i data-lucide="atom" class="fs-md"></i>
-                                            </span>
-                                        </span>
-                                        <span class="logo-text text-body fw-bold fs-xl">ZENTORA</span>
-                                    </span>
-                                </a>
-                                <a href="index.html" class="logo-light">
-                                    <span class="d-flex align-items-center gap-1">
-                                        <span class="avatar avatar-xs rounded-1 text-bg-dark">
-                                            <span class="avatar-title">
-                                                <i data-lucide="atom" class="fs-md"></i>
-                                            </span>
-                                        </span>
-                                        <span class="logo-text text-white fw-bold fs-xl">ZENTORA</span>
-                                    </span>
-                                </a>
-                                <p class="text-muted w-lg-75 mt-3">Let’s get you signed in. Enter your email and password to continue.</p>
+    <div class="login-wrapper">
+        <!-- Floating background blobs -->
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+
+        <div class="login-card">
+            <!-- Left Side: HRMS Showcase -->
+            <div class="login-showcase">
+                <div class="showcase-content">
+                    <div class="showcase-slides">
+                        <!-- Slide 1: General Core HR -->
+                        <div class="showcase-slide active" data-slide="1">
+                            <div class="showcase-graphic">
+                                <div class="graphic-card card-main">
+                                    <div class="card-header-custom">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="avatar-mock text-bg-success-subtle">
+                                                <i data-lucide="user-check" class="text-success"></i>
+                                            </div>
+                                            <div class="text-start">
+                                                <div class="fw-semibold text-white fs-xs">Active Staff</div>
+                                                <div class="text-white-50 fs-xxs">Current Shift</div>
+                                            </div>
+                                        </div>
+                                        <span class="badge bg-success-subtle text-success border-0 px-2 py-0.5" style="font-size: 9px;">On Time</span>
+                                    </div>
+                                    <div class="card-body-custom mt-3 text-start">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="text-white-50 fs-xxs">Check-in time:</span>
+                                            <span class="fw-medium text-white fs-xxs">09:00 AM</span>
+                                        </div>
+                                        <div class="progress mt-2" style="height: 5px; background: rgba(255, 255, 255, 0.1);">
+                                            <div class="progress-bar bg-success" style="width: 100%;"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="graphic-card card-secondary text-start">
+                                    <div class="fw-semibold text-white fs-xs mb-1">Performance Goal</div>
+                                    <div class="text-white-50 fs-xxs mb-2">Q3 Retention Target</div>
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <span class="text-success fw-semibold fs-xxs">85% Achieved</span>
+                                        <div class="spinner-grow spinner-grow-sm text-success" role="status" style="width: 6px; height: 6px;"></div>
+                                    </div>
+                                </div>
+
+                                <div class="graphic-card card-tertiary text-start">
+                                    <div class="d-flex align-items-center gap-2 mb-1">
+                                        <div class="avatar-mock-sm text-bg-primary-subtle">
+                                            <i data-lucide="award" class="text-primary" style="width: 10px; height: 10px;"></i>
+                                        </div>
+                                        <span class="fw-medium text-white fs-xxs">Goal Approved</span>
+                                    </div>
+                                    <div class="text-white-50 fs-xxs">Policy review completed.</div>
+                                </div>
                             </div>
+                            <h3 class="showcase-title">Empower Your Workforce</h3>
+                            <p class="showcase-desc">Track shifts, manage team leave operations, and align corporate objectives in one unified workspace.</p>
+                        </div>
 
-                            <div class="">
-                                <form id="loginForm">
-                                    <div class="mb-3">
-                                        <label for="userIdentifier" class="form-label">
-                                            Username / Phone / Email <span class="text-danger">*</span>
-                                        </label>
-                                        <div class="input-group">
-                                            <input type="text" class="form-control" id="userIdentifier" name="UserIdentifier"
-                                                   placeholder="Enter Username, Phone or Email" required>
+                        <!-- Slide 2: Recruitment & Pipelines -->
+                        <div class="showcase-slide" data-slide="2">
+                            <div class="showcase-graphic">
+                                <div class="graphic-card card-main text-start">
+                                    <div class="card-header-custom">
+                                        <div class="fw-semibold text-white fs-xs">Candidate Pipeline</div>
+                                        <span class="badge bg-primary-subtle text-primary border-0 px-2 py-0.5" style="font-size: 9px;">Active</span>
+                                    </div>
+                                    <div class="card-body-custom mt-3">
+                                        <div class="pipeline-item mb-2 text-start">
+                                            <div class="d-flex justify-content-between fs-xxs text-white-50">
+                                                <span>Technical Assessment</span>
+                                                <span>80% Match</span>
+                                            </div>
+                                            <div class="progress mt-1" style="height: 4px; background: rgba(255, 255, 255, 0.1);">
+                                                <div class="progress-bar bg-primary" style="width: 80%;"></div>
+                                            </div>
+                                        </div>
+                                        <div class="pipeline-item text-start">
+                                            <div class="d-flex justify-content-between fs-xxs text-white-50">
+                                                <span>Management Review</span>
+                                                <span>95% Match</span>
+                                            </div>
+                                            <div class="progress mt-1" style="height: 4px; background: rgba(255, 255, 255, 0.1);">
+                                                <div class="progress-bar bg-success" style="width: 95%;"></div>
+                                            </div>
                                         </div>
                                     </div>
-
-                                    <div class="mb-3">
-                                        <label for="userPassword" class="form-label">Password <span class="text-danger">*</span></label>
-                                        <div class="input-group">
-                                            <input type="password" class="form-control" id="userPassword" name="Password" placeholder="" required>
-                                            <button class="btn btn-outline-light border" type="button" id="toggleLoginPasswordBtn">
-                                                <i data-lucide="eye" class="eye-open"></i>
-                                                <i data-lucide="eye-off" class="eye-closed d-none"></i>
-                                            </button>
-                                        </div>
+                                </div>
+                                <div class="graphic-card card-secondary text-start">
+                                    <div class="fw-semibold text-white fs-xs mb-1">Interview Round 2</div>
+                                    <div class="text-white-50 fs-xxs mb-2">Starts in 15 mins</div>
+                                    <div class="d-flex align-items-center gap-1 text-white fs-xxs" style="font-size: 9px;">
+                                        <i data-lucide="video" style="width: 10px; height: 10px;"></i> MS Teams Link
                                     </div>
+                                </div>
+                            </div>
+                            <h3 class="showcase-title">Streamline ATS & Onboarding</h3>
+                            <p class="showcase-desc">Schedule interviews across panels, track candidate pipelines, and trigger onboarding checklists automatically.</p>
+                        </div>
 
-                                    <div class="d-grid">
-                                        <button type="submit" id="btnLogin" class="btn btn-primary fw-semibold py-2">Sign In</button>
+                        <!-- Slide 3: Payroll & Slips -->
+                        <div class="showcase-slide" data-slide="3">
+                            <div class="showcase-graphic">
+                                <div class="graphic-card card-main text-start">
+                                    <div class="card-header-custom">
+                                        <div class="fw-semibold text-white fs-xs">Payroll Administration</div>
+                                        <span class="badge bg-success-subtle text-success border-0 px-2 py-0.5" style="font-size: 9px;">Calculated</span>
                                     </div>
-                                </form>
+                                    <div class="card-body-custom mt-3 text-center">
+                                        <div class="fw-bold text-white fs-lg">$45,280.00</div>
+                                        <div class="text-white-50 fs-xxs">Total Monthly Outflow</div>
+                                    </div>
+                                </div>
+                                <div class="graphic-card card-secondary text-start">
+                                    <div class="fw-semibold text-white fs-xs mb-1">Latest Payslip</div>
+                                    <div class="text-success fs-xxs mb-1 d-flex align-items-center gap-1">
+                                        <i data-lucide="check-circle" style="width: 10px; height: 10px;"></i> Released
+                                    </div>
+                                    <div class="text-white-50 fs-xxs">PDF format available.</div>
+                                </div>
+                            </div>
+                            <h3 class="showcase-title">Accurate Payroll Control</h3>
+                            <p class="showcase-desc">Configure base structures, manage automatic deductions, and distribute digital monthly payslips transparently.</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Pagination Dots -->
+                    <div class="showcase-pagination">
+                        <span class="pagination-dot active" data-slide="1"></span>
+                        <span class="pagination-dot" data-slide="2"></span>
+                        <span class="pagination-dot" data-slide="3"></span>
+                    </div>
+                </div>
+            </div>
 
-                                <!-- Placeholder for error -->
-                                <div id="loginError" class="text-danger mt-2"></div>
+            <!-- Right Side: Login Form -->
+            <div class="login-form-container">
+                <!-- Theme Toggle Button -->
+                <button type="button" class="theme-toggle-btn" id="themeToggleBtn" title="Toggle Theme">
+                    <i data-lucide="sun" class="theme-icon-sun"></i>
+                    <i data-lucide="moon" class="theme-icon-moon d-none"></i>
+                </button>
+
+                <div class="form-content text-start">
+                    <!-- Branding -->
+                    <div class="auth-brand text-center mb-4">
+                        <span class="logo-wrapper">
+                            <span class="avatar avatar-sm text-bg-dark border-0">
+                                <span class="avatar-title">
+                                    <i data-lucide="atom" class="logo-icon-atom text-white"></i>
+                                </span>
+                            </span>
+                            <span class="logo-text fw-bold text-body fs-2xl">ZENTORA</span>
+                        </span>
+                        <h2 class="auth-title mt-4">Hello Again!</h2>
+                        <p class="text-muted text-description mt-2">Enter your email and password to access the workspace.</p>
+                    </div>
+
+                    <!-- Form -->
+                    <form id="loginForm">
+                        <div class="mb-3">
+                            <label for="userIdentifier" class="form-label fw-semibold text-secondary-custom">
+                                Username / Phone / Email
+                            </label>
+                            <div class="input-group-custom">
+                                <div class="input-icon">
+                                    <i data-lucide="mail"></i>
+                                </div>
+                                <input type="text" class="form-control" id="userIdentifier" name="UserIdentifier"
+                                       placeholder="Enter email, username or phone" required autocomplete="username">
                             </div>
                         </div>
+
+                        <div class="mb-3">
+                            <label for="userPassword" class="form-label fw-semibold text-secondary-custom">Password</label>
+                            <div class="input-group-custom">
+                                <div class="input-icon">
+                                    <i data-lucide="lock"></i>
+                                </div>
+                                <input type="password" class="form-control" id="userPassword" name="Password" placeholder="Enter password" required autocomplete="current-password">
+                                <button class="password-toggle-btn" type="button" id="toggleLoginPasswordBtn">
+                                    <i data-lucide="eye" class="eye-open"></i>
+                                    <i data-lucide="eye-off" class="eye-closed d-none"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-center justify-content-between mb-4">
+                            <div class="form-check-custom">
+                                <input class="form-check-input-custom" type="checkbox" id="rememberMe" name="RememberMe">
+                                <label class="form-check-label-custom" for="rememberMe">Remember Me</label>
+                            </div>
+                            <a href="#" class="forgot-password-link">Recovery Password</a>
+                        </div>
+
+                        <div class="d-grid mb-3">
+                            <button type="submit" id="btnLogin" class="btn btn-primary-custom fw-semibold py-2.5">Login</button>
+                        </div>
+
+                        <div class="divider-custom">
+                            <span>Or sign in with</span>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="button" class="btn-google-custom fw-medium py-2.5">
+                                <svg class="google-icon" viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"/>
+                                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/>
+                                </svg>
+                                Sign in with Google
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Error Alert -->
+                    <div id="loginError" class="alert-error-custom d-none mt-3">
+                        <i data-lucide="alert-circle" class="alert-icon"></i>
+                        <span id="loginErrorMessage">Invalid credentials!</span>
+                    </div>
+
+                    <!-- Footer Sign up -->
+                    <div class="text-center mt-4">
+                        <span class="text-muted-custom text-xs">Don't have an account yet?</span>
+                        <a href="mailto:hr@zentora.com" class="link-primary-custom text-xs fw-semibold ms-1">Contact HR</a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <!-- end auth-fluid-->
+
     <!-- Vendor js -->
     <script src="~/assets/js/vendors.min.js"></script>
 
     <!-- App js -->
     <script src="~/assets/js/app.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
     <script>
+        // Setup current theme from config/storage
+        function initTheme() {
+            var currentTheme = "light";
+            var config = sessionStorage.getItem("__SIMPLE_CONFIG__");
+            if (config) {
+                try {
+                    var configObj = JSON.parse(config);
+                    if (configObj.theme) {
+                        currentTheme = configObj.theme;
+                    }
+                } catch (e) {}
+            } else {
+                currentTheme = document.documentElement.getAttribute("data-bs-theme") || "light";
+            }
+            setTheme(currentTheme);
+        }
+
+        function setTheme(theme) {
+            document.documentElement.setAttribute("data-bs-theme", theme);
+            var config = sessionStorage.getItem("__SIMPLE_CONFIG__");
+            var configObj = {};
+            if (config) {
+                try {
+                    configObj = JSON.parse(config);
+                } catch (e) {}
+            }
+            configObj.theme = theme;
+            sessionStorage.setItem("__SIMPLE_CONFIG__", JSON.stringify(configObj));
+            
+            // Toggle sun/moon icons
+            if (theme === 'dark') {
+                $('#themeToggleBtn .theme-icon-sun').addClass('d-none');
+                $('#themeToggleBtn .theme-icon-moon').removeClass('d-none');
+            } else {
+                $('#themeToggleBtn .theme-icon-sun').removeClass('d-none');
+                $('#themeToggleBtn .theme-icon-moon').addClass('d-none');
+            }
+        }
+
         $(document).ready(function () {
+            // Initialize Lucide icons
+            lucide.createIcons();
+
+            // Initialize Theme
+            initTheme();
+
+            // Handle Theme Toggle Click
+            $("#themeToggleBtn").on("click", function() {
+                var currentTheme = document.documentElement.getAttribute("data-bs-theme") || "light";
+                var newTheme = currentTheme === "dark" ? "light" : "dark";
+                setTheme(newTheme);
+            });
+
+            // Showcase Carousel Slideshow
+            var currentSlide = 1;
+            var slideInterval = setInterval(nextSlide, 5000);
+
+            function showSlide(index) {
+                currentSlide = index;
+                $(".showcase-slide").removeClass("active");
+                $(".showcase-pagination .pagination-dot").removeClass("active");
+                
+                $(`.showcase-slide[data-slide="${index}"]`).addClass("active");
+                $(`.showcase-pagination .pagination-dot[data-slide="${index}"]`).addClass("active");
+            }
+
+            function nextSlide() {
+                var next = currentSlide + 1;
+                if (next > 3) next = 1;
+                showSlide(next);
+            }
+
+            $(".showcase-pagination .pagination-dot").on("click", function() {
+                clearInterval(slideInterval);
+                var index = parseInt($(this).data("slide"));
+                showSlide(index);
+                slideInterval = setInterval(nextSlide, 5000);
+            });
+
+            // Password Toggle Visibility
             $("#toggleLoginPasswordBtn").on("click", function () {
                 var input = $("#userPassword");
                 if (input.attr("type") === "password") {
@@ -121,16 +1008,19 @@
                 }
             });
 
+            // AJAX Form Submit
             $("#loginForm").on("submit", function (e) {
                 e.preventDefault();
 
-                var userIdentifier = $("#userIdentifier").val(); // can be email / phone / username
+                var userIdentifier = $("#userIdentifier").val();
                 var password = $("#userPassword").val();
 
                 var $btn = $("#btnLogin");
+                var originalHtml = $btn.html();
+                
                 $btn.prop("disabled", true);
-                $btn.html('<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Signing in...');
-                $("#loginError").text("");
+                $btn.html('<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Logging in...');
+                $("#loginError").addClass("d-none");
 
                 $.ajax({
                     url: '/Auth/Login',
@@ -141,18 +1031,19 @@
                     },
                     success: function (response) {
                         if (response.success) {
-                            // redirect to dashboard or home
                             window.location.href = response.redirectUrl;
                         } else {
-                            $("#loginError").text(response.message);
+                            $("#loginErrorMessage").text(response.message);
+                            $("#loginError").removeClass("d-none");
                             $btn.prop("disabled", false);
-                            $btn.html('Sign In');
+                            $btn.html(originalHtml);
                         }
                     },
                     error: function () {
-                        $("#loginError").text("An error occurred. Please try again.");
+                        $("#loginErrorMessage").text("An error occurred. Please try again.");
+                        $("#loginError").removeClass("d-none");
                         $btn.prop("disabled", false);
-                        $btn.html('Sign In');
+                        $btn.html(originalHtml);
                     }
                 });
             });
@@ -165,4 +1056,4 @@
     </script>
 
 </body>
-</html>
+</html>
