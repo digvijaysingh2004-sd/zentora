@@ -1,3 +1,47 @@
+<style>
+    .topbar-menu {
+        backdrop-filter: blur(12px) !important;
+        background-color: rgba(255, 255, 255, 0.8) !important;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+        transition: all 0.3s ease-in-out;
+    }
+    
+    [data-bs-theme=dark] .topbar-menu {
+        background-color: rgba(30, 32, 41, 0.85) !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+    }
+
+    .search-bar-wrapper input::placeholder {
+        color: #9ca3af;
+    }
+
+    .search-bar-wrapper input:focus {
+        border-color: #8b5cf6 !important;
+        background-color: #ffffff !important;
+        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15) !important;
+    }
+
+    [data-bs-theme=dark] .search-bar-wrapper input:focus {
+        background-color: #1e2029 !important;
+        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.25) !important;
+    }
+
+    .logo-topbar {
+        transition: all 0.2s ease-in-out;
+    }
+    .logo-topbar:hover .logo-text {
+        color: #8b5cf6 !important;
+    }
+
+    .nav-user .topbar-link {
+        border-radius: 30px;
+        transition: all 0.2s ease;
+    }
+    .nav-user .topbar-link:hover {
+        background-color: rgba(139, 92, 246, 0.08) !important;
+    }
+</style>
+
 <div class="container-fluid topbar-menu">
     <div class="d-flex align-items-center justify-content-center gap-2">
         <!-- Topbar Brand Logo -->
@@ -36,6 +80,15 @@
         </button>
 
     </div> 
+
+    <!-- Middle search bar container to occupy the vacant space -->
+    <div class="d-none d-lg-flex align-items-center flex-grow-1 justify-content-center px-4" style="max-width: 480px; margin: 0 auto;">
+        <div class="position-relative w-100 search-bar-wrapper">
+            <i data-lucide="search" class="position-absolute top-50 start-0 translate-middle-y ms-3 text-muted" style="width: 15px; height: 15px;"></i>
+            <input type="search" class="form-control ps-5 rounded-pill border-light bg-light-subtle" style="font-size: 13px; height: 38px; border: 1px solid rgba(0, 0, 0, 0.08);" placeholder="Search dashboard, pages, or tools... (Ctrl + K)">
+            <span class="position-absolute end-0 top-50 translate-middle-y me-3 badge bg-light text-muted border fw-normal fs-xxs" style="font-size: 10px; border-color: rgba(0,0,0,0.15) !important;">Ctrl K</span>
+        </div>
+    </div>
 
     <div class="d-flex align-items-center gap-2">
         <!-- Search (Moved to Sidebar) -->

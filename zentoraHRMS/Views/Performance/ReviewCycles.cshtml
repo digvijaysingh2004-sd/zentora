@@ -3,6 +3,31 @@
     ViewBag.Title = "Review Cycles";
 }
 
+<style>
+    .freq-badge {
+        background-color: #eff6ff !important;
+        color: #2563eb !important;
+        border: 1px solid #bfdbfe !important;
+        font-weight: 500 !important;
+        text-transform: none !important;
+        letter-spacing: normal !important;
+    }
+
+    [data-bs-theme=dark] .freq-badge {
+        background-color: rgba(37, 99, 235, 0.15) !important;
+        color: #93c5fd !important;
+        border: 1px solid rgba(37, 99, 235, 0.4) !important;
+    }
+
+    /* Prevent Choices.js select dropdowns from being cut off or layered behind the modal footer */
+    .choices.is-open {
+        z-index: 1050 !important;
+    }
+    .choices__list--dropdown {
+        z-index: 9999 !important;
+    }
+</style>
+
 <div class="container-fluid">
     <div class="row justify-content-center py-5">
         <div class="col-xxl-5 col-xl-7 text-center">
@@ -60,7 +85,7 @@
                                         </div>
                                     </td>
                                     <td>
-                                        <span class="badge bg-light text-dark">@c.Frequency</span>
+                                        <span class="badge freq-badge">@c.Frequency</span>
                                     </td>
                                     <td>
                                         @if (c.Status == "Active")
@@ -105,7 +130,7 @@
                         </div>
                         <div class="mb-3">
                             <label for="Frequency" class="form-label">Frequency</label>
-                            <select class="form-select" id="Frequency">
+                            <select class="form-select" id="Frequency" data-choices data-choices-search-false>
                                 <option value="Monthly">Monthly</option>
                                 <option value="Annual" selected>Annual</option>
                                 <option value="Semi-Annual">Semi-Annual</option>
@@ -115,14 +140,14 @@
                         </div>
                         <div class="mb-3">
                             <label for="Status" class="form-label">Status</label>
-                            <select class="form-select" id="Status">
+                            <select class="form-select" id="Status" data-choices data-choices-search-false>
                                 <option value="Active" selected>Active</option>
                                 <option value="Inactive">Inactive</option>
                             </select>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-soft-primary">Save changes</button>
                     </div>
                 </form>
@@ -151,7 +176,7 @@
                         </div>
                         <div class="mb-3">
                             <label for="uFrequency" class="form-label">Frequency</label>
-                            <select class="form-select" id="uFrequency">
+                            <select class="form-select" id="uFrequency" data-choices data-choices-search-false>
                                 <option value="Monthly">Monthly</option>
                                 <option value="Annual">Annual</option>
                                 <option value="Semi-Annual">Semi-Annual</option>
@@ -161,14 +186,14 @@
                         </div>
                         <div class="mb-3">
                             <label for="uStatus" class="form-label">Status</label>
-                            <select class="form-select" id="uStatus">
+                            <select class="form-select" id="uStatus" data-choices data-choices-search-false>
                                 <option value="Active">Active</option>
                                 <option value="Inactive">Inactive</option>
                             </select>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-soft-primary">Save changes</button>
                     </div>
                 </form>

@@ -410,6 +410,20 @@
             color: #ffffff !important;
         }
 
+        /* Global Modal Footer Close/Cancel Button Override */
+        .modal-footer .btn-light {
+            background-color: #f3f4f6 !important;
+            border: 1px solid #d1d5db !important;
+            color: #374151 !important;
+        }
+
+        /* Dark mode compatibility for Close Button */
+        [data-bs-theme=dark] .modal-footer .btn-light {
+            background-color: #2a2b36 !important;
+            border: 1px solid #4b4c56 !important;
+            color: #d1d5db !important;
+        }
+
         /* Static Sizing and Scroll for Large Tabbed Modals */
         .modal-body-static {
             min-height: 400px !important;
