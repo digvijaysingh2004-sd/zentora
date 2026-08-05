@@ -10,7 +10,7 @@
                 <i data-lucide="square-check" class="fs-sm me-1"></i> DashBoard
             </a>
             <h3 class="fw-bold">Review Cycles</h3>
-            <p class="text-muted">Manage company-wide performance review cycles, timelines, and status.</p>
+            <p class="text-muted">Manage company-wide performance review cycles, frequency schedules, and status.</p>
         </div>
     </div>
 
@@ -29,9 +29,8 @@
                         <thead class="thead-sm text-uppercase fs-xxs">
                             <tr>
                                 <th class="fs-sm" style="width: 1%;"></th>
-                                <th>Cycle Name</th>
-                                <th>Start Date</th>
-                                <th>End Date</th>
+                                <th>Review Cycle Name</th>
+                                <th>Frequency</th>
                                 <th>Status</th>
                                 <th>Action</th>
                             </tr>
@@ -42,7 +41,7 @@
                                 <tr>
                                     <td class="fs-sm" style="width: 1%;"></td>
                                     <td>
-                                        <div class="fw-semibold text-dark fs-sm">@c.CycleName</div>
+                                        <div class="fw-semibold text-dark fs-sm">@c.ReviewCycleName</div>
                                         <div class="text-muted fs-xs mt-1 desc-container">
                                             @if (string.IsNullOrEmpty(c.Description))
                                             {
@@ -61,27 +60,16 @@
                                         </div>
                                     </td>
                                     <td>
-                                        <span class="text-dark">@(c.StartDate.HasValue ? c.StartDate.Value.ToString("yyyy-MM-dd") : "-")</span>
-                                    </td>
-                                    <td>
-                                        <span class="text-dark">@(c.EndDate.HasValue ? c.EndDate.Value.ToString("yyyy-MM-dd") : "-")</span>
+                                        <span class="badge bg-light text-dark">@c.Frequency</span>
                                     </td>
                                     <td>
                                         @if (c.Status == "Active")
                                         {
                                             <span class="badge bg-success-subtle text-success">Active</span>
                                         }
-                                        else if (c.Status == "Completed")
-                                        {
-                                            <span class="badge bg-primary-subtle text-primary">Completed</span>
-                                        }
-                                        else if (c.Status == "Cancelled")
-                                        {
-                                            <span class="badge bg-danger-subtle text-danger">Cancelled</span>
-                                        }
                                         else
                                         {
-                                            <span class="badge bg-warning-subtle text-warning">@c.Status</span>
+                                            <span class="badge bg-danger-subtle text-danger">Inactive</span>
                                         }
                                     </td>
                                     <td>
@@ -108,30 +96,28 @@
                     </div>
                     <div class="modal-body">
                         <div class="mb-3">
-                            <label for="CycleName" class="form-label">Cycle Name <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="CycleName" required placeholder="Enter cycle name">
+                            <label for="ReviewCycleName" class="form-label">Review Cycle Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="ReviewCycleName" required placeholder="Enter review cycle name">
                         </div>
                         <div class="mb-3">
                             <label for="Description" class="form-label">Description</label>
                             <textarea class="form-control" id="Description" rows="3" placeholder="Enter description of review cycle"></textarea>
                         </div>
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="StartDate" class="form-label">Start Date</label>
-                                <input type="date" class="form-control" id="StartDate">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="EndDate" class="form-label">End Date</label>
-                                <input type="date" class="form-control" id="EndDate">
-                            </div>
+                        <div class="mb-3">
+                            <label for="Frequency" class="form-label">Frequency</label>
+                            <select class="form-select" id="Frequency">
+                                <option value="Monthly">Monthly</option>
+                                <option value="Annual" selected>Annual</option>
+                                <option value="Semi-Annual">Semi-Annual</option>
+                                <option value="One-Time">One-Time</option>
+                                <option value="Quarterly">Quarterly</option>
+                            </select>
                         </div>
                         <div class="mb-3">
                             <label for="Status" class="form-label">Status</label>
                             <select class="form-select" id="Status">
-                                <option value="Draft" selected>Draft</option>
-                                <option value="Active">Active</option>
-                                <option value="Completed">Completed</option>
-                                <option value="Cancelled">Cancelled</option>
+                                <option value="Active" selected>Active</option>
+                                <option value="Inactive">Inactive</option>
                             </select>
                         </div>
                     </div>
@@ -156,30 +142,28 @@
                     <div class="modal-body">
                         <input type="hidden" id="update_id" />
                         <div class="mb-3">
-                            <label for="uCycleName" class="form-label">Cycle Name <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="uCycleName" required>
+                            <label for="uReviewCycleName" class="form-label">Review Cycle Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="uReviewCycleName" required>
                         </div>
                         <div class="mb-3">
                             <label for="uDescription" class="form-label">Description</label>
                             <textarea class="form-control" id="uDescription" rows="3"></textarea>
                         </div>
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="uStartDate" class="form-label">Start Date</label>
-                                <input type="date" class="form-control" id="uStartDate">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="uEndDate" class="form-label">End Date</label>
-                                <input type="date" class="form-control" id="uEndDate">
-                            </div>
+                        <div class="mb-3">
+                            <label for="uFrequency" class="form-label">Frequency</label>
+                            <select class="form-select" id="uFrequency">
+                                <option value="Monthly">Monthly</option>
+                                <option value="Annual">Annual</option>
+                                <option value="Semi-Annual">Semi-Annual</option>
+                                <option value="One-Time">One-Time</option>
+                                <option value="Quarterly">Quarterly</option>
+                            </select>
                         </div>
                         <div class="mb-3">
                             <label for="uStatus" class="form-label">Status</label>
                             <select class="form-select" id="uStatus">
-                                <option value="Draft">Draft</option>
                                 <option value="Active">Active</option>
-                                <option value="Completed">Completed</option>
-                                <option value="Cancelled">Cancelled</option>
+                                <option value="Inactive">Inactive</option>
                             </select>
                         </div>
                     </div>
@@ -198,9 +182,15 @@
         $("#AddReviewCycleModal").on("show.bs.modal", function () {
             $("#ReviewCycleForm")[0].reset();
             $("#ReviewCycleForm").removeClass('was-validated');
+            
+            var elFreq = document.getElementById("Frequency");
+            if (elFreq && elFreq.choicesInstance) {
+                elFreq.choicesInstance.setChoiceByValue("Annual");
+            }
+            
             var elStatus = document.getElementById("Status");
             if (elStatus && elStatus.choicesInstance) {
-                elStatus.choicesInstance.setChoiceByValue("Draft");
+                elStatus.choicesInstance.setChoiceByValue("Active");
             }
         });
 
@@ -213,10 +203,9 @@
             }
 
             var formData = {
-                CycleName: $("#CycleName").val(),
+                ReviewCycleName: $("#ReviewCycleName").val(),
                 Description: $("#Description").val(),
-                StartDate: $("#StartDate").val() ? $("#StartDate").val() : null,
-                EndDate: $("#EndDate").val() ? $("#EndDate").val() : null,
+                Frequency: $("#Frequency").val(),
                 Status: $("#Status").val()
             };
 
@@ -245,10 +234,9 @@
 
             var formData = {
                 ReviewCycleId: $("#update_id").val(),
-                CycleName: $("#uCycleName").val(),
+                ReviewCycleName: $("#uReviewCycleName").val(),
                 Description: $("#uDescription").val(),
-                StartDate: $("#uStartDate").val() ? $("#uStartDate").val() : null,
-                EndDate: $("#uEndDate").val() ? $("#uEndDate").val() : null,
+                Frequency: $("#uFrequency").val(),
                 Status: $("#uStatus").val()
             };
 
@@ -277,10 +265,15 @@
                 if (res.success && res.data) {
                     var data = res.data;
                     $("#update_id").val(data.ReviewCycleId);
-                    $("#uCycleName").val(data.CycleName);
+                    $("#uReviewCycleName").val(data.ReviewCycleName);
                     $("#uDescription").val(data.Description);
-                    $("#uStartDate").val(formatJsonDate(data.StartDate));
-                    $("#uEndDate").val(formatJsonDate(data.EndDate));
+                    
+                    var elFreq = document.getElementById("uFrequency");
+                    if (elFreq && elFreq.choicesInstance) {
+                        elFreq.choicesInstance.setChoiceByValue(data.Frequency);
+                    } else {
+                        $("#uFrequency").val(data.Frequency);
+                    }
                     
                     var elStatus = document.getElementById("uStatus");
                     if (elStatus && elStatus.choicesInstance) {
@@ -329,25 +322,5 @@
             shortText.removeClass('d-none');
             $(btn).text('Show More');
         }
-    }
-
-    function formatJsonDate(jsonDate) {
-        if (!jsonDate) return "";
-        var date;
-        if (typeof jsonDate === 'string' && jsonDate.indexOf('/Date(') !== -1) {
-            date = new Date(parseInt(jsonDate.replace(/\/Date\((\d+)\)\//, '$1')));
-        } else {
-            date = new Date(jsonDate);
-        }
-        if (isNaN(date.getTime())) return "";
-        
-        var month = '' + (date.getMonth() + 1);
-        var day = '' + date.getDate();
-        var year = date.getFullYear();
-
-        if (month.length < 2) month = '0' + month;
-        if (day.length < 2) day = '0' + day;
-
-        return [year, month, day].join('-');
     }
 </script>

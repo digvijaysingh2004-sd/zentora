@@ -206,8 +206,8 @@ namespace zentoraHRMS.Controllers
                 string dropOldReviewCyclesQuery = @"
                     IF EXISTS (SELECT * FROM sys.tables WHERE name = 'ReviewCycles')
                     BEGIN
-                        -- If the table exists but uses the old schema (CreatedBy), drop it so it can be re-created
-                        IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'ReviewCycles' AND COLUMN_NAME = 'CreatedBy')
+                        -- If the table exists but uses the old schema (like containing StartDate or CycleName columns), drop it so it can be re-created
+                        IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'ReviewCycles' AND (COLUMN_NAME = 'StartDate' OR COLUMN_NAME = 'CycleName'))
                         BEGIN
                             DROP TABLE dbo.ReviewCycles;
                         END
@@ -223,11 +223,10 @@ namespace zentoraHRMS.Controllers
                     BEGIN
                         CREATE TABLE dbo.ReviewCycles (
                             ReviewCycleId INT IDENTITY(1,1) PRIMARY KEY,
-                            CycleName NVARCHAR(150) NOT NULL,
+                            ReviewCycleName NVARCHAR(150) NOT NULL,
                             Description NVARCHAR(MAX) NULL,
-                            StartDate DATETIME NULL,
-                            EndDate DATETIME NULL,
-                            Status NVARCHAR(50) NOT NULL DEFAULT 'Draft',
+                            Frequency NVARCHAR(50) NULL,
+                            Status NVARCHAR(50) NOT NULL DEFAULT 'Active',
                             CreateDate DATETIME NULL DEFAULT GETDATE(),
                             CreateBy INT NULL,
                             UpdateDate DATETIME NULL,
@@ -236,9 +235,9 @@ namespace zentoraHRMS.Controllers
                         );
                         
                         -- Seed some initial data
-                        INSERT INTO dbo.ReviewCycles (CycleName, Description, StartDate, EndDate, Status, CreateBy, CreateDate, SystemAddon) VALUES
-                        (N'Annual Performance Review 2026', N'Company-wide annual appraisal process for the year 2026.', '2026-01-01', '2026-12-31', N'Active', 1, GETDATE(), GETDATE()),
-                        (N'Mid-Year Performance Review 2026', N'Mid-year performance feedback and goal adjustments.', '2026-06-01', '2026-06-30', N'Draft', 1, GETDATE(), GETDATE());
+                        INSERT INTO dbo.ReviewCycles (ReviewCycleName, Description, Frequency, Status, CreateBy, CreateDate, SystemAddon) VALUES
+                        (N'Annual Performance Review 2026', N'Company-wide annual appraisal process for the year 2026.', N'Annual', N'Active', 1, GETDATE(), GETDATE()),
+                        (N'Mid-Year Performance Review 2026', N'Mid-year performance feedback and goal adjustments.', N'Semi-Annual', N'Active', 1, GETDATE(), GETDATE());
                     END";
 
                 using (SqlCommand cmd = new SqlCommand(createReviewCyclesQuery, con))
@@ -1011,7 +1010,7 @@ namespace zentoraHRMS.Controllers
             using (SqlConnection con = new SqlConnection(connectionString))
             {
                 string query = @"
-                    SELECT ReviewCycleId, CycleName, Description, StartDate, EndDate, Status, 
+                    SELECT ReviewCycleId, ReviewCycleName, Description, Frequency, Status, 
                            CreateDate, CreateBy, UpdateDate, UpdateBy, SystemAddon 
                     FROM ReviewCycles 
                     ORDER BY ReviewCycleId DESC";
@@ -1026,11 +1025,10 @@ namespace zentoraHRMS.Controllers
                             list.Add(new ReviewCycleModel
                             {
                                 ReviewCycleId = Convert.ToInt32(reader["ReviewCycleId"]),
-                                CycleName = reader["CycleName"].ToString(),
+                                ReviewCycleName = reader["ReviewCycleName"].ToString(),
                                 Description = reader["Description"] != DBNull.Value ? reader["Description"].ToString() : "",
-                                StartDate = reader["StartDate"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(reader["StartDate"]) : null,
-                                EndDate = reader["EndDate"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(reader["EndDate"]) : null,
-                                Status = reader["Status"] != DBNull.Value ? reader["Status"].ToString() : "Draft",
+                                Frequency = reader["Frequency"] != DBNull.Value ? reader["Frequency"].ToString() : "",
+                                Status = reader["Status"] != DBNull.Value ? reader["Status"].ToString() : "Active",
                                 CreateBy = reader["CreateBy"] != DBNull.Value ? (int?)Convert.ToInt32(reader["CreateBy"]) : null,
                                 CreateDate = reader["CreateDate"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(reader["CreateDate"]) : null,
                                 UpdateBy = reader["UpdateBy"] != DBNull.Value ? (int?)Convert.ToInt32(reader["UpdateBy"]) : null,
@@ -1056,7 +1054,7 @@ namespace zentoraHRMS.Controllers
                 using (SqlConnection con = new SqlConnection(connectionString))
                 {
                     string query = @"
-                        SELECT ReviewCycleId, CycleName, Description, StartDate, EndDate, Status, 
+                        SELECT ReviewCycleId, ReviewCycleName, Description, Frequency, Status, 
                                CreateDate, CreateBy, UpdateDate, UpdateBy, SystemAddon 
                         FROM ReviewCycles 
                         WHERE ReviewCycleId = @ReviewCycleId";
@@ -1072,11 +1070,10 @@ namespace zentoraHRMS.Controllers
                                 model = new ReviewCycleModel
                                 {
                                     ReviewCycleId = Convert.ToInt32(reader["ReviewCycleId"]),
-                                    CycleName = reader["CycleName"].ToString(),
+                                    ReviewCycleName = reader["ReviewCycleName"].ToString(),
                                     Description = reader["Description"] != DBNull.Value ? reader["Description"].ToString() : "",
-                                    StartDate = reader["StartDate"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(reader["StartDate"]) : null,
-                                    EndDate = reader["EndDate"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(reader["EndDate"]) : null,
-                                    Status = reader["Status"] != DBNull.Value ? reader["Status"].ToString() : "Draft",
+                                    Frequency = reader["Frequency"] != DBNull.Value ? reader["Frequency"].ToString() : "",
+                                    Status = reader["Status"] != DBNull.Value ? reader["Status"].ToString() : "Active",
                                     CreateBy = reader["CreateBy"] != DBNull.Value ? (int?)Convert.ToInt32(reader["CreateBy"]) : null,
                                     CreateDate = reader["CreateDate"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(reader["CreateDate"]) : null,
                                     UpdateBy = reader["UpdateBy"] != DBNull.Value ? (int?)Convert.ToInt32(reader["UpdateBy"]) : null,
@@ -1116,16 +1113,15 @@ namespace zentoraHRMS.Controllers
                     if (model.ReviewCycleId == 0)
                     {
                         string query = @"
-                            INSERT INTO ReviewCycles (CycleName, Description, StartDate, EndDate, Status, CreateBy, CreateDate, SystemAddon) 
-                            VALUES (@CycleName, @Description, @StartDate, @EndDate, @Status, @CreateBy, GETDATE(), GETDATE())";
+                            INSERT INTO ReviewCycles (ReviewCycleName, Description, Frequency, Status, CreateBy, CreateDate, SystemAddon) 
+                            VALUES (@ReviewCycleName, @Description, @Frequency, @Status, @CreateBy, GETDATE(), GETDATE())";
                         
                         using (SqlCommand cmd = new SqlCommand(query, con))
                         {
-                            cmd.Parameters.AddWithValue("@CycleName", model.CycleName ?? "");
+                            cmd.Parameters.AddWithValue("@ReviewCycleName", model.ReviewCycleName ?? "");
                             cmd.Parameters.AddWithValue("@Description", model.Description ?? "");
-                            cmd.Parameters.AddWithValue("@StartDate", model.StartDate.HasValue ? (object)model.StartDate.Value : DBNull.Value);
-                            cmd.Parameters.AddWithValue("@EndDate", model.EndDate.HasValue ? (object)model.EndDate.Value : DBNull.Value);
-                            cmd.Parameters.AddWithValue("@Status", model.Status ?? "Draft");
+                            cmd.Parameters.AddWithValue("@Frequency", model.Frequency ?? "One-Time");
+                            cmd.Parameters.AddWithValue("@Status", model.Status ?? "Active");
                             cmd.Parameters.AddWithValue("@CreateBy", updaterId);
                             cmd.ExecuteNonQuery();
                         }
@@ -1134,19 +1130,18 @@ namespace zentoraHRMS.Controllers
                     {
                         string query = @"
                             UPDATE ReviewCycles 
-                            SET CycleName = @CycleName, Description = @Description, 
-                                StartDate = @StartDate, EndDate = @EndDate, Status = @Status, 
+                            SET ReviewCycleName = @ReviewCycleName, Description = @Description, 
+                                Frequency = @Frequency, Status = @Status, 
                                 UpdateBy = @UpdateBy, UpdateDate = GETDATE() 
                             WHERE ReviewCycleId = @ReviewCycleId";
                         
                         using (SqlCommand cmd = new SqlCommand(query, con))
                         {
                             cmd.Parameters.AddWithValue("@ReviewCycleId", model.ReviewCycleId);
-                            cmd.Parameters.AddWithValue("@CycleName", model.CycleName ?? "");
+                            cmd.Parameters.AddWithValue("@ReviewCycleName", model.ReviewCycleName ?? "");
                             cmd.Parameters.AddWithValue("@Description", model.Description ?? "");
-                            cmd.Parameters.AddWithValue("@StartDate", model.StartDate.HasValue ? (object)model.StartDate.Value : DBNull.Value);
-                            cmd.Parameters.AddWithValue("@EndDate", model.EndDate.HasValue ? (object)model.EndDate.Value : DBNull.Value);
-                            cmd.Parameters.AddWithValue("@Status", model.Status ?? "Draft");
+                            cmd.Parameters.AddWithValue("@Frequency", model.Frequency ?? "One-Time");
+                            cmd.Parameters.AddWithValue("@Status", model.Status ?? "Active");
                             cmd.Parameters.AddWithValue("@UpdateBy", updaterId);
                             cmd.ExecuteNonQuery();
                         }
