@@ -201,6 +201,50 @@ namespace zentoraHRMS.Controllers
                 {
                     cmd.ExecuteNonQuery();
                 }
+
+                // 5. Create ReviewCycles Table if not exists
+                string dropOldReviewCyclesQuery = @"
+                    IF EXISTS (SELECT * FROM sys.tables WHERE name = 'ReviewCycles')
+                    BEGIN
+                        -- If the table exists but uses the old schema (CreatedBy), drop it so it can be re-created
+                        IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'ReviewCycles' AND COLUMN_NAME = 'CreatedBy')
+                        BEGIN
+                            DROP TABLE dbo.ReviewCycles;
+                        END
+                    END";
+
+                using (SqlCommand cmd = new SqlCommand(dropOldReviewCyclesQuery, con))
+                {
+                    cmd.ExecuteNonQuery();
+                }
+
+                string createReviewCyclesQuery = @"
+                    IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'ReviewCycles')
+                    BEGIN
+                        CREATE TABLE dbo.ReviewCycles (
+                            ReviewCycleId INT IDENTITY(1,1) PRIMARY KEY,
+                            CycleName NVARCHAR(150) NOT NULL,
+                            Description NVARCHAR(MAX) NULL,
+                            StartDate DATETIME NULL,
+                            EndDate DATETIME NULL,
+                            Status NVARCHAR(50) NOT NULL DEFAULT 'Draft',
+                            CreateDate DATETIME NULL DEFAULT GETDATE(),
+                            CreateBy INT NULL,
+                            UpdateDate DATETIME NULL,
+                            UpdateBy INT NULL,
+                            SystemAddon DATETIME NULL DEFAULT GETDATE()
+                        );
+                        
+                        -- Seed some initial data
+                        INSERT INTO dbo.ReviewCycles (CycleName, Description, StartDate, EndDate, Status, CreateBy, CreateDate, SystemAddon) VALUES
+                        (N'Annual Performance Review 2026', N'Company-wide annual appraisal process for the year 2026.', '2026-01-01', '2026-12-31', N'Active', 1, GETDATE(), GETDATE()),
+                        (N'Mid-Year Performance Review 2026', N'Mid-year performance feedback and goal adjustments.', '2026-06-01', '2026-06-30', N'Draft', 1, GETDATE(), GETDATE());
+                    END";
+
+                using (SqlCommand cmd = new SqlCommand(createReviewCyclesQuery, con))
+                {
+                    cmd.ExecuteNonQuery();
+                }
             }
         }
 
@@ -958,9 +1002,190 @@ namespace zentoraHRMS.Controllers
         }
         #endregion
 
-        #region Boilerplate Actions
-        public ActionResult ReviewCycles() { return View(); }
+        public ActionResult ReviewCycles()
+        {
+            if (Session["RoleType"] == null || Session["UserId"] == null) 
+                return RedirectToAction("Login", "Auth");
+
+            List<ReviewCycleModel> list = new List<ReviewCycleModel>();
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                string query = @"
+                    SELECT ReviewCycleId, CycleName, Description, StartDate, EndDate, Status, 
+                           CreateDate, CreateBy, UpdateDate, UpdateBy, SystemAddon 
+                    FROM ReviewCycles 
+                    ORDER BY ReviewCycleId DESC";
+                
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+                    con.Open();
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            list.Add(new ReviewCycleModel
+                            {
+                                ReviewCycleId = Convert.ToInt32(reader["ReviewCycleId"]),
+                                CycleName = reader["CycleName"].ToString(),
+                                Description = reader["Description"] != DBNull.Value ? reader["Description"].ToString() : "",
+                                StartDate = reader["StartDate"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(reader["StartDate"]) : null,
+                                EndDate = reader["EndDate"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(reader["EndDate"]) : null,
+                                Status = reader["Status"] != DBNull.Value ? reader["Status"].ToString() : "Draft",
+                                CreateBy = reader["CreateBy"] != DBNull.Value ? (int?)Convert.ToInt32(reader["CreateBy"]) : null,
+                                CreateDate = reader["CreateDate"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(reader["CreateDate"]) : null,
+                                UpdateBy = reader["UpdateBy"] != DBNull.Value ? (int?)Convert.ToInt32(reader["UpdateBy"]) : null,
+                                UpdateDate = reader["UpdateDate"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(reader["UpdateDate"]) : null,
+                                SystemAddon = reader["SystemAddon"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(reader["SystemAddon"]) : null
+                            });
+                        }
+                    }
+                }
+            }
+            return View(list);
+        }
+
+        [HttpGet]
+        public JsonResult GetReviewCycle(int id)
+        {
+            try
+            {
+                if (Session["RoleType"] == null || Session["UserId"] == null) 
+                    return Json(new { success = false, message = "Unauthorized access" }, JsonRequestBehavior.AllowGet);
+
+                ReviewCycleModel model = null;
+                using (SqlConnection con = new SqlConnection(connectionString))
+                {
+                    string query = @"
+                        SELECT ReviewCycleId, CycleName, Description, StartDate, EndDate, Status, 
+                               CreateDate, CreateBy, UpdateDate, UpdateBy, SystemAddon 
+                        FROM ReviewCycles 
+                        WHERE ReviewCycleId = @ReviewCycleId";
+                    
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        cmd.Parameters.AddWithValue("@ReviewCycleId", id);
+                        con.Open();
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                model = new ReviewCycleModel
+                                {
+                                    ReviewCycleId = Convert.ToInt32(reader["ReviewCycleId"]),
+                                    CycleName = reader["CycleName"].ToString(),
+                                    Description = reader["Description"] != DBNull.Value ? reader["Description"].ToString() : "",
+                                    StartDate = reader["StartDate"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(reader["StartDate"]) : null,
+                                    EndDate = reader["EndDate"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(reader["EndDate"]) : null,
+                                    Status = reader["Status"] != DBNull.Value ? reader["Status"].ToString() : "Draft",
+                                    CreateBy = reader["CreateBy"] != DBNull.Value ? (int?)Convert.ToInt32(reader["CreateBy"]) : null,
+                                    CreateDate = reader["CreateDate"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(reader["CreateDate"]) : null,
+                                    UpdateBy = reader["UpdateBy"] != DBNull.Value ? (int?)Convert.ToInt32(reader["UpdateBy"]) : null,
+                                    UpdateDate = reader["UpdateDate"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(reader["UpdateDate"]) : null,
+                                    SystemAddon = reader["SystemAddon"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(reader["SystemAddon"]) : null
+                                };
+                            }
+                        }
+                    }
+                }
+
+                if (model != null)
+                {
+                    return Json(new { success = true, data = model }, JsonRequestBehavior.AllowGet);
+                }
+                return Json(new { success = false, message = "Review Cycle not found" }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpPost]
+        public JsonResult SaveReviewCycle(ReviewCycleModel model)
+        {
+            try
+            {
+                if (Session["RoleType"] == null || Session["UserId"] == null) 
+                    return Json(new { success = false, message = "Unauthorized access" });
+
+                int updaterId = Convert.ToInt32(Session["UserId"]);
+
+                using (SqlConnection con = new SqlConnection(connectionString))
+                {
+                    con.Open();
+                    if (model.ReviewCycleId == 0)
+                    {
+                        string query = @"
+                            INSERT INTO ReviewCycles (CycleName, Description, StartDate, EndDate, Status, CreateBy, CreateDate, SystemAddon) 
+                            VALUES (@CycleName, @Description, @StartDate, @EndDate, @Status, @CreateBy, GETDATE(), GETDATE())";
+                        
+                        using (SqlCommand cmd = new SqlCommand(query, con))
+                        {
+                            cmd.Parameters.AddWithValue("@CycleName", model.CycleName ?? "");
+                            cmd.Parameters.AddWithValue("@Description", model.Description ?? "");
+                            cmd.Parameters.AddWithValue("@StartDate", model.StartDate.HasValue ? (object)model.StartDate.Value : DBNull.Value);
+                            cmd.Parameters.AddWithValue("@EndDate", model.EndDate.HasValue ? (object)model.EndDate.Value : DBNull.Value);
+                            cmd.Parameters.AddWithValue("@Status", model.Status ?? "Draft");
+                            cmd.Parameters.AddWithValue("@CreateBy", updaterId);
+                            cmd.ExecuteNonQuery();
+                        }
+                    }
+                    else
+                    {
+                        string query = @"
+                            UPDATE ReviewCycles 
+                            SET CycleName = @CycleName, Description = @Description, 
+                                StartDate = @StartDate, EndDate = @EndDate, Status = @Status, 
+                                UpdateBy = @UpdateBy, UpdateDate = GETDATE() 
+                            WHERE ReviewCycleId = @ReviewCycleId";
+                        
+                        using (SqlCommand cmd = new SqlCommand(query, con))
+                        {
+                            cmd.Parameters.AddWithValue("@ReviewCycleId", model.ReviewCycleId);
+                            cmd.Parameters.AddWithValue("@CycleName", model.CycleName ?? "");
+                            cmd.Parameters.AddWithValue("@Description", model.Description ?? "");
+                            cmd.Parameters.AddWithValue("@StartDate", model.StartDate.HasValue ? (object)model.StartDate.Value : DBNull.Value);
+                            cmd.Parameters.AddWithValue("@EndDate", model.EndDate.HasValue ? (object)model.EndDate.Value : DBNull.Value);
+                            cmd.Parameters.AddWithValue("@Status", model.Status ?? "Draft");
+                            cmd.Parameters.AddWithValue("@UpdateBy", updaterId);
+                            cmd.ExecuteNonQuery();
+                        }
+                    }
+                }
+                return Json(new { success = true, message = "Review Cycle saved successfully!" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult DeleteReviewCycle(int id)
+        {
+            try
+            {
+                if (Session["RoleType"] == null || Session["UserId"] == null) 
+                    return Json(new { success = false, message = "Unauthorized access" });
+
+                using (SqlConnection con = new SqlConnection(connectionString))
+                {
+                    string query = "DELETE FROM ReviewCycles WHERE ReviewCycleId = @ReviewCycleId";
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        cmd.Parameters.AddWithValue("@ReviewCycleId", id);
+                        con.Open();
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+                return Json(new { success = true, message = "Review Cycle deleted successfully!" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
         public ActionResult EmployeeReviews() { return View(); }
-        #endregion
     }
 }

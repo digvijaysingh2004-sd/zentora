@@ -153,6 +153,7 @@
     <Compile Include="Models\IndicatorModel.cs" />
     <Compile Include="Models\GoalTypeModel.cs" />
     <Compile Include="Models\EmployeeGoalModel.cs" />
+    <Compile Include="Models\ReviewCycleModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
