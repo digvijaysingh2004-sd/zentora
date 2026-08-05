@@ -373,18 +373,41 @@
             color: #ffffff !important;
         }
 
-        /* Sidebar hover overrides - remove background and only keep text color */
+        /* Sidebar hover overrides - restore background and set text color to black in light mode, white in dark mode */
         .side-nav .side-nav-item .side-nav-link:hover,
         .side-nav .side-nav-item .side-nav-link:active,
         .side-nav .side-nav-item .side-nav-link:focus {
-            background-color: transparent !important;
-            background: transparent !important;
+            background-color: var(--ins-sidenav-item-hover-bg) !important;
+            color: #000000 !important;
         }
+        .side-nav .side-nav-item .side-nav-link:hover i,
+        .side-nav .side-nav-item .side-nav-link:hover .menu-text,
+        .side-nav .side-nav-item .side-nav-link:hover svg,
+        .side-nav .side-nav-item .side-nav-link:active i,
+        .side-nav .side-nav-item .side-nav-link:active .menu-text,
+        .side-nav .side-nav-item .side-nav-link:active svg,
+        .side-nav .side-nav-item .side-nav-link:focus i,
+        .side-nav .side-nav-item .side-nav-link:focus .menu-text,
+        .side-nav .side-nav-item .side-nav-link:focus svg {
+            color: #000000 !important;
+        }
+
         [data-bs-theme=dark] .side-nav .side-nav-item .side-nav-link:hover,
         [data-bs-theme=dark] .side-nav .side-nav-item .side-nav-link:active,
         [data-bs-theme=dark] .side-nav .side-nav-item .side-nav-link:focus {
-            background-color: transparent !important;
-            background: transparent !important;
+            background-color: var(--ins-sidenav-item-hover-bg) !important;
+            color: #ffffff !important;
+        }
+        [data-bs-theme=dark] .side-nav .side-nav-item .side-nav-link:hover i,
+        [data-bs-theme=dark] .side-nav .side-nav-item .side-nav-link:hover .menu-text,
+        [data-bs-theme=dark] .side-nav .side-nav-item .side-nav-link:hover svg,
+        [data-bs-theme=dark] .side-nav .side-nav-item .side-nav-link:active i,
+        [data-bs-theme=dark] .side-nav .side-nav-item .side-nav-link:active .menu-text,
+        [data-bs-theme=dark] .side-nav .side-nav-item .side-nav-link:active svg,
+        [data-bs-theme=dark] .side-nav .side-nav-item .side-nav-link:focus i,
+        [data-bs-theme=dark] .side-nav .side-nav-item .side-nav-link:focus .menu-text,
+        [data-bs-theme=dark] .side-nav .side-nav-item .side-nav-link:focus svg {
+            color: #ffffff !important;
         }
 
         /* Static Sizing and Scroll for Large Tabbed Modals */

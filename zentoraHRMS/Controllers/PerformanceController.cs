@@ -1001,6 +1001,7 @@ namespace zentoraHRMS.Controllers
         }
         #endregion
 
+        #region Review Cycles
         public ActionResult ReviewCycles()
         {
             if (Session["RoleType"] == null || Session["UserId"] == null) 
@@ -1180,6 +1181,8 @@ namespace zentoraHRMS.Controllers
                 return Json(new { success = false, message = ex.Message });
             }
         }
+
+        #endregion
 
         public ActionResult EmployeeReviews() { return View(); }
     }
