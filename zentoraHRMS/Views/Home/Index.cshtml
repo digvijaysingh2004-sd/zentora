@@ -128,8 +128,14 @@
         box-shadow: 0 0 8px rgba(139, 92, 246, 0.6);
         animation: dot-wave 1.2s infinite ease-in-out;
     }
+    .pulse-dot-active:nth-child(1) {
+        animation-delay: 0s;
+    }
     .pulse-dot-active:nth-child(2) {
         animation-delay: 0.2s;
+    }
+    .pulse-dot-active:nth-child(3) {
+        animation-delay: 0.4s;
     }
     .pulse-dot-inactive {
         background-color: rgba(255, 255, 255, 0.25);
@@ -139,39 +145,69 @@
         50% { transform: translateY(-4px); }
     }
 
-    /* Three moving wave animations at the bottom of the card - made little faster */
-    .three-wave-container {
+    /* Four moving wave animations at the bottom of the card - realistic and visible */
+    .hero-wave-container {
         position: absolute;
         bottom: 0;
         left: 0;
         width: 100%;
-        height: 40px;
+        height: 52px;
         overflow: hidden;
         pointer-events: none;
         z-index: 2;
     }
-    .three-wave {
+    .hero-wave-wrapper {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+    }
+    /* Wave vertical bobbing animations synced with the dots */
+    .wave-bob-1 {
+        animation: dot-wave 1.2s infinite ease-in-out;
+        animation-delay: 0s;
+    }
+    .wave-bob-2 {
+        animation: dot-wave 1.2s infinite ease-in-out;
+        animation-delay: 0.2s;
+    }
+    .wave-bob-3 {
+        animation: dot-wave 1.2s infinite ease-in-out;
+        animation-delay: 0.4s;
+    }
+    .wave-bob-4 {
+        animation: dot-wave 1.2s infinite ease-in-out;
+        animation-delay: 0.6s;
+    }
+    .hero-wave {
         position: absolute;
         bottom: 0;
         width: 200%;
-        height: 40px;
-        background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none"><path d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,42.4V0Z" fill="rgba(139,92,246,0.025)"/></svg>') repeat-x; /* subtle violet wave */
+        background-repeat: repeat-x;
         background-size: 50% 100%;
-        animation: wave-horizontal 8s linear infinite; /* sped up from 16s */
+        transform: translate3d(0, 0, 0);
     }
-    .three-wave-middle {
-        bottom: 1px;
-        height: 34px;
-        background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none"><path d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,42.4V0Z" fill="rgba(139,92,246,0.015)"/></svg>') repeat-x;
-        background-size: 50% 100%;
-        animation: wave-horizontal 6s linear infinite reverse; /* sped up from 11s */
+    .wave-1 {
+        height: 52px;
+        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none"><path d="M0,60 C300,100 600,20 900,90 L1200,60 L1200,120 L0,120 Z" fill="rgba(139,92,246,0.08)"/></svg>');
+        animation: wave-horizontal 12s linear infinite;
     }
-    .three-wave-top {
-        bottom: 3px;
-        height: 26px;
-        background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none"><path d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,42.4V0Z" fill="rgba(139,92,246,0.008)"/></svg>') repeat-x;
-        background-size: 50% 100%;
-        animation: wave-horizontal 12s linear infinite; /* sped up from 22s */
+    .wave-2 {
+        height: 44px;
+        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none"><path d="M0,45 C350,90 700,20 1050,70 L1200,50 L1200,120 L0,120 Z" fill="rgba(139,92,246,0.12)"/></svg>');
+        animation: wave-horizontal 8s linear infinite reverse;
+    }
+    .wave-3 {
+        height: 36px;
+        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none"><path d="M0,70 C400,30 800,95 1000,45 L1200,60 L1200,120 L0,120 Z" fill="rgba(139,92,246,0.16)"/></svg>');
+        animation: wave-horizontal 10s linear infinite;
+    }
+    .wave-4 {
+        height: 28px;
+        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none"><path d="M0,50 C300,10 600,80 900,30 L1200,55 L1200,120 L0,120 Z" fill="rgba(139,92,246,0.22)"/></svg>');
+        animation: wave-horizontal 6s linear infinite reverse;
     }
     @@keyframes wave-horizontal {
         0% { transform: translateX(0); }
@@ -220,11 +256,20 @@
             <span class="star-dot" style="top: 12%; left: 52%; animation-delay: 0.1s; animation-duration: 3.3s;"></span>
         </div>
         
-        <!-- 3 layer wave animations at the bottom (no white background, only waves) -->
-        <div class="three-wave-container">
-            <div class="three-wave"></div>
-            <div class="three-wave-middle"></div>
-            <div class="three-wave-top"></div>
+        <!-- 4 layer wave animations at the bottom synced in motion with the 3 pulse dots -->
+        <div class="hero-wave-container">
+            <div class="hero-wave-wrapper wave-bob-1">
+                <div class="hero-wave wave-1"></div>
+            </div>
+            <div class="hero-wave-wrapper wave-bob-2">
+                <div class="hero-wave wave-2"></div>
+            </div>
+            <div class="hero-wave-wrapper wave-bob-3">
+                <div class="hero-wave wave-3"></div>
+            </div>
+            <div class="hero-wave-wrapper wave-bob-4">
+                <div class="hero-wave wave-4"></div>
+            </div>
         </div>
 
         <div class="card-body p-4 d-flex flex-column flex-md-row justify-content-between align-items-md-center position-relative" style="z-index: 10;">
@@ -237,7 +282,7 @@
                     <div class="dot-pulse">
                         <span class="pulse-dot-active"></span>
                         <span class="pulse-dot-active"></span>
-                        <span class="pulse-dot-inactive"></span>
+                        <span class="pulse-dot-active"></span>
                     </div>
                     <span class="fs-xs fw-semibold" style="color: #a78bfa !important;">45 present today</span> <!-- green replaced with violet #a78bfa -->
                 </div>
@@ -247,19 +292,19 @@
             <div class="d-flex align-items-center gap-4 flex-wrap">
                 <!-- Career Page Pill Box -->
                 <div class="d-flex align-items-center rounded-3 px-3 py-2" style="background-color: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08);">
-                    <div class="p-2 rounded-3 text-white d-flex align-items-center justify-content-center me-2.5" style="background-color: #8b5cf6; width: 34px; height: 34px;"> <!-- green briefcase replaced with violet #8b5cf6 -->
+                    <div class="p-2 rounded-3 text-white d-flex align-items-center justify-content-center me-2" style="background-color: #8b5cf6; width: 34px; height: 34px; flex-shrink: 0;"> <!-- green briefcase replaced with violet #8b5cf6, fixed shrinking overlap -->
                         <i data-lucide="briefcase" style="width: 16px; height: 16px;"></i>
                     </div>
                     <div class="me-3">
                         <div class="fw-semibold text-white fs-xs mb-0" style="line-height: 1.2; font-size: 13px;">Career Page</div>
-                        <span class="fs-xxs fw-semibold" style="color: #a78bfa !important; font-size: 10px;">13 open</span> <!-- green replaced with violet #a78bfa -->
+                        <span class="fs-xxs fw-semibold" style="color: #a78bfa !important; font-size: 10px;">@openJobs open</span> <!-- dynamic open jobs count, green replaced with violet #a78bfa -->
                     </div>
                     <div class="mx-2" style="width: 1px; height: 24px; background-color: rgba(255, 255, 255, 0.15);"></div> <!-- line dividing the copy/external actions -->
-                    <div class="d-flex align-items-center gap-1.5">
-                        <button class="career-icon-btn" title="Copy Career Link">
+                    <div class="d-flex align-items-center" style="gap: 6px;">
+                        <button class="career-icon-btn" title="Copy Career Link" onclick="copyCareerLink()">
                             <i data-lucide="copy" style="width: 14px; height: 14px;"></i>
                         </button>
-                        <a href="#" class="career-icon-btn" title="Open Career Page">
+                        <a href="@Url.Action("Career", "Recruitment")" target="_blank" class="career-icon-btn" title="Open Career Page">
                             <i data-lucide="external-link" style="width: 14px; height: 14px;"></i>
                         </a>
                     </div>
@@ -889,6 +934,19 @@
 
 <!-- Zoho-Style Dashboard Scripts -->
 <script>
+    function copyCareerLink() {
+        var url = '@Url.Action("Career", "Recruitment", null, Request.Url.Scheme)';
+        navigator.clipboard.writeText(url).then(function() {
+            if (window.toastr) {
+                toastr.success("Career Page link copied to clipboard!");
+            } else {
+                alert("Career Page link copied to clipboard!");
+            }
+        }).catch(function(err) {
+            console.error("Could not copy link: ", err);
+        });
+    }
+
     $(document).ready(function () {
         // --- ApexCharts for Dashboard (Using Violet brand color: #8b5cf6) ---
         if ($('#attendanceChartContainer').length > 0) {
