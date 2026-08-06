@@ -371,34 +371,6 @@
             justify-content: center;
         }
 
-        .theme-toggle-btn {
-            position: absolute;
-            top: 24px;
-            right: 24px;
-            background: var(--input-bg);
-            border: 1px solid var(--input-border);
-            color: var(--text-main);
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-            z-index: 10;
-        }
-
-        .theme-toggle-btn:hover {
-            background: var(--google-btn-hover);
-            transform: scale(1.05);
-        }
-
-        .theme-toggle-btn i {
-            width: 18px;
-            height: 18px;
-        }
 
         .logo-wrapper {
             display: flex;
@@ -686,10 +658,6 @@
             .login-form-container {
                 padding: 30px 20px;
             }
-            .theme-toggle-btn {
-                top: 16px;
-                right: 16px;
-            }
         }
     </style>
 </head>
@@ -838,11 +806,6 @@
 
             <!-- Right Side: Login Form -->
             <div class="login-form-container">
-                <!-- Theme Toggle Button -->
-                <button type="button" class="theme-toggle-btn" id="themeToggleBtn" title="Toggle Theme">
-                    <i data-lucide="sun" class="theme-icon-sun"></i>
-                    <i data-lucide="moon" class="theme-icon-moon d-none"></i>
-                </button>
 
                 <div class="form-content text-start">
                     <!-- Branding -->
@@ -970,14 +933,6 @@
             configObj.theme = theme;
             sessionStorage.setItem("__SIMPLE_CONFIG__", JSON.stringify(configObj));
             
-            // Toggle sun/moon icons
-            if (theme === 'dark') {
-                $('#themeToggleBtn .theme-icon-sun').addClass('d-none');
-                $('#themeToggleBtn .theme-icon-moon').removeClass('d-none');
-            } else {
-                $('#themeToggleBtn .theme-icon-sun').removeClass('d-none');
-                $('#themeToggleBtn .theme-icon-moon').addClass('d-none');
-            }
         }
 
         $(document).ready(function () {
@@ -987,12 +942,6 @@
             // Initialize Theme
             initTheme();
 
-            // Handle Theme Toggle Click
-            $("#themeToggleBtn").on("click", function() {
-                var currentTheme = document.documentElement.getAttribute("data-bs-theme") || "light";
-                var newTheme = currentTheme === "dark" ? "light" : "dark";
-                setTheme(newTheme);
-            });
 
             // Showcase Carousel Slideshow
             var currentSlide = 1;
