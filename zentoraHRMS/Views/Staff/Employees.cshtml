@@ -1047,6 +1047,36 @@
             }
         });
 
+        $.ajax({
+            url: '/Staff/GetRolesList',
+            type: 'GET',
+            success: function (list) {
+                var choicesArray = [{
+                    value: '',
+                    label: 'Select Role Type',
+                    selected: true,
+                    disabled: false,
+                    placeholder: true
+                }];
+                var uChoicesArray = [];
+                $.each(list, function(i, item) {
+                    var option = {
+                        value: item.RoleId.toString(),
+                        label: item.RoleName,
+                        selected: false,
+                        disabled: false
+                    };
+                    choicesArray.push(option);
+                    uChoicesArray.push(option);
+                });
+                roleChoice.clearStore();
+                roleChoice.setChoices(choicesArray, 'value', 'label', true);
+                
+                uRoleChoice.clearStore();
+                uRoleChoice.setChoices(uChoicesArray, 'value', 'label', true);
+            }
+        });
+
         // Load Reporting Managers
         $.ajax({
             url: '/Staff/GetEmployeeList',

@@ -51,6 +51,12 @@
         color: #8e8e93 !important;
         border-color: rgba(142, 142, 147, 0.35) !important;
     }
+
+    .badge-glass-success {
+        background: rgba(52, 199, 89, 0.14) !important;
+        color: #34c759 !important;
+        border-color: rgba(52, 199, 89, 0.35) !important;
+    }
 </style>
 
 <div class="container-fluid">
@@ -99,6 +105,7 @@
                                          else if (c.RoleType == "2") { <span class="badge-glass badge-glass-warning">Admin</span> }
                                          else if (c.RoleType == "3") { <span class="badge-glass badge-glass-primary">Manager</span> }
                                          else if (c.RoleType == "4") { <span class="badge-glass badge-glass-info">HR</span> }
+                                         else if (c.RoleType == "5") { <span class="badge-glass badge-glass-success">Team Leader</span> }
                                          else { <span class="badge-glass badge-glass-secondary">Employee</span> }
                                     </td>
                                     <td>
@@ -154,11 +161,6 @@
                             <label for="RoleType" class="form-label">Role Type <span class="text-danger">*</span></label>
                             <select id="RoleType" data-choices class="form-select" required>
                                 <option value="" selected disabled>Select Role</option>
-                                <option value="1">Superadmin</option>
-                                <option value="2">Admin</option>
-                                <option value="3">Manager</option>
-                                <option value="4">HR</option>
-                                <option value="6">Employee</option>
                             </select>
                         </div>
                     </div>
@@ -206,13 +208,8 @@
                         </div>
                         <div class="mb-3">
                             <label for="uRoleType" class="form-label">Role Type <span class="text-danger">*</span></label>
-                            <select id="uRoleType" data-choices class="form-select" required>
-                                <option value="1">Superadmin</option>
-                                <option value="2">Admin</option>
-                                <option value="3">Manager</option>
-                                <option value="4">HR</option>
-                                <option value="6">Employee</option>
-                            </select>
+                             <select id="uRoleType" data-choices class="form-select" required>
+                             </select>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -269,6 +266,22 @@
                 }
                 $("#EmpId").html(s);
                 $("#uEmpId").html(s);
+            }
+        });
+
+        // Load role dropdowns
+        $.ajax({
+            url: '/Staff/GetRolesList',
+            type: 'GET',
+            success: function (data) {
+                var s = '<option value="" selected disabled>Select Role</option>';
+                var u = '';
+                for (var i = 0; i < data.length; i++) {
+                    s += '<option value="' + data[i].RoleId + '">' + data[i].RoleName + '</option>';
+                    u += '<option value="' + data[i].RoleId + '">' + data[i].RoleName + '</option>';
+                }
+                $("#RoleType").html(s);
+                $("#uRoleType").html(u);
             }
         });
 

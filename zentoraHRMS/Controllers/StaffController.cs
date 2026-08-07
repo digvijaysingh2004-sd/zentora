@@ -544,7 +544,7 @@ namespace zentoraHRMS.Controllers
             List<EmployeeModel> list = new List<EmployeeModel>();
             using (SqlConnection con = new SqlConnection(connectionString))
             {
-                string query = "SELECT Id, FirstName, LastName, Username FROM EmployeeDetails WHERE IsDeleted = 0 AND IsActive = 1";
+                string query = "SELECT Id, FirstName, MiddleName, LastName, Username FROM EmployeeDetails WHERE IsDeleted = 0 AND IsActive = 1";
                 using (SqlCommand cmd = new SqlCommand(query, con))
                 {
                     con.Open();
@@ -552,10 +552,11 @@ namespace zentoraHRMS.Controllers
                     {
                         while (reader.Read())
                         {
+                            string mid = reader["MiddleName"] != DBNull.Value ? reader["MiddleName"].ToString().Trim() : "";
                             list.Add(new EmployeeModel
                             {
                                 Id = Convert.ToInt32(reader["Id"]),
-                                FirstName = reader["FirstName"].ToString(),
+                                FirstName = reader["FirstName"].ToString() + (string.IsNullOrEmpty(mid) ? "" : " " + mid),
                                 LastName = reader["LastName"].ToString(),
                                 Username = reader["Username"] != DBNull.Value ? reader["Username"].ToString() : ""
                             });
@@ -806,6 +807,32 @@ namespace zentoraHRMS.Controllers
             {
                 return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
             }
+        }
+
+        [HttpGet]
+        public JsonResult GetRolesList()
+        {
+            List<object> list = new List<object>();
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                string query = "SELECT Id, RoleName FROM Roles WHERE IsActive = 1 AND IsDeleted = 0 ORDER BY Id ASC";
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+                    con.Open();
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            list.Add(new
+                            {
+                                RoleId = Convert.ToInt32(reader["Id"]),
+                                RoleName = reader["RoleName"].ToString()
+                            });
+                        }
+                    }
+                }
+            }
+            return Json(list, JsonRequestBehavior.AllowGet);
         }
 
         [HttpPost]

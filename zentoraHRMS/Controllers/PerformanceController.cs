@@ -1126,7 +1126,7 @@ namespace zentoraHRMS.Controllers
             List<EmployeeModel> list = new List<EmployeeModel>();
             using (SqlConnection con = new SqlConnection(connectionString))
             {
-                string query = "SELECT Id, FirstName, LastName, Username, ProfileImage FROM EmployeeDetails WHERE IsDeleted = 0 AND IsActive = 1";
+                string query = "SELECT Id, FirstName, MiddleName, LastName, Username, ProfileImage FROM EmployeeDetails WHERE IsDeleted = 0 AND IsActive = 1";
                 using (SqlCommand cmd = new SqlCommand(query, con))
                 {
                     con.Open();
@@ -1134,10 +1134,11 @@ namespace zentoraHRMS.Controllers
                     {
                         while (reader.Read())
                         {
+                            string mid = reader["MiddleName"] != DBNull.Value ? reader["MiddleName"].ToString().Trim() : "";
                             list.Add(new EmployeeModel
                             {
                                 Id = Convert.ToInt32(reader["Id"]),
-                                FirstName = reader["FirstName"].ToString(),
+                                FirstName = reader["FirstName"].ToString() + (string.IsNullOrEmpty(mid) ? "" : " " + mid),
                                 LastName = reader["LastName"] != DBNull.Value ? reader["LastName"].ToString() : "",
                                 ProfileImage = reader["ProfileImage"] != DBNull.Value ? reader["ProfileImage"].ToString() : ""
                             });
