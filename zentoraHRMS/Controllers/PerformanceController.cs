@@ -244,6 +244,64 @@ namespace zentoraHRMS.Controllers
                 {
                     cmd.ExecuteNonQuery();
                 }
+
+                // 6. Migrate Indicators Table to support RoleId
+                string migrateIndicatorsQuery = @"
+                    IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Indicators' AND COLUMN_NAME = 'RoleId')
+                    BEGIN
+                        ALTER TABLE dbo.Indicators ADD RoleId INT NULL;
+                        ALTER TABLE dbo.Indicators ADD CONSTRAINT FK_Indicators_Roles FOREIGN KEY (RoleId) REFERENCES dbo.Roles(Id) ON DELETE SET NULL;
+                    END";
+                using (SqlCommand cmd = new SqlCommand(migrateIndicatorsQuery, con))
+                {
+                    cmd.ExecuteNonQuery();
+                }
+
+                // 7. Create EmployeeReviews Table if not exists
+                string createReviewsQuery = @"
+                    IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'EmployeeReviews')
+                    BEGIN
+                        CREATE TABLE dbo.EmployeeReviews (
+                            ReviewId INT IDENTITY(1,1) PRIMARY KEY,
+                            EmployeeId INT NOT NULL,
+                            ReviewerId INT NOT NULL,
+                            ReviewCycleId INT NOT NULL,
+                            ReviewDate DATETIME NOT NULL,
+                            Rating DECIMAL(3,2) NULL,
+                            Status NVARCHAR(50) NOT NULL DEFAULT 'Scheduled',
+                            OverallComments NVARCHAR(MAX) NULL,
+                            CreatedAt DATETIME NULL DEFAULT GETDATE(),
+                            CreatedBy NVARCHAR(100) NULL,
+                            UpdatedAt DATETIME NULL,
+                            UpdatedBy NVARCHAR(100) NULL,
+                            CONSTRAINT FK_EmployeeReviews_EmployeeDetails FOREIGN KEY (EmployeeId) REFERENCES dbo.EmployeeDetails(Id),
+                            CONSTRAINT FK_EmployeeReviews_ReviewerDetails FOREIGN KEY (ReviewerId) REFERENCES dbo.EmployeeDetails(Id),
+                            CONSTRAINT FK_EmployeeReviews_ReviewCycles FOREIGN KEY (ReviewCycleId) REFERENCES dbo.ReviewCycles(ReviewCycleId)
+                        );
+                    END";
+                using (SqlCommand cmd = new SqlCommand(createReviewsQuery, con))
+                {
+                    cmd.ExecuteNonQuery();
+                }
+
+                // 8. Create EmployeeReviewRatings Table if not exists
+                string createRatingsQuery = @"
+                    IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'EmployeeReviewRatings')
+                    BEGIN
+                        CREATE TABLE dbo.EmployeeReviewRatings (
+                            ReviewRatingId INT IDENTITY(1,1) PRIMARY KEY,
+                            ReviewId INT NOT NULL,
+                            IndicatorId INT NOT NULL,
+                            RatingValue INT NOT NULL,
+                            Comments NVARCHAR(MAX) NULL,
+                            CONSTRAINT FK_EmployeeReviewRatings_EmployeeReviews FOREIGN KEY (ReviewId) REFERENCES dbo.EmployeeReviews(ReviewId) ON DELETE CASCADE,
+                            CONSTRAINT FK_EmployeeReviewRatings_Indicators FOREIGN KEY (IndicatorId) REFERENCES dbo.Indicators(IndicatorId) ON DELETE CASCADE
+                        );
+                    END";
+                using (SqlCommand cmd = new SqlCommand(createRatingsQuery, con))
+                {
+                    cmd.ExecuteNonQuery();
+                }
             }
         }
 
@@ -399,13 +457,22 @@ namespace zentoraHRMS.Controllers
             if (Session["RoleType"] == null || Session["UserId"] == null) 
                 return RedirectToAction("Login", "Auth");
 
+            string currentRole = Session["RoleName"]?.ToString() ?? "";
+            if (!currentRole.Equals("Superadmin", StringComparison.OrdinalIgnoreCase) && 
+                !currentRole.Equals("Admin", StringComparison.OrdinalIgnoreCase))
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
             List<IndicatorModel> list = new List<IndicatorModel>();
             using (SqlConnection con = new SqlConnection(connectionString))
             {
                 string query = @"SELECT I.IndicatorId, I.IndicatorCategoryId, C.CategoryName, I.IndicatorName, I.Description, 
-                                        I.IsActive, I.MeasurementUnit, I.TargetValue, I.CreatedAt, I.UpdatedAt, I.CreatedBy, I.UpdatedBy 
+                                        I.IsActive, I.MeasurementUnit, I.TargetValue, I.CreatedAt, I.UpdatedAt, I.CreatedBy, I.UpdatedBy,
+                                        I.RoleId, R.RoleName 
                                  FROM Indicators I
                                  INNER JOIN IndicatorCategories C ON I.IndicatorCategoryId = C.IndicatorCategoryId
+                                 LEFT JOIN Roles R ON I.RoleId = R.Id
                                  ORDER BY I.IndicatorId DESC";
                 using (SqlCommand cmd = new SqlCommand(query, con))
                 {
@@ -427,7 +494,9 @@ namespace zentoraHRMS.Controllers
                                 CreatedAt = reader["CreatedAt"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(reader["CreatedAt"]) : null,
                                 UpdatedAt = reader["UpdatedAt"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(reader["UpdatedAt"]) : null,
                                 CreatedBy = reader["CreatedBy"].ToString(),
-                                UpdatedBy = reader["UpdatedBy"].ToString()
+                                UpdatedBy = reader["UpdatedBy"].ToString(),
+                                RoleId = reader["RoleId"] != DBNull.Value ? (int?)Convert.ToInt32(reader["RoleId"]) : null,
+                                RoleName = reader["RoleName"] != DBNull.Value ? reader["RoleName"].ToString() : "All Roles"
                             });
                         }
                     }
@@ -441,11 +510,21 @@ namespace zentoraHRMS.Controllers
         {
             try
             {
+                if (Session["RoleType"] == null || Session["UserId"] == null) 
+                    return Json(new { success = false, message = "Unauthorized access" });
+
+                string currentRole = Session["RoleName"]?.ToString() ?? "";
+                if (!currentRole.Equals("Superadmin", StringComparison.OrdinalIgnoreCase) && 
+                    !currentRole.Equals("Admin", StringComparison.OrdinalIgnoreCase))
+                {
+                    return Json(new { success = false, message = "Access Denied. Only Administrators can manage indicators." });
+                }
+
                 string creator = Session["UserName"]?.ToString() ?? "System";
                 using (SqlConnection con = new SqlConnection(connectionString))
                 {
-                    string query = @"INSERT INTO Indicators (IndicatorCategoryId, IndicatorName, Description, IsActive, MeasurementUnit, TargetValue, CreatedAt, CreatedBy) 
-                                     VALUES (@IndicatorCategoryId, @IndicatorName, @Description, @IsActive, @MeasurementUnit, @TargetValue, GETDATE(), @CreatedBy)";
+                    string query = @"INSERT INTO Indicators (IndicatorCategoryId, IndicatorName, Description, IsActive, MeasurementUnit, TargetValue, CreatedAt, CreatedBy, RoleId) 
+                                     VALUES (@IndicatorCategoryId, @IndicatorName, @Description, @IsActive, @MeasurementUnit, @TargetValue, GETDATE(), @CreatedBy, @RoleId)";
                     using (SqlCommand cmd = new SqlCommand(query, con))
                     {
                         cmd.Parameters.AddWithValue("@IndicatorCategoryId", model.IndicatorCategoryId);
@@ -455,6 +534,7 @@ namespace zentoraHRMS.Controllers
                         cmd.Parameters.AddWithValue("@MeasurementUnit", model.MeasurementUnit ?? "");
                         cmd.Parameters.AddWithValue("@TargetValue", model.TargetValue ?? "");
                         cmd.Parameters.AddWithValue("@CreatedBy", creator);
+                        cmd.Parameters.AddWithValue("@RoleId", (object)model.RoleId ?? DBNull.Value);
                         con.Open();
                         cmd.ExecuteNonQuery();
                     }
@@ -472,7 +552,7 @@ namespace zentoraHRMS.Controllers
             IndicatorModel model = null;
             using (SqlConnection con = new SqlConnection(connectionString))
             {
-                string query = "SELECT IndicatorId, IndicatorCategoryId, IndicatorName, Description, IsActive, MeasurementUnit, TargetValue FROM Indicators WHERE IndicatorId = @IndicatorId";
+                string query = "SELECT IndicatorId, IndicatorCategoryId, IndicatorName, Description, IsActive, MeasurementUnit, TargetValue, RoleId FROM Indicators WHERE IndicatorId = @IndicatorId";
                 using (SqlCommand cmd = new SqlCommand(query, con))
                 {
                     cmd.Parameters.AddWithValue("@IndicatorId", id);
@@ -489,7 +569,8 @@ namespace zentoraHRMS.Controllers
                                 Description = reader["Description"].ToString(),
                                 IsActive = Convert.ToBoolean(reader["IsActive"]),
                                 MeasurementUnit = reader["MeasurementUnit"].ToString(),
-                                TargetValue = reader["TargetValue"].ToString()
+                                TargetValue = reader["TargetValue"].ToString(),
+                                RoleId = reader["RoleId"] != DBNull.Value ? (int?)Convert.ToInt32(reader["RoleId"]) : null
                             };
                         }
                     }
@@ -503,6 +584,16 @@ namespace zentoraHRMS.Controllers
         {
             try
             {
+                if (Session["RoleType"] == null || Session["UserId"] == null) 
+                    return Json(new { success = false, message = "Unauthorized access" });
+
+                string currentRole = Session["RoleName"]?.ToString() ?? "";
+                if (!currentRole.Equals("Superadmin", StringComparison.OrdinalIgnoreCase) && 
+                    !currentRole.Equals("Admin", StringComparison.OrdinalIgnoreCase))
+                {
+                    return Json(new { success = false, message = "Access Denied. Only Administrators can manage indicators." });
+                }
+
                 string updater = Session["UserName"]?.ToString() ?? "System";
                 using (SqlConnection con = new SqlConnection(connectionString))
                 {
@@ -510,7 +601,7 @@ namespace zentoraHRMS.Controllers
                                      SET IndicatorCategoryId = @IndicatorCategoryId, IndicatorName = @IndicatorName, 
                                          Description = @Description, IsActive = @IsActive, 
                                          MeasurementUnit = @MeasurementUnit, TargetValue = @TargetValue,
-                                         UpdatedAt = GETDATE(), UpdatedBy = @UpdatedBy 
+                                         UpdatedAt = GETDATE(), UpdatedBy = @UpdatedBy, RoleId = @RoleId
                                      WHERE IndicatorId = @IndicatorId";
                     using (SqlCommand cmd = new SqlCommand(query, con))
                     {
@@ -522,6 +613,7 @@ namespace zentoraHRMS.Controllers
                         cmd.Parameters.AddWithValue("@MeasurementUnit", model.MeasurementUnit ?? "");
                         cmd.Parameters.AddWithValue("@TargetValue", model.TargetValue ?? "");
                         cmd.Parameters.AddWithValue("@UpdatedBy", updater);
+                        cmd.Parameters.AddWithValue("@RoleId", (object)model.RoleId ?? DBNull.Value);
                         con.Open();
                         cmd.ExecuteNonQuery();
                     }
@@ -575,6 +667,32 @@ namespace zentoraHRMS.Controllers
                             {
                                 IndicatorCategoryId = Convert.ToInt32(reader["IndicatorCategoryId"]),
                                 CategoryName = reader["CategoryName"].ToString()
+                            });
+                        }
+                    }
+                }
+            }
+            return Json(list, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpGet]
+        public JsonResult GetRolesList()
+        {
+            List<object> list = new List<object>();
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                string query = "SELECT Id, RoleName FROM Roles WHERE IsActive = 1 AND IsDeleted = 0 ORDER BY RoleName";
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+                    con.Open();
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            list.Add(new
+                            {
+                                RoleId = Convert.ToInt32(reader["Id"]),
+                                RoleName = reader["RoleName"].ToString()
                             });
                         }
                     }
@@ -1184,6 +1302,553 @@ namespace zentoraHRMS.Controllers
 
         #endregion
 
-        public ActionResult EmployeeReviews() { return View(); }
+        public ActionResult EmployeeReviews()
+        {
+            if (Session["RoleType"] == null || Session["UserId"] == null) 
+                return RedirectToAction("Login", "Auth");
+
+            string currentRole = Session["RoleName"]?.ToString() ?? "";
+            ViewBag.IsAdmin = currentRole.Equals("Superadmin", StringComparison.OrdinalIgnoreCase) || 
+                              currentRole.Equals("Admin", StringComparison.OrdinalIgnoreCase);
+
+            return View();
+        }
+
+        [HttpGet]
+        public JsonResult GetEmployeeReviews()
+        {
+            try
+            {
+                if (Session["RoleType"] == null || Session["UserId"] == null)
+                    return Json(new { success = false, message = "Unauthorized access" }, JsonRequestBehavior.AllowGet);
+
+                List<EmployeeReviewModel> list = new List<EmployeeReviewModel>();
+                using (SqlConnection con = new SqlConnection(connectionString))
+                {
+                    string query = @"
+                        SELECT r.ReviewId, r.EmployeeId, r.ReviewerId, r.ReviewCycleId, r.ReviewDate, r.Rating, r.Status, r.OverallComments,
+                               emp.FirstName AS EmpFirst, emp.LastName AS EmpLast, emp.Email AS EmpEmail, emp.ProfileImage AS EmpImg, emp.RoleType AS EmpRoleId,
+                               rev.FirstName AS RevFirst, rev.LastName AS RevLast, rev.Email AS RevEmail, rev.ProfileImage AS RevImg,
+                               c.ReviewCycleName
+                        FROM EmployeeReviews r
+                        INNER JOIN EmployeeDetails emp ON r.EmployeeId = emp.Id
+                        INNER JOIN EmployeeDetails rev ON r.ReviewerId = rev.Id
+                        INNER JOIN ReviewCycles c ON r.ReviewCycleId = c.ReviewCycleId
+                        ORDER BY r.ReviewId DESC";
+
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        con.Open();
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                list.Add(new EmployeeReviewModel
+                                {
+                                    ReviewId = Convert.ToInt32(reader["ReviewId"]),
+                                    EmployeeId = Convert.ToInt32(reader["EmployeeId"]),
+                                    EmployeeName = reader["EmpFirst"].ToString() + " " + reader["EmpLast"].ToString(),
+                                    EmployeeEmail = reader["EmpEmail"].ToString(),
+                                    EmployeeImage = reader["EmpImg"] != DBNull.Value ? reader["EmpImg"].ToString() : "",
+                                    ReviewerId = Convert.ToInt32(reader["ReviewerId"]),
+                                    ReviewerName = reader["RevFirst"].ToString() + " " + reader["RevLast"].ToString(),
+                                    ReviewerEmail = reader["RevEmail"].ToString(),
+                                    ReviewerImage = reader["RevImg"] != DBNull.Value ? reader["RevImg"].ToString() : "",
+                                    ReviewCycleId = Convert.ToInt32(reader["ReviewCycleId"]),
+                                    ReviewCycleName = reader["ReviewCycleName"].ToString(),
+                                    ReviewDate = Convert.ToDateTime(reader["ReviewDate"]),
+                                    Rating = reader["Rating"] != DBNull.Value ? (decimal?)Convert.ToDecimal(reader["Rating"]) : null,
+                                    Status = reader["Status"].ToString(),
+                                    OverallComments = reader["OverallComments"] != DBNull.Value ? reader["OverallComments"].ToString() : "",
+                                    EmployeeRoleId = reader["EmpRoleId"] != DBNull.Value ? (int?)Convert.ToInt32(reader["EmpRoleId"]) : null
+                                });
+                            }
+                        }
+                    }
+                }
+                return Json(new { success = true, data = list }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpPost]
+        public JsonResult SaveEmployeeReview(EmployeeReviewModel model)
+        {
+            try
+            {
+                if (Session["RoleType"] == null || Session["UserId"] == null)
+                    return Json(new { success = false, message = "Unauthorized access" });
+
+                string currentRole = Session["RoleName"]?.ToString() ?? "";
+                if (!currentRole.Equals("Superadmin", StringComparison.OrdinalIgnoreCase) && 
+                    !currentRole.Equals("Admin", StringComparison.OrdinalIgnoreCase))
+                {
+                    return Json(new { success = false, message = "Access Denied. Only Administrators can schedule reviews." });
+                }
+
+                string creator = Session["UserName"]?.ToString() ?? "System";
+                using (SqlConnection con = new SqlConnection(connectionString))
+                {
+                    con.Open();
+                    if (model.ReviewId == 0)
+                    {
+                        string query = @"
+                            INSERT INTO EmployeeReviews (EmployeeId, ReviewerId, ReviewCycleId, ReviewDate, Status, CreatedAt, CreatedBy)
+                            VALUES (@EmployeeId, @ReviewerId, @ReviewCycleId, @ReviewDate, 'Scheduled', GETDATE(), @CreatedBy)";
+                        using (SqlCommand cmd = new SqlCommand(query, con))
+                        {
+                            cmd.Parameters.AddWithValue("@EmployeeId", model.EmployeeId);
+                            cmd.Parameters.AddWithValue("@ReviewerId", model.ReviewerId);
+                            cmd.Parameters.AddWithValue("@ReviewCycleId", model.ReviewCycleId);
+                            cmd.Parameters.AddWithValue("@ReviewDate", model.ReviewDate);
+                            cmd.Parameters.AddWithValue("@CreatedBy", creator);
+                            cmd.ExecuteNonQuery();
+                        }
+                    }
+                    else
+                    {
+                        string query = @"
+                            UPDATE EmployeeReviews
+                            SET EmployeeId = @EmployeeId, ReviewerId = @ReviewerId, ReviewCycleId = @ReviewCycleId, 
+                                ReviewDate = @ReviewDate, UpdatedAt = GETDATE(), UpdatedBy = @UpdatedBy
+                            WHERE ReviewId = @ReviewId";
+                        using (SqlCommand cmd = new SqlCommand(query, con))
+                        {
+                            cmd.Parameters.AddWithValue("@ReviewId", model.ReviewId);
+                            cmd.Parameters.AddWithValue("@EmployeeId", model.EmployeeId);
+                            cmd.Parameters.AddWithValue("@ReviewerId", model.ReviewerId);
+                            cmd.Parameters.AddWithValue("@ReviewCycleId", model.ReviewCycleId);
+                            cmd.Parameters.AddWithValue("@ReviewDate", model.ReviewDate);
+                            cmd.Parameters.AddWithValue("@UpdatedBy", creator);
+                            cmd.ExecuteNonQuery();
+                        }
+                    }
+                }
+                return Json(new { success = true, message = "Review scheduled successfully!" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public JsonResult GetEmployeeReviewById(int id)
+        {
+            try
+            {
+                if (Session["RoleType"] == null || Session["UserId"] == null)
+                    return Json(new { success = false, message = "Unauthorized access" }, JsonRequestBehavior.AllowGet);
+
+                EmployeeReviewModel model = null;
+                using (SqlConnection con = new SqlConnection(connectionString))
+                {
+                    string query = @"
+                        SELECT ReviewId, EmployeeId, ReviewerId, ReviewCycleId, ReviewDate, Rating, Status, OverallComments
+                        FROM EmployeeReviews
+                        WHERE ReviewId = @ReviewId";
+
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        cmd.Parameters.AddWithValue("@ReviewId", id);
+                        con.Open();
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                model = new EmployeeReviewModel
+                                {
+                                    ReviewId = Convert.ToInt32(reader["ReviewId"]),
+                                    EmployeeId = Convert.ToInt32(reader["EmployeeId"]),
+                                    ReviewerId = Convert.ToInt32(reader["ReviewerId"]),
+                                    ReviewCycleId = Convert.ToInt32(reader["ReviewCycleId"]),
+                                    ReviewDate = Convert.ToDateTime(reader["ReviewDate"]),
+                                    Rating = reader["Rating"] != DBNull.Value ? (decimal?)Convert.ToDecimal(reader["Rating"]) : null,
+                                    Status = reader["Status"].ToString(),
+                                    OverallComments = reader["OverallComments"] != DBNull.Value ? reader["OverallComments"].ToString() : ""
+                                };
+                            }
+                        }
+                    }
+                }
+
+                if (model != null)
+                    return Json(new { success = true, data = model }, JsonRequestBehavior.AllowGet);
+
+                return Json(new { success = false, message = "Review not found" }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpGet]
+        public JsonResult GetIndicatorsForEmployee(int employeeId)
+        {
+            try
+            {
+                if (Session["RoleType"] == null || Session["UserId"] == null)
+                    return Json(new { success = false, message = "Unauthorized access" }, JsonRequestBehavior.AllowGet);
+
+                int? employeeRoleId = null;
+                using (SqlConnection con = new SqlConnection(connectionString))
+                {
+                    con.Open();
+                    using (SqlCommand cmd = new SqlCommand("SELECT RoleType FROM EmployeeDetails WHERE Id = @Id", con))
+                    {
+                        cmd.Parameters.AddWithValue("@Id", employeeId);
+                        object res = cmd.ExecuteScalar();
+                        if (res != null && res != DBNull.Value)
+                        {
+                            employeeRoleId = Convert.ToInt32(res);
+                        }
+                    }
+                }
+
+                List<IndicatorModel> indicators = new List<IndicatorModel>();
+                using (SqlConnection con = new SqlConnection(connectionString))
+                {
+                    string query = @"
+                        SELECT I.IndicatorId, I.IndicatorCategoryId, C.CategoryName, I.IndicatorName, I.Description, 
+                               I.MeasurementUnit, I.TargetValue
+                        FROM Indicators I
+                        INNER JOIN IndicatorCategories C ON I.IndicatorCategoryId = C.IndicatorCategoryId
+                        WHERE I.IsActive = 1 AND (I.RoleId IS NULL OR I.RoleId = @RoleId)
+                        ORDER BY C.CategoryName, I.IndicatorName";
+
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        cmd.Parameters.AddWithValue("@RoleId", (object)employeeRoleId ?? DBNull.Value);
+                        con.Open();
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                indicators.Add(new IndicatorModel
+                                {
+                                    IndicatorId = Convert.ToInt32(reader["IndicatorId"]),
+                                    IndicatorCategoryId = Convert.ToInt32(reader["IndicatorCategoryId"]),
+                                    CategoryName = reader["CategoryName"].ToString(),
+                                    IndicatorName = reader["IndicatorName"].ToString(),
+                                    Description = reader["Description"].ToString(),
+                                    MeasurementUnit = reader["MeasurementUnit"] != DBNull.Value ? reader["MeasurementUnit"].ToString() : "",
+                                    TargetValue = reader["TargetValue"] != DBNull.Value ? reader["TargetValue"].ToString() : ""
+                                });
+                            }
+                        }
+                    }
+                }
+
+                return Json(new { success = true, data = indicators }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpPost]
+        public JsonResult SubmitEmployeeReview(ReviewSubmissionModel model)
+        {
+            try
+            {
+                if (Session["RoleType"] == null || Session["UserId"] == null)
+                    return Json(new { success = false, message = "Unauthorized access" });
+
+                if (model.Ratings == null || model.Ratings.Count == 0)
+                    return Json(new { success = false, message = "Please rate at least one performance indicator." });
+
+                double totalRating = 0;
+                foreach (var r in model.Ratings)
+                {
+                    totalRating += r.RatingValue;
+                }
+                decimal averageRating = (decimal)(totalRating / model.Ratings.Count);
+                string updater = Session["UserName"]?.ToString() ?? "System";
+
+                using (SqlConnection con = new SqlConnection(connectionString))
+                {
+                    con.Open();
+                    using (SqlTransaction transaction = con.BeginTransaction())
+                    {
+                        try
+                        {
+                            string deleteRatingsQuery = "DELETE FROM EmployeeReviewRatings WHERE ReviewId = @ReviewId";
+                            using (SqlCommand cmd = new SqlCommand(deleteRatingsQuery, con, transaction))
+                            {
+                                cmd.Parameters.AddWithValue("@ReviewId", model.ReviewId);
+                                cmd.ExecuteNonQuery();
+                            }
+
+                            string insertRatingQuery = @"
+                                INSERT INTO EmployeeReviewRatings (ReviewId, IndicatorId, RatingValue, Comments)
+                                VALUES (@ReviewId, @IndicatorId, @RatingValue, @Comments)";
+                            foreach (var rating in model.Ratings)
+                            {
+                                using (SqlCommand cmd = new SqlCommand(insertRatingQuery, con, transaction))
+                                {
+                                    cmd.Parameters.AddWithValue("@ReviewId", model.ReviewId);
+                                    cmd.Parameters.AddWithValue("@IndicatorId", rating.IndicatorId);
+                                    cmd.Parameters.AddWithValue("@RatingValue", rating.RatingValue);
+                                    cmd.Parameters.AddWithValue("@Comments", rating.Comments ?? "");
+                                    cmd.ExecuteNonQuery();
+                                }
+                            }
+
+                            string updateReviewQuery = @"
+                                UPDATE EmployeeReviews
+                                SET Rating = @Rating, Status = 'Completed', OverallComments = @OverallComments,
+                                    UpdatedAt = GETDATE(), UpdatedBy = @UpdatedBy
+                                WHERE ReviewId = @ReviewId";
+                            using (SqlCommand cmd = new SqlCommand(updateReviewQuery, con, transaction))
+                            {
+                                cmd.Parameters.AddWithValue("@ReviewId", model.ReviewId);
+                                cmd.Parameters.AddWithValue("@Rating", averageRating);
+                                cmd.Parameters.AddWithValue("@OverallComments", model.OverallComments ?? "");
+                                cmd.Parameters.AddWithValue("@UpdatedBy", updater);
+                                cmd.ExecuteNonQuery();
+                            }
+
+                            transaction.Commit();
+                        }
+                        catch (Exception ex)
+                        {
+                            transaction.Rollback();
+                            throw ex;
+                        }
+                    }
+                }
+
+                return Json(new { success = true, message = "Performance review submitted successfully!" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public JsonResult GetConductedReviewDetails(int reviewId)
+        {
+            try
+            {
+                if (Session["RoleType"] == null || Session["UserId"] == null)
+                    return Json(new { success = false, message = "Unauthorized access" }, JsonRequestBehavior.AllowGet);
+
+                EmployeeReviewModel review = null;
+                using (SqlConnection con = new SqlConnection(connectionString))
+                {
+                    string query = @"
+                        SELECT r.ReviewId, r.EmployeeId, r.ReviewerId, r.ReviewCycleId, r.ReviewDate, r.Rating, r.Status, r.OverallComments,
+                               emp.FirstName AS EmpFirst, emp.LastName AS EmpLast, emp.Email AS EmpEmail, emp.ProfileImage AS EmpImg,
+                               rev.FirstName AS RevFirst, rev.LastName AS RevLast, rev.Email AS RevEmail, rev.ProfileImage AS RevImg,
+                               c.ReviewCycleName
+                        FROM EmployeeReviews r
+                        INNER JOIN EmployeeDetails emp ON r.EmployeeId = emp.Id
+                        INNER JOIN EmployeeDetails rev ON r.ReviewerId = rev.Id
+                        INNER JOIN ReviewCycles c ON r.ReviewCycleId = c.ReviewCycleId
+                        WHERE r.ReviewId = @ReviewId";
+
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        cmd.Parameters.AddWithValue("@ReviewId", reviewId);
+                        con.Open();
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                review = new EmployeeReviewModel
+                                {
+                                    ReviewId = Convert.ToInt32(reader["ReviewId"]),
+                                    EmployeeId = Convert.ToInt32(reader["EmployeeId"]),
+                                    EmployeeName = reader["EmpFirst"].ToString() + " " + reader["EmpLast"].ToString(),
+                                    EmployeeEmail = reader["EmpEmail"].ToString(),
+                                    EmployeeImage = reader["EmpImg"] != DBNull.Value ? reader["EmpImg"].ToString() : "",
+                                    ReviewerId = Convert.ToInt32(reader["ReviewerId"]),
+                                    ReviewerName = reader["RevFirst"].ToString() + " " + reader["RevLast"].ToString(),
+                                    ReviewerEmail = reader["RevEmail"].ToString(),
+                                    ReviewerImage = reader["RevImg"] != DBNull.Value ? reader["RevImg"].ToString() : "",
+                                    ReviewCycleId = Convert.ToInt32(reader["ReviewCycleId"]),
+                                    ReviewCycleName = reader["ReviewCycleName"].ToString(),
+                                    ReviewDate = Convert.ToDateTime(reader["ReviewDate"]),
+                                    Rating = reader["Rating"] != DBNull.Value ? (decimal?)Convert.ToDecimal(reader["Rating"]) : null,
+                                    Status = reader["Status"].ToString(),
+                                    OverallComments = reader["OverallComments"] != DBNull.Value ? reader["OverallComments"].ToString() : ""
+                                };
+                            }
+                        }
+                    }
+                }
+
+                if (review == null)
+                    return Json(new { success = false, message = "Review not found" }, JsonRequestBehavior.AllowGet);
+
+                List<EmployeeReviewRatingModel> ratings = new List<EmployeeReviewRatingModel>();
+                using (SqlConnection con = new SqlConnection(connectionString))
+                {
+                    string query = @"
+                        SELECT r.ReviewRatingId, r.ReviewId, r.IndicatorId, r.RatingValue, r.Comments,
+                               i.IndicatorName, c.CategoryName, i.MeasurementUnit, i.TargetValue, i.Description
+                        FROM EmployeeReviewRatings r
+                        INNER JOIN Indicators i ON r.IndicatorId = i.IndicatorId
+                        INNER JOIN IndicatorCategories c ON i.IndicatorCategoryId = c.IndicatorCategoryId
+                        WHERE r.ReviewId = @ReviewId
+                        ORDER BY c.CategoryName, i.IndicatorName";
+
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        cmd.Parameters.AddWithValue("@ReviewId", reviewId);
+                        con.Open();
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                ratings.Add(new EmployeeReviewRatingModel
+                                {
+                                    ReviewRatingId = Convert.ToInt32(reader["ReviewRatingId"]),
+                                    ReviewId = Convert.ToInt32(reader["ReviewId"]),
+                                    IndicatorId = Convert.ToInt32(reader["IndicatorId"]),
+                                    RatingValue = Convert.ToInt32(reader["RatingValue"]),
+                                    Comments = reader["Comments"].ToString(),
+                                    IndicatorName = reader["IndicatorName"].ToString(),
+                                    IndicatorCategoryName = reader["CategoryName"].ToString(),
+                                    MeasurementUnit = reader["MeasurementUnit"] != DBNull.Value ? reader["MeasurementUnit"].ToString() : "",
+                                    TargetValue = reader["TargetValue"] != DBNull.Value ? reader["TargetValue"].ToString() : "",
+                                    Description = reader["Description"].ToString()
+                                });
+                            }
+                        }
+                    }
+                }
+
+                return Json(new { success = true, review = review, ratings = ratings }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpPost]
+        public JsonResult DeleteEmployeeReview(int id)
+        {
+            try
+            {
+                if (Session["RoleType"] == null || Session["UserId"] == null)
+                    return Json(new { success = false, message = "Unauthorized access" });
+
+                string currentRole = Session["RoleName"]?.ToString() ?? "";
+                if (!currentRole.Equals("Superadmin", StringComparison.OrdinalIgnoreCase) && 
+                    !currentRole.Equals("Admin", StringComparison.OrdinalIgnoreCase))
+                {
+                    return Json(new { success = false, message = "Access Denied. Only Administrators can delete reviews." });
+                }
+
+                using (SqlConnection con = new SqlConnection(connectionString))
+                {
+                    string query = "DELETE FROM EmployeeReviews WHERE ReviewId = @ReviewId";
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        cmd.Parameters.AddWithValue("@ReviewId", id);
+                        con.Open();
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+                return Json(new { success = true, message = "Review deleted successfully!" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult ResetEmployeeReview(int id)
+        {
+            try
+            {
+                if (Session["RoleType"] == null || Session["UserId"] == null)
+                    return Json(new { success = false, message = "Unauthorized access" });
+
+                string currentRole = Session["RoleName"]?.ToString() ?? "";
+                if (!currentRole.Equals("Superadmin", StringComparison.OrdinalIgnoreCase) && 
+                    !currentRole.Equals("Admin", StringComparison.OrdinalIgnoreCase))
+                {
+                    return Json(new { success = false, message = "Access Denied. Only Administrators can reset reviews." });
+                }
+
+                using (SqlConnection con = new SqlConnection(connectionString))
+                {
+                    con.Open();
+                    using (SqlTransaction transaction = con.BeginTransaction())
+                    {
+                        try
+                        {
+                            using (SqlCommand cmd = new SqlCommand("DELETE FROM EmployeeReviewRatings WHERE ReviewId = @ReviewId", con, transaction))
+                            {
+                                cmd.Parameters.AddWithValue("@ReviewId", id);
+                                cmd.ExecuteNonQuery();
+                            }
+
+                            using (SqlCommand cmd = new SqlCommand("UPDATE EmployeeReviews SET Status = 'Scheduled', Rating = NULL, OverallComments = NULL, UpdatedAt = GETDATE(), UpdatedBy = @UpdatedBy WHERE ReviewId = @ReviewId", con, transaction))
+                            {
+                                cmd.Parameters.AddWithValue("@ReviewId", id);
+                                cmd.Parameters.AddWithValue("@UpdatedBy", Session["UserName"]?.ToString() ?? "System");
+                                cmd.ExecuteNonQuery();
+                            }
+
+                            transaction.Commit();
+                        }
+                        catch (Exception ex)
+                        {
+                            transaction.Rollback();
+                            throw ex;
+                        }
+                    }
+                }
+                return Json(new { success = true, message = "Review reset successfully!" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public JsonResult GetActiveReviewCycles()
+        {
+            try
+            {
+                List<object> list = new List<object>();
+                using (SqlConnection con = new SqlConnection(connectionString))
+                {
+                    string query = "SELECT ReviewCycleId, ReviewCycleName FROM ReviewCycles WHERE Status = 'Active' ORDER BY ReviewCycleName";
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        con.Open();
+                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                list.Add(new
+                                {
+                                    ReviewCycleId = Convert.ToInt32(reader["ReviewCycleId"]),
+                                    ReviewCycleName = reader["ReviewCycleName"].ToString()
+                                });
+                            }
+                        }
+                    }
+                }
+                return Json(list, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
     }
 }

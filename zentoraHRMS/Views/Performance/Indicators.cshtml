@@ -33,6 +33,7 @@
                                 <th>Indicator Name</th>
                                 <th>Measurement Unit</th>
                                 <th>Target Value</th>
+                                <th>Applicable Role</th>
                                 <th>Description</th>
                                 <th>Status</th>
                                 <th>Action</th>
@@ -48,6 +49,16 @@
                                     <td>@c.IndicatorName</td>
                                     <td>@c.MeasurementUnit</td>
                                     <td>@c.TargetValue</td>
+                                    <td>
+                                        @if (c.RoleId == null)
+                                        {
+                                            <span class="badge bg-secondary-subtle text-secondary">All Roles</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-primary-subtle text-primary">@c.RoleName</span>
+                                        }
+                                    </td>
                                     <td>@c.Description</td>
                                     <td>
                                         @if (c.IsActive) { <span class="badge bg-success-subtle text-success">Active</span> }
@@ -93,6 +104,12 @@
                         <div class="mb-3">
                             <label for="TargetValue" class="form-label">Target Value</label>
                             <input type="text" class="form-control" id="TargetValue" placeholder="e.g. 95%, 4.5/5, 100">
+                        </div>
+                        <div class="mb-3">
+                            <label for="RoleId" class="form-label">Applicable Role</label>
+                            <select class="form-select" id="RoleId" data-choices>
+                                <option value="">All Roles</option>
+                            </select>
                         </div>
                         <div class="mb-3">
                             <label for="Description" class="form-label">Description</label>
@@ -145,6 +162,12 @@
                             <input type="text" class="form-control" id="uTargetValue" placeholder="e.g. 95%, 4.5/5, 100">
                         </div>
                         <div class="mb-3">
+                            <label for="uRoleId" class="form-label">Applicable Role</label>
+                            <select class="form-select" id="uRoleId" data-choices>
+                                <option value="">All Roles</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
                             <label for="uDescription" class="form-label">Description</label>
                             <textarea class="form-control" id="uDescription" rows="3"></textarea>
                         </div>
@@ -180,7 +203,13 @@
             if (elStatus && elStatus.choicesInstance) {
                 elStatus.choicesInstance.setChoiceByValue("true");
             }
+            var elRole = document.getElementById("RoleId");
+            if (elRole && elRole.choicesInstance) {
+                elRole.choicesInstance.setChoiceByValue("");
+            }
         });
+
+        LoadRoles();
 
         $("#IndicatorForm").on("submit", function (e) {
             e.preventDefault();
@@ -190,7 +219,8 @@
                 MeasurementUnit: $("#MeasurementUnit").val(),
                 TargetValue: $("#TargetValue").val(),
                 Description: $("#Description").val(),
-                IsActive: $("#IsActive").val() === "true"
+                IsActive: $("#IsActive").val() === "true",
+                RoleId: $("#RoleId").val() ? parseInt($("#RoleId").val()) : null
             };
             $.ajax({
                 url: '/Performance/SaveIndicator',
@@ -216,7 +246,8 @@
                 MeasurementUnit: $("#uMeasurementUnit").val(),
                 TargetValue: $("#uTargetValue").val(),
                 Description: $("#uDescription").val(),
-                IsActive: $("#uIsActive").val() === "true"
+                IsActive: $("#uIsActive").val() === "true",
+                RoleId: $("#uRoleId").val() ? parseInt($("#uRoleId").val()) : null
             };
             $.ajax({
                 url: '/Performance/UpdateIndicator',
@@ -254,6 +285,26 @@
         });
     }
 
+    function LoadRoles() {
+        $.ajax({
+            url: '/Performance/GetRolesList',
+            type: 'GET',
+            success: function (data) {
+                var selectAdd = $("#RoleId");
+                var selectEdit = $("#uRoleId");
+                
+                selectAdd.empty().append('<option value="">All Roles</option>');
+                selectEdit.empty().append('<option value="">All Roles</option>');
+                
+                $.each(data, function (i, item) {
+                    var optionHtml = '<option value="' + item.RoleId + '">' + item.RoleName + '</option>';
+                    selectAdd.append(optionHtml);
+                    selectEdit.append(optionHtml);
+                });
+            }
+        });
+    }
+
     function UpdateIndicator(id) {
         $.ajax({
             url: '/Performance/GetIndicatorById',
@@ -279,6 +330,14 @@
                         elStatus.choicesInstance.setChoiceByValue(data.IsActive.toString());
                     } else {
                         $("#uIsActive").val(data.IsActive.toString());
+                    }
+
+                    var elRole = document.getElementById("uRoleId");
+                    var roleVal = data.RoleId ? data.RoleId.toString() : "";
+                    if (elRole && elRole.choicesInstance) {
+                        elRole.choicesInstance.setChoiceByValue(roleVal);
+                    } else {
+                        $("#uRoleId").val(roleVal);
                     }
 
                     $("#UpdateIndicatorModal").modal("show");

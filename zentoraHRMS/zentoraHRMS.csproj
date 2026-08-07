@@ -154,6 +154,7 @@
     <Compile Include="Models\GoalTypeModel.cs" />
     <Compile Include="Models\EmployeeGoalModel.cs" />
     <Compile Include="Models\ReviewCycleModel.cs" />
+    <Compile Include="Models\EmployeeReviewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
