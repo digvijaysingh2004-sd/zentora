@@ -21,9 +21,10 @@ namespace zentoraHRMS.Models
         public string Status { get; set; } // Scheduled, In Progress, Completed
         public string OverallComments { get; set; }
         public DateTime? CreatedAt { get; set; }
-        public string CreatedBy { get; set; }
+        public int? CreatedBy { get; set; }
         public DateTime? UpdatedAt { get; set; }
-        public string UpdatedBy { get; set; }
+        public int? UpdatedBy { get; set; }
+        public DateTime? SystemAddedOn { get; set; }
         
         // Helper properties for roles
         public int? EmployeeRoleId { get; set; }
@@ -40,7 +41,7 @@ namespace zentoraHRMS.Models
         public string MeasurementUnit { get; set; }
         public string TargetValue { get; set; }
         public string Description { get; set; }
-        public int RatingValue { get; set; }
+        public decimal RatingValue { get; set; }
         public string Comments { get; set; }
     }
 
@@ -54,7 +55,7 @@ namespace zentoraHRMS.Models
     public class IndicatorRatingSubmission
     {
         public int IndicatorId { get; set; }
-        public int RatingValue { get; set; }
+        public decimal RatingValue { get; set; }
         public string Comments { get; set; }
     }
 }

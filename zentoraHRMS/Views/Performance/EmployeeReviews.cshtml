@@ -271,21 +271,21 @@
                 
                 <div class="mb-3">
                     <label for="sch_employee_id" class="form-label">Employee <span class="text-danger">*</span></label>
-                    <select class="form-select" id="sch_employee_id" required>
+                    <select class="form-select" id="sch_employee_id" data-choices data-choices-search-false required>
                         <option value="">Select Employee</option>
                     </select>
                 </div>
 
                 <div class="mb-3">
                     <label for="sch_reviewer_id" class="form-label">Reviewer <span class="text-danger">*</span></label>
-                    <select class="form-select" id="sch_reviewer_id" required>
+                    <select class="form-select" id="sch_reviewer_id" data-choices data-choices-search-false required>
                         <option value="">Select Reviewer</option>
                     </select>
                 </div>
 
                 <div class="mb-3">
                     <label for="sch_cycle_id" class="form-label">Review Cycle <span class="text-danger">*</span></label>
-                    <select class="form-select" id="sch_cycle_id" required>
+                    <select class="form-select" id="sch_cycle_id" data-choices data-choices-search-false required>
                         <option value="">Select Review Cycle</option>
                     </select>
                 </div>
@@ -293,6 +293,14 @@
                 <div class="mb-3">
                     <label for="sch_date" class="form-label">Review Date <span class="text-danger">*</span></label>
                     <input type="date" class="form-control" id="sch_date" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="sch_status" class="form-label">Status <span class="text-danger">*</span></label>
+                    <select class="form-select" id="sch_status" data-choices data-choices-search-false required>
+                        <option value="Scheduled" selected>Scheduled</option>
+                        <option value="In Progress">In Progress</option>
+                    </select>
                 </div>
             </div>
             <div class="modal-footer">
@@ -396,7 +404,14 @@
                             <div class="col-md-3 text-center border-start border-light-subtle">
                                 <span class="text-muted d-block font-size-10 text-uppercase fw-semibold mb-1">Overall Rating</span>
                                 <h3 class="fw-bold text-primary mb-0" id="view_overall_rating">-</h3>
-                                <div class="text-warning font-size-12 mt-1" id="view_rating_stars"></div>
+                                 <div class="d-inline-block text-center mt-1" id="view_rating_stars_container">
+                                     <div class="star-rating-outer" style="display: inline-block; position: relative; font-size: 16px; color: #e9ecef; white-space: nowrap; letter-spacing: 2px;">
+                                         <div class="star-rating-inner" id="view_rating_stars_inner" style="position: absolute; top: 0; left: 0; white-space: nowrap; overflow: hidden; color: #ffc107; width: 0%; transition: width 0.3s ease;">
+                                             &#9733;&#9733;&#9733;&#9733;&#9733;
+                                         </div>
+                                         &#9733;&#9733;&#9733;&#9733;&#9733;
+                                     </div>
+                                 </div>
                             </div>
                         </div>
                     </div>
@@ -589,17 +604,44 @@
             url: '/Performance/GetActiveEmployees',
             type: 'GET',
             success: function (data) {
-                var selectEmp = $("#sch_employee_id");
-                var selectRev = $("#sch_reviewer_id");
-                
-                selectEmp.empty().append('<option value="">Select Employee</option>');
-                selectRev.empty().append('<option value="">Select Reviewer</option>');
+                var empChoicesList = [{ value: '', label: 'Select Employee', selected: true, placeholder: true }];
+                var revChoicesList = [{ value: '', label: 'Select Reviewer', selected: true, placeholder: true }];
                 
                 $.each(data, function (i, item) {
                     var name = item.FirstName + " " + item.LastName;
-                    selectEmp.append('<option value="' + item.Id + '">' + name + '</option>');
-                    selectRev.append('<option value="' + item.Id + '">' + name + '</option>');
+                    empChoicesList.push({
+                        value: item.Id.toString(),
+                        label: name
+                    });
+                    revChoicesList.push({
+                        value: item.Id.toString(),
+                        label: name
+                    });
                 });
+                
+                var elEmp = document.getElementById("sch_employee_id");
+                if (elEmp && elEmp.choicesInstance) {
+                    elEmp.choicesInstance.clearStore();
+                    elEmp.choicesInstance.setChoices(empChoicesList, 'value', 'label', true);
+                } else {
+                    var selectEmp = $("#sch_employee_id");
+                    selectEmp.empty().append('<option value="">Select Employee</option>');
+                    $.each(data, function (i, item) {
+                        selectEmp.append('<option value="' + item.Id + '">' + (item.FirstName + " " + item.LastName) + '</option>');
+                    });
+                }
+                
+                var elRev = document.getElementById("sch_reviewer_id");
+                if (elRev && elRev.choicesInstance) {
+                    elRev.choicesInstance.clearStore();
+                    elRev.choicesInstance.setChoices(revChoicesList, 'value', 'label', true);
+                } else {
+                    var selectRev = $("#sch_reviewer_id");
+                    selectRev.empty().append('<option value="">Select Reviewer</option>');
+                    $.each(data, function (i, item) {
+                        selectRev.append('<option value="' + item.Id + '">' + (item.FirstName + " " + item.LastName) + '</option>');
+                    });
+                }
             }
         });
 
@@ -608,12 +650,25 @@
             url: '/Performance/GetActiveReviewCycles',
             type: 'GET',
             success: function (data) {
-                var selectCycle = $("#sch_cycle_id");
-                
-                selectCycle.empty().append('<option value="">Select Review Cycle</option>');
+                var cycleChoicesList = [{ value: '', label: 'Select Review Cycle', selected: true, placeholder: true }];
                 $.each(data, function (i, item) {
-                    selectCycle.append('<option value="' + item.ReviewCycleId + '">' + item.ReviewCycleName + '</option>');
+                    cycleChoicesList.push({
+                        value: item.ReviewCycleId.toString(),
+                        label: item.ReviewCycleName
+                    });
                 });
+                
+                var elCycle = document.getElementById("sch_cycle_id");
+                if (elCycle && elCycle.choicesInstance) {
+                    elCycle.choicesInstance.clearStore();
+                    elCycle.choicesInstance.setChoices(cycleChoicesList, 'value', 'label', true);
+                } else {
+                    var selectCycle = $("#sch_cycle_id");
+                    selectCycle.empty().append('<option value="">Select Review Cycle</option>');
+                    $.each(data, function (i, item) {
+                        selectCycle.append('<option value="' + item.ReviewCycleId + '">' + item.ReviewCycleName + '</option>');
+                    });
+                }
             }
         });
     }
@@ -623,6 +678,35 @@
         $("#sch_review_id").val("0");
         $("#ScheduleReviewForm")[0].reset();
         $("#ScheduleReviewForm").removeClass('was-validated');
+        
+        var elEmp = document.getElementById("sch_employee_id");
+        if (elEmp && elEmp.choicesInstance) {
+            elEmp.choicesInstance.setChoiceByValue("");
+        } else {
+            $("#sch_employee_id").val("");
+        }
+
+        var elRev = document.getElementById("sch_reviewer_id");
+        if (elRev && elRev.choicesInstance) {
+            elRev.choicesInstance.setChoiceByValue("");
+        } else {
+            $("#sch_reviewer_id").val("");
+        }
+
+        var elCycle = document.getElementById("sch_cycle_id");
+        if (elCycle && elCycle.choicesInstance) {
+            elCycle.choicesInstance.setChoiceByValue("");
+        } else {
+            $("#sch_cycle_id").val("");
+        }
+
+        var elStatus = document.getElementById("sch_status");
+        if (elStatus && elStatus.choicesInstance) {
+            elStatus.choicesInstance.setChoiceByValue("Scheduled");
+        } else {
+            $("#sch_status").val("Scheduled");
+        }
+
         $("#ScheduleReviewModalLabel").text("Schedule Performance Review");
         $("#btnScheduleSubmit").text("Schedule Review");
         $("#ScheduleReviewModal").modal("show");
@@ -637,15 +721,40 @@
                 if (res.success && res.data) {
                     var r = res.data;
                     $("#sch_review_id").val(r.ReviewId);
-                    $("#sch_employee_id").val(r.EmployeeId);
-                    $("#sch_reviewer_id").val(r.ReviewerId);
-                    $("#sch_cycle_id").val(r.ReviewCycleId);
+                    
+                    var elEmp = document.getElementById("sch_employee_id");
+                    if (elEmp && elEmp.choicesInstance) {
+                        elEmp.choicesInstance.setChoiceByValue(r.EmployeeId.toString());
+                    } else {
+                        $("#sch_employee_id").val(r.EmployeeId);
+                    }
+
+                    var elRev = document.getElementById("sch_reviewer_id");
+                    if (elRev && elRev.choicesInstance) {
+                        elRev.choicesInstance.setChoiceByValue(r.ReviewerId.toString());
+                    } else {
+                        $("#sch_reviewer_id").val(r.ReviewerId);
+                    }
+
+                    var elCycle = document.getElementById("sch_cycle_id");
+                    if (elCycle && elCycle.choicesInstance) {
+                        elCycle.choicesInstance.setChoiceByValue(r.ReviewCycleId.toString());
+                    } else {
+                        $("#sch_cycle_id").val(r.ReviewCycleId);
+                    }
                     
                     var dateObj = new Date(parseInt(r.ReviewDate.substr(6)));
                     var yyyy = dateObj.getFullYear();
                     var mm = String(dateObj.getMonth() + 1).padStart(2, '0');
                     var dd = String(dateObj.getDate()).padStart(2, '0');
                     $("#sch_date").val(yyyy + '-' + mm + '-' + dd);
+
+                    var elStatus = document.getElementById("sch_status");
+                    if (elStatus && elStatus.choicesInstance) {
+                        elStatus.choicesInstance.setChoiceByValue(r.Status);
+                    } else {
+                        $("#sch_status").val(r.Status);
+                    }
 
                     $("#ScheduleReviewModalLabel").text("Edit Scheduled Review");
                     $("#btnScheduleSubmit").text("Save Changes");
@@ -672,7 +781,8 @@
             EmployeeId: parseInt($("#sch_employee_id").val()),
             ReviewerId: parseInt($("#sch_reviewer_id").val()),
             ReviewCycleId: parseInt($("#sch_cycle_id").val()),
-            ReviewDate: $("#sch_date").val()
+            ReviewDate: $("#sch_date").val(),
+            Status: $("#sch_status").val()
         };
 
         $.ajax({
@@ -763,9 +873,9 @@
                         '<div class="col-md-6 mt-2 mt-md-0">' +
                             '<div class="d-flex align-items-center justify-content-between mb-1">' +
                                 '<span class="text-muted fs-xxs">Rating</span>' +
-                                '<span class="badge rating-badge" id="badge_rating_' + ind.IndicatorId + '">3 ★</span>' +
+                                '<span class="badge rating-badge" id="badge_rating_' + ind.IndicatorId + '">3.0 \u2605</span>' +
                             '</div>' +
-                            '<input type="range" class="form-range rating-slider" min="1" max="5" value="3" oninput="OnSliderChange(this, ' + ind.IndicatorId + ')">' +
+                            '<input type="range" class="form-range rating-slider" min="1" max="5" step="0.1" value="3.0" oninput="OnSliderChange(this, ' + ind.IndicatorId + ')">' +
                             '<div class="d-flex justify-content-between text-muted fs-xxs mt-1" style="font-size: 9px;">' +
                                 '<span>Poor</span>' +
                                 '<span>Average</span>' +
@@ -786,7 +896,7 @@
     }
 
     function OnSliderChange(slider, indId) {
-        $("#badge_rating_" + indId).text(slider.value + " ★");
+        $("#badge_rating_" + indId).text(parseFloat(slider.value).toFixed(1) + " \u2605");
     }
 
     function SubmitConductedReview(e) {
@@ -802,7 +912,7 @@
 
         $.each(rows, function (i, el) {
             var indId = $(el).data("indicator-id");
-            var val = parseInt($(el).find(".rating-slider").val());
+            var val = parseFloat($(el).find(".rating-slider").val());
             var comm = $(el).find(".ind-comments").val();
 
             ratings.push({
@@ -854,13 +964,12 @@
 
                     $("#view_overall_rating").text(r.Rating ? r.Rating.toFixed(1) : '-');
 
-                    // Draw static rating stars
-                    var stars = '';
                     if (r.Rating) {
-                        var score = Math.round(r.Rating);
-                        stars += '★'.repeat(score) + '☆'.repeat(5 - score);
+                        var percent = (parseFloat(r.Rating) / 5.0) * 100;
+                        $("#view_rating_stars_inner").css("width", percent + "%");
+                    } else {
+                        $("#view_rating_stars_inner").css("width", "0%");
                     }
-                    $("#view_rating_stars").text(stars);
 
                     $("#view_overall_comments").text(r.OverallComments ? r.OverallComments : 'No overall review remarks recorded.');
 
@@ -924,8 +1033,13 @@
                         '</div>' +
                         '<div class="col-md-4 mt-2 mt-md-0 text-md-end">' +
                             '<div class="d-inline-flex align-items-center">' +
-                                '<span class="badge ' + badgeClass + ' py-1 px-2 rounded-pill fw-bold text-uppercase fs-xxs me-2">Score: ' + r.RatingValue + ' / 5</span>' +
-                                '<span class="text-warning fs-xs">' + '★'.repeat(r.RatingValue) + '☆'.repeat(5 - r.RatingValue) + '</span>' +
+                                '<span class="badge ' + badgeClass + ' py-1 px-2 rounded-pill fw-bold text-uppercase fs-xxs me-2">Score: ' + parseFloat(r.RatingValue).toFixed(1) + ' / 5</span>' +
+                                '<div class="star-rating-outer" style="display: inline-block; position: relative; font-size: 13px; color: #e9ecef; white-space: nowrap; letter-spacing: 1px; vertical-align: middle;">' +
+                                    '<div class="star-rating-inner" style="position: absolute; top: 0; left: 0; white-space: nowrap; overflow: hidden; color: #ffc107; width: ' + ((parseFloat(r.RatingValue) / 5.0) * 100) + '%;">' +
+                                        '&#9733;&#9733;&#9733;&#9733;&#9733;' +
+                                    '</div>' +
+                                    '&#9733;&#9733;&#9733;&#9733;&#9733;' +
+                                '</div>' +
                             '</div>' +
                         '</div>' +
                     '</div>' +

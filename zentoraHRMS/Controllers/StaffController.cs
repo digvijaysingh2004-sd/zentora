@@ -281,7 +281,7 @@ namespace zentoraHRMS.Controllers
                         cmd.Parameters.AddWithValue("@City", model.City ?? "");
                         cmd.Parameters.AddWithValue("@Country", model.Country ?? "");
                         cmd.Parameters.AddWithValue("@ZipCode", model.ZipCode ?? "");
-                        cmd.Parameters.AddWithValue("@RoleType", (object)model.RoleType ?? 5);
+                        cmd.Parameters.AddWithValue("@RoleType", (object)model.RoleType ?? 6);
                         cmd.Parameters.AddWithValue("@LeaveCategory", model.LeaveCategory ?? "");
                         cmd.Parameters.AddWithValue("@HolidayCategory", model.HolidayCategory ?? "");
                         cmd.Parameters.AddWithValue("@ProjectRole", model.ProjectRole ?? "");
@@ -429,7 +429,7 @@ namespace zentoraHRMS.Controllers
                         cmd.Parameters.AddWithValue("@City", model.City ?? "");
                         cmd.Parameters.AddWithValue("@Country", model.Country ?? "");
                         cmd.Parameters.AddWithValue("@ZipCode", model.ZipCode ?? "");
-                        cmd.Parameters.AddWithValue("@RoleType", (object)model.RoleType ?? 5);
+                        cmd.Parameters.AddWithValue("@RoleType", (object)model.RoleType ?? 6);
                         cmd.Parameters.AddWithValue("@LeaveCategory", model.LeaveCategory ?? "");
                         cmd.Parameters.AddWithValue("@HolidayCategory", model.HolidayCategory ?? "");
                         cmd.Parameters.AddWithValue("@ProjectRole", model.ProjectRole ?? "");

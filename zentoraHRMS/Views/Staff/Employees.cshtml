@@ -366,7 +366,8 @@
                                     <div class="col-md-4 mb-3">
                                         <label for="RoleType" class="form-label fw-semibold">Role Type</label>
                                         <select class="form-select form-control" id="RoleType">
-                                            <option value="5" selected>Employee</option>
+                                            <option value="6" selected>Employee</option>
+                                            <option value="5">Team Leader</option>
                                             <option value="4">HR</option>
                                             <option value="3">Manager</option>
                                             <option value="2">Admin</option>
@@ -663,7 +664,8 @@
                                     <div class="col-md-4 mb-3">
                                         <label for="uRoleType" class="form-label fw-semibold">Role Type</label>
                                         <select class="form-select form-control" id="uRoleType">
-                                            <option value="5">Employee</option>
+                                            <option value="6">Employee</option>
+                                            <option value="5">Team Leader</option>
                                             <option value="4">HR</option>
                                             <option value="3">Manager</option>
                                             <option value="2">Admin</option>
@@ -837,7 +839,7 @@
                 OfficeLocation: $("#OfficeLocation").val(),
                 DOJ: $("#DOJ").val() || null,
                 DOL: $("#DOL").val() || null,
-                RoleType: parseInt($("#RoleType").val()) || 5,
+                RoleType: parseInt($("#RoleType").val()) || 6,
                 ProjectRole: $("#ProjectRole").val(),
                 ReportingManager: parseInt($("#ReportingManager").val()) || 0,
                 AssociateReportingManager: parseInt($("#AssociateReportingManager").val()) || 0,
@@ -895,7 +897,7 @@
                 OfficeLocation: $("#uOfficeLocation").val(),
                 DOJ: $("#uDOJ").val() || null,
                 DOL: $("#uDOL").val() || null,
-                RoleType: parseInt($("#uRoleType").val()) || 5,
+                RoleType: parseInt($("#uRoleType").val()) || 6,
                 ProjectRole: $("#uProjectRole").val(),
                 ReportingManager: parseInt($("#uReportingManager").val()) || 0,
                 AssociateReportingManager: parseInt($("#uAssociateReportingManager").val()) || 0,
@@ -1311,7 +1313,7 @@
                     
                     managerChoice.setChoiceByValue((data.ReportingManager || 0).toString());
                     assocManagerChoice.setChoiceByValue((data.AssociateReportingManager || 0).toString());
-                    roleChoice.setChoiceByValue((data.RoleType || 5).toString());
+                    roleChoice.setChoiceByValue((data.RoleType || 6).toString());
                     
                     // Trigger Cascades sequentially
                     uDesignationChoice.setChoiceByValue(data.Designation);
@@ -1321,7 +1323,7 @@
                     uLeaveChoice.setChoiceByValue(data.LeaveCategory);
                     uManagerChoice.setChoiceByValue((data.ReportingManager || 0).toString());
                     uAssocManagerChoice.setChoiceByValue((data.AssociateReportingManager || 0).toString());
-                    uRoleChoice.setChoiceByValue((data.RoleType || 5).toString());
+                    uRoleChoice.setChoiceByValue((data.RoleType || 6).toString());
                     uGenderChoice.setChoiceByValue(data.Gender || "");
                     uMaritalChoice.setChoiceByValue(data.MaritalStatus || "");
                     uPhoneCodeChoice.setChoiceByValue(data.PhoneCode || "+91");

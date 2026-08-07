@@ -271,9 +271,10 @@ namespace zentoraHRMS.Controllers
                             Status NVARCHAR(50) NOT NULL DEFAULT 'Scheduled',
                             OverallComments NVARCHAR(MAX) NULL,
                             CreatedAt DATETIME NULL DEFAULT GETDATE(),
-                            CreatedBy NVARCHAR(100) NULL,
+                            CreatedBy INT NULL,
                             UpdatedAt DATETIME NULL,
-                            UpdatedBy NVARCHAR(100) NULL,
+                            UpdatedBy INT NULL,
+                            SystemAddedOn DATETIME NULL DEFAULT GETDATE(),
                             CONSTRAINT FK_EmployeeReviews_EmployeeDetails FOREIGN KEY (EmployeeId) REFERENCES dbo.EmployeeDetails(Id),
                             CONSTRAINT FK_EmployeeReviews_ReviewerDetails FOREIGN KEY (ReviewerId) REFERENCES dbo.EmployeeDetails(Id),
                             CONSTRAINT FK_EmployeeReviews_ReviewCycles FOREIGN KEY (ReviewCycleId) REFERENCES dbo.ReviewCycles(ReviewCycleId)
@@ -299,6 +300,35 @@ namespace zentoraHRMS.Controllers
                         );
                     END";
                 using (SqlCommand cmd = new SqlCommand(createRatingsQuery, con))
+                {
+                    cmd.ExecuteNonQuery();
+                }
+
+                // 9. Sync/Migrate EmployeeDetails where RoleType = 5 (due to front-end mismatch) but designation or context implies Employee (role 6)
+                string syncEmployeeRolesQuery = @"
+                    UPDATE EmployeeDetails 
+                    SET RoleType = 6 
+                    WHERE RoleType = 5 AND Designation = 'Employee';
+
+                    UPDATE EmployeeDetails 
+                    SET RoleType = 6 
+                    WHERE Email = 'employee@zentora.com';
+                    
+                    UPDATE LoginDetails
+                    SET RoleType = '6'
+                    WHERE RoleType = '5' AND EmpId IN (SELECT Id FROM EmployeeDetails WHERE RoleType = 6);";
+                using (SqlCommand cmd = new SqlCommand(syncEmployeeRolesQuery, con))
+                {
+                    cmd.ExecuteNonQuery();
+                }
+
+                // 10. Sync/Migrate EmployeeReviewRatings.RatingValue to DECIMAL(3,2)
+                string migrateReviewRatingsQuery = @"
+                    IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'EmployeeReviewRatings' AND COLUMN_NAME = 'RatingValue' AND DATA_TYPE = 'int')
+                    BEGIN
+                        ALTER TABLE dbo.EmployeeReviewRatings ALTER COLUMN RatingValue DECIMAL(3,2) NOT NULL;
+                    END";
+                using (SqlCommand cmd = new SqlCommand(migrateReviewRatingsQuery, con))
                 {
                     cmd.ExecuteNonQuery();
                 }
@@ -861,7 +891,7 @@ namespace zentoraHRMS.Controllers
             {
                 string query = @"
                     SELECT eg.EmployeeGoalId, eg.EmployeeId, 
-                           (emp.FirstName + ' ' + ISNULL(emp.LastName, '')) AS EmployeeName, 
+                           (emp.FirstName + ' ' + CASE WHEN emp.MiddleName IS NOT NULL AND emp.MiddleName <> '' THEN emp.MiddleName + ' ' ELSE '' END + ISNULL(emp.LastName, '')) AS EmployeeName, 
                            emp.ProfileImage, emp.Email,
                            eg.GoalTypeId, gt.GoalTypeName, eg.GoalTitle, eg.Description, 
                            eg.StartDate, eg.EndDate, eg.Target, eg.Progress, eg.Status, 
@@ -953,7 +983,7 @@ namespace zentoraHRMS.Controllers
             {
                 string query = @"
                     SELECT eg.EmployeeGoalId, eg.EmployeeId, 
-                           (emp.FirstName + ' ' + ISNULL(emp.LastName, '')) AS EmployeeName, 
+                           (emp.FirstName + ' ' + CASE WHEN emp.MiddleName IS NOT NULL AND emp.MiddleName <> '' THEN emp.MiddleName + ' ' ELSE '' END + ISNULL(emp.LastName, '')) AS EmployeeName, 
                            emp.ProfileImage, emp.Email,
                            eg.GoalTypeId, gt.GoalTypeName, eg.GoalTitle, eg.Description, 
                            eg.StartDate, eg.EndDate, eg.Target, eg.Progress, eg.Status, 
@@ -1316,8 +1346,8 @@ namespace zentoraHRMS.Controllers
             {
                 string query = @"
                     SELECT r.ReviewId, r.EmployeeId, r.ReviewerId, r.ReviewCycleId, r.ReviewDate, r.Rating, r.Status, r.OverallComments,
-                           emp.FirstName AS EmpFirst, emp.LastName AS EmpLast, emp.Email AS EmpEmail, emp.ProfileImage AS EmpImg, emp.RoleType AS EmpRoleId,
-                           rev.FirstName AS RevFirst, rev.LastName AS RevLast, rev.Email AS RevEmail, rev.ProfileImage AS RevImg,
+                           emp.FirstName AS EmpFirst, emp.MiddleName AS EmpMiddle, emp.LastName AS EmpLast, emp.Email AS EmpEmail, emp.ProfileImage AS EmpImg, emp.RoleType AS EmpRoleId,
+                           rev.FirstName AS RevFirst, rev.MiddleName AS RevMiddle, rev.LastName AS RevLast, rev.Email AS RevEmail, rev.ProfileImage AS RevImg,
                            c.ReviewCycleName
                     FROM EmployeeReviews r
                     INNER JOIN EmployeeDetails emp ON r.EmployeeId = emp.Id
@@ -1332,15 +1362,21 @@ namespace zentoraHRMS.Controllers
                     {
                         while (reader.Read())
                         {
+                            string empMiddle = reader["EmpMiddle"] != DBNull.Value ? reader["EmpMiddle"].ToString() : "";
+                            string empName = reader["EmpFirst"].ToString() + (string.IsNullOrEmpty(empMiddle) ? "" : " " + empMiddle) + " " + reader["EmpLast"].ToString();
+                            
+                            string revMiddle = reader["RevMiddle"] != DBNull.Value ? reader["RevMiddle"].ToString() : "";
+                            string revName = reader["RevFirst"].ToString() + (string.IsNullOrEmpty(revMiddle) ? "" : " " + revMiddle) + " " + reader["RevLast"].ToString();
+
                             list.Add(new EmployeeReviewModel
                             {
                                 ReviewId = Convert.ToInt32(reader["ReviewId"]),
                                 EmployeeId = Convert.ToInt32(reader["EmployeeId"]),
-                                EmployeeName = reader["EmpFirst"].ToString() + " " + reader["EmpLast"].ToString(),
+                                EmployeeName = empName,
                                 EmployeeEmail = reader["EmpEmail"].ToString(),
                                 EmployeeImage = reader["EmpImg"] != DBNull.Value ? reader["EmpImg"].ToString() : "",
                                 ReviewerId = Convert.ToInt32(reader["ReviewerId"]),
-                                ReviewerName = reader["RevFirst"].ToString() + " " + reader["RevLast"].ToString(),
+                                ReviewerName = revName,
                                 ReviewerEmail = reader["RevEmail"].ToString(),
                                 ReviewerImage = reader["RevImg"] != DBNull.Value ? reader["RevImg"].ToString() : "",
                                 ReviewCycleId = Convert.ToInt32(reader["ReviewCycleId"]),
@@ -1372,8 +1408,8 @@ namespace zentoraHRMS.Controllers
                 {
                     string query = @"
                         SELECT r.ReviewId, r.EmployeeId, r.ReviewerId, r.ReviewCycleId, r.ReviewDate, r.Rating, r.Status, r.OverallComments,
-                               emp.FirstName AS EmpFirst, emp.LastName AS EmpLast, emp.Email AS EmpEmail, emp.ProfileImage AS EmpImg, emp.RoleType AS EmpRoleId,
-                               rev.FirstName AS RevFirst, rev.LastName AS RevLast, rev.Email AS RevEmail, rev.ProfileImage AS RevImg,
+                               emp.FirstName AS EmpFirst, emp.MiddleName AS EmpMiddle, emp.LastName AS EmpLast, emp.Email AS EmpEmail, emp.ProfileImage AS EmpImg, emp.RoleType AS EmpRoleId,
+                               rev.FirstName AS RevFirst, rev.MiddleName AS RevMiddle, rev.LastName AS RevLast, rev.Email AS RevEmail, rev.ProfileImage AS RevImg,
                                c.ReviewCycleName
                         FROM EmployeeReviews r
                         INNER JOIN EmployeeDetails emp ON r.EmployeeId = emp.Id
@@ -1388,15 +1424,21 @@ namespace zentoraHRMS.Controllers
                         {
                             while (reader.Read())
                             {
+                                string empMiddle = reader["EmpMiddle"] != DBNull.Value ? reader["EmpMiddle"].ToString() : "";
+                                string empName = reader["EmpFirst"].ToString() + (string.IsNullOrEmpty(empMiddle) ? "" : " " + empMiddle) + " " + reader["EmpLast"].ToString();
+                                
+                                string revMiddle = reader["RevMiddle"] != DBNull.Value ? reader["RevMiddle"].ToString() : "";
+                                string revName = reader["RevFirst"].ToString() + (string.IsNullOrEmpty(revMiddle) ? "" : " " + revMiddle) + " " + reader["RevLast"].ToString();
+
                                 list.Add(new EmployeeReviewModel
                                 {
                                     ReviewId = Convert.ToInt32(reader["ReviewId"]),
                                     EmployeeId = Convert.ToInt32(reader["EmployeeId"]),
-                                    EmployeeName = reader["EmpFirst"].ToString() + " " + reader["EmpLast"].ToString(),
+                                    EmployeeName = empName,
                                     EmployeeEmail = reader["EmpEmail"].ToString(),
                                     EmployeeImage = reader["EmpImg"] != DBNull.Value ? reader["EmpImg"].ToString() : "",
                                     ReviewerId = Convert.ToInt32(reader["ReviewerId"]),
-                                    ReviewerName = reader["RevFirst"].ToString() + " " + reader["RevLast"].ToString(),
+                                    ReviewerName = revName,
                                     ReviewerEmail = reader["RevEmail"].ToString(),
                                     ReviewerImage = reader["RevImg"] != DBNull.Value ? reader["RevImg"].ToString() : "",
                                     ReviewCycleId = Convert.ToInt32(reader["ReviewCycleId"]),
@@ -1434,7 +1476,7 @@ namespace zentoraHRMS.Controllers
                     return Json(new { success = false, message = "Access Denied. Only Administrators can schedule reviews." });
                 }
 
-                string creator = Session["UserName"]?.ToString() ?? "System";
+                int creatorId = Convert.ToInt32(Session["UserId"] ?? 0);
                 using (SqlConnection con = new SqlConnection(connectionString))
                 {
                     con.Open();
@@ -1442,14 +1484,15 @@ namespace zentoraHRMS.Controllers
                     {
                         string query = @"
                             INSERT INTO EmployeeReviews (EmployeeId, ReviewerId, ReviewCycleId, ReviewDate, Status, CreatedAt, CreatedBy)
-                            VALUES (@EmployeeId, @ReviewerId, @ReviewCycleId, @ReviewDate, 'Scheduled', GETDATE(), @CreatedBy)";
+                            VALUES (@EmployeeId, @ReviewerId, @ReviewCycleId, @ReviewDate, @Status, GETDATE(), @CreatedBy)";
                         using (SqlCommand cmd = new SqlCommand(query, con))
                         {
                             cmd.Parameters.AddWithValue("@EmployeeId", model.EmployeeId);
                             cmd.Parameters.AddWithValue("@ReviewerId", model.ReviewerId);
                             cmd.Parameters.AddWithValue("@ReviewCycleId", model.ReviewCycleId);
                             cmd.Parameters.AddWithValue("@ReviewDate", model.ReviewDate);
-                            cmd.Parameters.AddWithValue("@CreatedBy", creator);
+                            cmd.Parameters.AddWithValue("@Status", string.IsNullOrEmpty(model.Status) ? "Scheduled" : model.Status);
+                            cmd.Parameters.AddWithValue("@CreatedBy", creatorId);
                             cmd.ExecuteNonQuery();
                         }
                     }
@@ -1458,7 +1501,7 @@ namespace zentoraHRMS.Controllers
                         string query = @"
                             UPDATE EmployeeReviews
                             SET EmployeeId = @EmployeeId, ReviewerId = @ReviewerId, ReviewCycleId = @ReviewCycleId, 
-                                ReviewDate = @ReviewDate, UpdatedAt = GETDATE(), UpdatedBy = @UpdatedBy
+                                ReviewDate = @ReviewDate, Status = @Status, UpdatedAt = GETDATE(), UpdatedBy = @UpdatedBy
                             WHERE ReviewId = @ReviewId";
                         using (SqlCommand cmd = new SqlCommand(query, con))
                         {
@@ -1467,7 +1510,8 @@ namespace zentoraHRMS.Controllers
                             cmd.Parameters.AddWithValue("@ReviewerId", model.ReviewerId);
                             cmd.Parameters.AddWithValue("@ReviewCycleId", model.ReviewCycleId);
                             cmd.Parameters.AddWithValue("@ReviewDate", model.ReviewDate);
-                            cmd.Parameters.AddWithValue("@UpdatedBy", creator);
+                            cmd.Parameters.AddWithValue("@Status", string.IsNullOrEmpty(model.Status) ? "Scheduled" : model.Status);
+                            cmd.Parameters.AddWithValue("@UpdatedBy", creatorId);
                             cmd.ExecuteNonQuery();
                         }
                     }
@@ -1607,13 +1651,13 @@ namespace zentoraHRMS.Controllers
                 if (model.Ratings == null || model.Ratings.Count == 0)
                     return Json(new { success = false, message = "Please rate at least one performance indicator." });
 
-                double totalRating = 0;
+                decimal totalRating = 0;
                 foreach (var r in model.Ratings)
                 {
                     totalRating += r.RatingValue;
                 }
-                decimal averageRating = (decimal)(totalRating / model.Ratings.Count);
-                string updater = Session["UserName"]?.ToString() ?? "System";
+                decimal averageRating = totalRating / model.Ratings.Count;
+                int updaterId = Convert.ToInt32(Session["UserId"] ?? 0);
 
                 using (SqlConnection con = new SqlConnection(connectionString))
                 {
@@ -1654,7 +1698,7 @@ namespace zentoraHRMS.Controllers
                                 cmd.Parameters.AddWithValue("@ReviewId", model.ReviewId);
                                 cmd.Parameters.AddWithValue("@Rating", averageRating);
                                 cmd.Parameters.AddWithValue("@OverallComments", model.OverallComments ?? "");
-                                cmd.Parameters.AddWithValue("@UpdatedBy", updater);
+                                cmd.Parameters.AddWithValue("@UpdatedBy", updaterId);
                                 cmd.ExecuteNonQuery();
                             }
 
@@ -1689,8 +1733,8 @@ namespace zentoraHRMS.Controllers
                 {
                     string query = @"
                         SELECT r.ReviewId, r.EmployeeId, r.ReviewerId, r.ReviewCycleId, r.ReviewDate, r.Rating, r.Status, r.OverallComments,
-                               emp.FirstName AS EmpFirst, emp.LastName AS EmpLast, emp.Email AS EmpEmail, emp.ProfileImage AS EmpImg,
-                               rev.FirstName AS RevFirst, rev.LastName AS RevLast, rev.Email AS RevEmail, rev.ProfileImage AS RevImg,
+                               emp.FirstName AS EmpFirst, emp.MiddleName AS EmpMiddle, emp.LastName AS EmpLast, emp.Email AS EmpEmail, emp.ProfileImage AS EmpImg,
+                               rev.FirstName AS RevFirst, rev.MiddleName AS RevMiddle, rev.LastName AS RevLast, rev.Email AS RevEmail, rev.ProfileImage AS RevImg,
                                c.ReviewCycleName
                         FROM EmployeeReviews r
                         INNER JOIN EmployeeDetails emp ON r.EmployeeId = emp.Id
@@ -1706,15 +1750,21 @@ namespace zentoraHRMS.Controllers
                         {
                             if (reader.Read())
                             {
+                                string empMiddle = reader["EmpMiddle"] != DBNull.Value ? reader["EmpMiddle"].ToString() : "";
+                                string empName = reader["EmpFirst"].ToString() + (string.IsNullOrEmpty(empMiddle) ? "" : " " + empMiddle) + " " + reader["EmpLast"].ToString();
+                                
+                                string revMiddle = reader["RevMiddle"] != DBNull.Value ? reader["RevMiddle"].ToString() : "";
+                                string revName = reader["RevFirst"].ToString() + (string.IsNullOrEmpty(revMiddle) ? "" : " " + revMiddle) + " " + reader["RevLast"].ToString();
+
                                 review = new EmployeeReviewModel
                                 {
                                     ReviewId = Convert.ToInt32(reader["ReviewId"]),
                                     EmployeeId = Convert.ToInt32(reader["EmployeeId"]),
-                                    EmployeeName = reader["EmpFirst"].ToString() + " " + reader["EmpLast"].ToString(),
+                                    EmployeeName = empName,
                                     EmployeeEmail = reader["EmpEmail"].ToString(),
                                     EmployeeImage = reader["EmpImg"] != DBNull.Value ? reader["EmpImg"].ToString() : "",
                                     ReviewerId = Convert.ToInt32(reader["ReviewerId"]),
-                                    ReviewerName = reader["RevFirst"].ToString() + " " + reader["RevLast"].ToString(),
+                                    ReviewerName = revName,
                                     ReviewerEmail = reader["RevEmail"].ToString(),
                                     ReviewerImage = reader["RevImg"] != DBNull.Value ? reader["RevImg"].ToString() : "",
                                     ReviewCycleId = Convert.ToInt32(reader["ReviewCycleId"]),
@@ -1757,7 +1807,7 @@ namespace zentoraHRMS.Controllers
                                     ReviewRatingId = Convert.ToInt32(reader["ReviewRatingId"]),
                                     ReviewId = Convert.ToInt32(reader["ReviewId"]),
                                     IndicatorId = Convert.ToInt32(reader["IndicatorId"]),
-                                    RatingValue = Convert.ToInt32(reader["RatingValue"]),
+                                    RatingValue = Convert.ToDecimal(reader["RatingValue"]),
                                     Comments = reader["Comments"].ToString(),
                                     IndicatorName = reader["IndicatorName"].ToString(),
                                     IndicatorCategoryName = reader["CategoryName"].ToString(),
@@ -1842,7 +1892,7 @@ namespace zentoraHRMS.Controllers
                             using (SqlCommand cmd = new SqlCommand("UPDATE EmployeeReviews SET Status = 'Scheduled', Rating = NULL, OverallComments = NULL, UpdatedAt = GETDATE(), UpdatedBy = @UpdatedBy WHERE ReviewId = @ReviewId", con, transaction))
                             {
                                 cmd.Parameters.AddWithValue("@ReviewId", id);
-                                cmd.Parameters.AddWithValue("@UpdatedBy", Session["UserName"]?.ToString() ?? "System");
+                                cmd.Parameters.AddWithValue("@UpdatedBy", Convert.ToInt32(Session["UserId"] ?? 0));
                                 cmd.ExecuteNonQuery();
                             }
 

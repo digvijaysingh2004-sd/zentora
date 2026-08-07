@@ -1,0 +1,11 @@
+# Custom SQL Development Rules
+
+Whenever you are asked to create a table in the database, you MUST strictly adhere to the following guidelines:
+
+1. **CreatedBy and UpdatedBy Columns**:
+   - MUST be stored as `INT` data types, not `VARCHAR` or `NVARCHAR`.
+   - These columns map to the integer ID of the user or employee performing the action.
+
+2. **SystemAddedOn Column**:
+   - Every table MUST include a column named `SystemAddedOn` of type `DATETIME`.
+   - It should allow `NULL` (or `NOT NULL`) and have a default constraint of `GETDATE()` to automatically store the date/time when the row was created in the system.
