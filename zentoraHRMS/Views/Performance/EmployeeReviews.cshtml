@@ -1,127 +1,254 @@
+@model IEnumerable<zentoraHRMS.Models.EmployeeReviewModel>
 @{
     ViewBag.Title = "Employee Reviews";
     bool isAdmin = ViewBag.IsAdmin ?? false;
 }
 
+<style>
+    /* Prevent Choices.js select dropdowns from being cut off or layered behind the modal footer */
+    .choices.is-open {
+        z-index: 1050 !important;
+    }
+    .choices__list--dropdown {
+        z-index: 9999 !important;
+    }
+
+    .rating-badge {
+        font-weight: 600;
+        background-color: #8b5cf6 !important;
+        color: #ffffff !important;
+        font-size: 11px;
+    }
+
+    [data-bs-theme=dark] .rating-badge {
+        background-color: rgba(139, 92, 246, 0.2) !important;
+        color: #a78bfa !important;
+    }
+
+    /* Style updates to support transparent backgrounds and correct down line visibility */
+    .nav-tabs .nav-link {
+        background: transparent !important;
+        border: none !important;
+        color: #6c757d !important;
+    }
+    .nav-tabs .nav-link.active {
+        color: #8b5cf6 !important;
+        background: transparent !important;
+        border-bottom: 2px solid #8b5cf6 !important;
+        font-weight: 600;
+    }
+    .nav-tabs {
+        border-bottom: none !important;
+    }
+</style>
+
 <div class="container-fluid">
-    <!-- Header Section -->
-    <div class="row align-items-center mb-4">
-        <div class="col-sm-6">
-            <h3 class="fw-bold mb-1">Employee Reviews</h3>
-            <p class="text-muted mb-0">Manage performance reviews for your employees.</p>
-        </div>
-        <div class="col-sm-6 text-sm-end mt-3 mt-sm-0">
-            @if (isAdmin)
-            {
-                <button type="button" class="btn btn-primary d-inline-flex align-items-center" onclick="OpenScheduleModal()">
-                    <i data-lucide="plus" class="fs-sm me-1" style="width:16px;height:16px;"></i> Schedule Review
-                </button>
-            }
+    <!-- Standard Dashboard Header -->
+    <div class="row justify-content-center py-5">
+        <div class="col-xxl-5 col-xl-7 text-center">
+            <a href="@Url.Action("Index","Home")" class="badge badge-default fw-normal shadow px-2 py-1 mb-2 fst-italic fs-xxs">
+                <i data-lucide="square-check" class="fs-sm me-1"></i> DashBoard
+            </a>
+            <h3 class="fw-bold">Employee Reviews</h3>
+            <p class="text-muted">Manage employee performance reviews, schedule milestones, rate indicators and track comments.</p>
         </div>
     </div>
 
-    <!-- Filter Card -->
-    <div class="card border-0 shadow-sm rounded-3 mb-4">
-        <div class="card-body">
-            <div class="row g-3 align-items-center">
-                <!-- Search Input -->
-                <div class="col-md-3 col-sm-6">
-                    <div class="input-group">
-                        <span class="input-group-text bg-transparent border-end-0 border-light-subtle">
-                            <i data-lucide="search" class="text-muted" style="width: 16px; height: 16px;"></i>
-                        </span>
-                        <input type="text" id="reviewSearch" class="form-control border-start-0 border-light-subtle ps-0" placeholder="Search..." oninput="ApplyFilters()">
+    <!-- Main Table & Card Section matching current design patterns -->
+    <div class="row justify-content-center">
+        <div class="col-xxl-12">
+            <div class="card rounded-2">
+                <div class="card-header justify-content-between align-items-center d-flex">
+                    <h5 class="card-title mb-0">Employee Review Details</h5>
+                    @if (isAdmin)
+                    {
+                        <button type="button" class="btn btn-sm btn-soft-primary" onclick="OpenScheduleModal()">
+                            <i class="me-1" data-lucide="plus"></i> Schedule Review
+                        </button>
+                    }
+                </div>
+
+                <!-- Custom Filter Panel aligned with client grids (transparent background) -->
+                <div class="p-3 bg-transparent border-bottom border-light-subtle">
+                    <div class="row g-2 align-items-center">
+                        <div class="col-md-3 col-sm-6">
+                            <select id="filterReviewCycle" class="form-select form-select-sm">
+                                <option value="">All Review Cycle</option>
+                                @foreach (var cycle in Model.Select(r => r.ReviewCycleName).Distinct())
+                                {
+                                    <option value="@cycle">@cycle</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-3 col-sm-4">
+                            <input type="date" id="filterStartDate" class="form-control form-control-sm" title="Start Date">
+                        </div>
+                        <div class="col-md-3 col-sm-4">
+                            <input type="date" id="filterEndDate" class="form-control form-control-sm" title="End Date">
+                        </div>
+                        <div class="col-md-3 col-sm-4">
+                            <button type="button" class="btn btn-sm btn-outline-secondary w-100 d-inline-flex align-items-center justify-content-center" onclick="ClearFilters()">
+                                <i data-lucide="sliders-horizontal" class="fs-xxs me-1" style="width: 12px; height: 12px;"></i> Clear Filters
+                            </button>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Review Cycle Filter -->
-                <div class="col-md-3 col-sm-6">
-                    <select id="filterReviewCycle" class="form-select border-light-subtle" onchange="ApplyFilters()">
-                        <option value="">All Review Cycle</option>
-                    </select>
+                <!-- Dynamic status tabs matching dashboard panels (transparent background) -->
+                <div class="bg-transparent border-bottom border-light-subtle px-3">
+                    <ul class="nav nav-tabs border-bottom-0 fs-xs" id="reviewTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active px-3 py-2 border-0 rounded-0 fw-medium" type="button" onclick="SetCurrentTab('All')">
+                                All <span class="badge bg-secondary-subtle text-secondary ms-1 rounded-pill" id="countAll">0</span>
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link px-3 py-2 border-0 rounded-0 fw-medium" type="button" onclick="SetCurrentTab('Scheduled')">
+                                Scheduled <span class="badge bg-info-subtle text-info ms-1 rounded-pill" id="countScheduled">0</span>
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link px-3 py-2 border-0 rounded-0 fw-medium" type="button" onclick="SetCurrentTab('In Progress')">
+                                In Progress <span class="badge bg-warning-subtle text-warning ms-1 rounded-pill" id="countInProgress">0</span>
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link px-3 py-2 border-0 rounded-0 fw-medium" type="button" onclick="SetCurrentTab('Completed')">
+                                Completed <span class="badge bg-success-subtle text-success ms-1 rounded-pill" id="countCompleted">0</span>
+                            </button>
+                        </li>
+                    </ul>
                 </div>
 
-                <!-- Date Range Filters -->
-                <div class="col-md-2 col-sm-4">
-                    <div class="input-group">
-                        <span class="input-group-text bg-transparent border-end-0 border-light-subtle">
-                            <i data-lucide="calendar" class="text-muted" style="width: 16px; height: 16px;"></i>
-                        </span>
-                        <input type="date" id="filterStartDate" class="form-control border-start-0 border-light-subtle ps-0" onchange="ApplyFilters()" placeholder="Start Date">
-                    </div>
+                <div class="card-body">
+                    <table id="checkbox-select-data" class="table table-striped dt-responsive checkbox-select-datatable align-middle mb-0">
+                        <thead class="thead-sm text-uppercase fs-xxs">
+                            <tr>
+                                <th class="fs-sm text-center" style="width: 1%;">#</th>
+                                <th>Employee</th>
+                                <th>Reviewer</th>
+                                <th>Review Cycle</th>
+                                <th>Review Date</th>
+                                <th>Rating</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{ int index = 1; }
+                            @foreach (var r in Model)
+                            {
+                                <tr>
+                                    <td class="fw-semibold text-muted text-center" style="width: 1%;">@index</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            @if (!string.IsNullOrEmpty(r.EmployeeImage))
+                                            {
+                                                <img src="@r.EmployeeImage" alt="avatar" class="rounded-circle me-2" style="width: 32px; height: 32px; object-fit: cover;" onerror="this.onerror=null; this.src='/assets/images/users/avatar-1.jpg';" />
+                                            }
+                                            else
+                                            {
+                                                var empInit = "";
+                                                if (!string.IsNullOrEmpty(r.EmployeeName))
+                                                {
+                                                    var parts = r.EmployeeName.Trim().Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                                                    if (parts.Length > 0)
+                                                    {
+                                                        empInit += parts[0][0];
+                                                        if (parts.Length > 1)
+                                                        {
+                                                            empInit += parts[parts.Length - 1][0];
+                                                        }
+                                                    }
+                                                }
+                                                if (string.IsNullOrEmpty(empInit)) { empInit = "EE"; }
+                                                empInit = empInit.ToUpper();
+                                                <div class="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center shadow-sm fw-semibold me-2" style="width: 32px; height: 32px; font-size: 10px; min-width: 32px;">
+                                                    @empInit
+                                                </div>
+                                            }
+                                            <div>
+                                                <div class="fw-semibold text-dark fs-sm">@r.EmployeeName</div>
+                                                <div class="text-muted fs-xxs">@r.EmployeeEmail</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            @if (!string.IsNullOrEmpty(r.ReviewerImage))
+                                            {
+                                                <img src="@r.ReviewerImage" alt="avatar" class="rounded-circle me-2" style="width: 32px; height: 32px; object-fit: cover;" onerror="this.onerror=null; this.src='/assets/images/users/avatar-2.jpg';" />
+                                            }
+                                            else
+                                            {
+                                                var revInit = "";
+                                                if (!string.IsNullOrEmpty(r.ReviewerName))
+                                                {
+                                                    var parts = r.ReviewerName.Trim().Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                                                    if (parts.Length > 0)
+                                                    {
+                                                        revInit += parts[0][0];
+                                                        if (parts.Length > 1)
+                                                        {
+                                                            revInit += parts[parts.Length - 1][0];
+                                                        }
+                                                    }
+                                                }
+                                                if (string.IsNullOrEmpty(revInit)) { revInit = "RR"; }
+                                                revInit = revInit.ToUpper();
+                                                <div class="rounded-circle bg-info-subtle text-info d-flex align-items-center justify-content-center shadow-sm fw-semibold me-2" style="width: 32px; height: 32px; font-size: 10px; min-width: 32px;">
+                                                    @revInit
+                                                </div>
+                                            }
+                                            <div>
+                                                <div class="fw-semibold text-dark fs-sm">@r.ReviewerName</div>
+                                                <div class="text-muted fs-xxs">@r.ReviewerEmail</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="fw-medium text-dark fs-sm">@r.ReviewCycleName</td>
+                                    <td>
+                                        <span class="text-dark fs-sm">@r.ReviewDate.ToString("yyyy-MM-dd")</span>
+                                    </td>
+                                    <td class="fw-bold text-primary fs-sm">
+                                        @(r.Rating.HasValue ? r.Rating.Value.ToString("0.0") : "-")
+                                    </td>
+                                    <td>
+                                        @if (r.Status == "Completed")
+                                        {
+                                            <span class="badge bg-success-subtle text-success">Completed</span>
+                                        }
+                                        else if (r.Status == "In Progress")
+                                        {
+                                            <span class="badge bg-warning-subtle text-warning">In Progress</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-info-subtle text-info">Scheduled</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (r.Status == "Completed")
+                                        {
+                                            <a href="javascript:void(0);" onclick="OpenViewReviewModal(@r.ReviewId)" class="btn btn-sm btn-soft-primary mt-1" title="View Review Details"><i data-lucide="eye"></i></a>
+                                        }
+                                        else
+                                        {
+                                            <a href="javascript:void(0);" onclick="OpenConductReviewModal(@r.ReviewId, @r.EmployeeId)" class="btn btn-sm btn-soft-success mt-1" title="Conduct Performance Review"><i data-lucide="clipboard-signature"></i></a>
+                                        }
+                                        @if (isAdmin)
+                                        {
+                                            <a href="javascript:void(0);" onclick="OpenEditReviewModal(@r.ReviewId)" class="btn btn-sm btn-soft-info mt-1" title="Edit Schedule"><i data-lucide="square-pen"></i></a>
+                                            <a href="javascript:void(0);" onclick="ResetReview(@r.ReviewId)" class="btn btn-sm btn-soft-warning mt-1" title="Reset Review Ratings"><i data-lucide="refresh-cw"></i></a>
+                                            <a href="javascript:void(0);" onclick="DeleteReview(@r.ReviewId)" class="btn btn-sm btn-soft-danger mt-1" title="Delete Schedule"><i data-lucide="trash-2"></i></a>
+                                        }
+                                    </td>
+                                </tr>
+                                index++;
+                            }
+                        </tbody>
+                    </table>
                 </div>
-
-                <div class="col-md-2 col-sm-4">
-                    <div class="input-group">
-                        <span class="input-group-text bg-transparent border-end-0 border-light-subtle">
-                            <i data-lucide="calendar" class="text-muted" style="width: 16px; height: 16px;"></i>
-                        </span>
-                        <input type="date" id="filterEndDate" class="form-control border-start-0 border-light-subtle ps-0" onchange="ApplyFilters()" placeholder="End Date">
-                    </div>
-                </div>
-
-                <!-- Action Button -->
-                <div class="col-md-2 col-sm-4">
-                    <button type="button" class="btn btn-outline-secondary w-100 d-inline-flex align-items-center justify-content-center" onclick="ClearFilters()">
-                        <i data-lucide="sliders-horizontal" class="fs-xs me-1" style="width: 14px; height: 14px;"></i> Clear Filters
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Review Tabs & Table -->
-    <div class="card border-0 shadow-sm rounded-3">
-        <div class="card-header bg-white border-bottom border-light-subtle px-3 py-0">
-            <ul class="nav nav-tabs border-bottom-0" id="reviewTabs" role="tablist">
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link active px-3 py-3 border-0 rounded-0" id="all-tab" data-bs-toggle="tab" data-bs-target="#all" type="button" role="tab" onclick="SetCurrentTab('All')">
-                        All <span class="badge bg-secondary-subtle text-secondary ms-1 rounded-pill" id="countAll">0</span>
-                    </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link px-3 py-3 border-0 rounded-0" id="scheduled-tab" data-bs-toggle="tab" data-bs-target="#scheduled" type="button" role="tab" onclick="SetCurrentTab('Scheduled')">
-                        Scheduled <span class="badge bg-primary-subtle text-primary ms-1 rounded-pill" id="countScheduled">0</span>
-                    </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link px-3 py-3 border-0 rounded-0" id="progress-tab" data-bs-toggle="tab" data-bs-target="#progress" type="button" role="tab" onclick="SetCurrentTab('In Progress')">
-                        In Progress <span class="badge bg-warning-subtle text-warning ms-1 rounded-pill" id="countInProgress">0</span>
-                    </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link px-3 py-3 border-0 rounded-0" id="completed-tab" data-bs-toggle="tab" data-bs-target="#completed" type="button" role="tab" onclick="SetCurrentTab('Completed')">
-                        Completed <span class="badge bg-success-subtle text-success ms-1 rounded-pill" id="countCompleted">0</span>
-                    </button>
-                </li>
-            </ul>
-        </div>
-        
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0" id="reviewsTable">
-                    <thead class="bg-light text-uppercase fs-xxs fw-semibold border-bottom">
-                        <tr>
-                            <th class="ps-3" style="width: 5%;">#</th>
-                            <th style="width: 25%;">Employee</th>
-                            <th style="width: 25%;">Reviewer</th>
-                            <th style="width: 15%;">Review Cycle</th>
-                            <th style="width: 12%;">Review Date</th>
-                            <th style="width: 8%;">Rating</th>
-                            <th style="width: 8%;">Status</th>
-                            <th class="pe-3 text-end" style="width: 12%;">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="reviewsTableBody">
-                        <!-- Populated by JavaScript -->
-                    </tbody>
-                </table>
-            </div>
-            
-            <div id="noDataContainer" class="text-center py-5 d-none">
-                <i data-lucide="clipboard-x" class="text-muted mb-3" style="width: 48px; height: 48px;"></i>
-                <h5 class="fw-semibold">No Performance Reviews Found</h5>
-                <p class="text-muted small">Try altering your filters or schedule a new review.</p>
             </div>
         </div>
     </div>
@@ -132,190 +259,168 @@
      ============================================== -->
 
 <!-- 1. Schedule / Edit Review Modal -->
-<div class="modal fade" id="ScheduleReviewModal" tabindex="-1" aria-labelledby="ScheduleReviewModalLabel" aria-hidden="true">
+<div id="ScheduleReviewModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg rounded-3">
-            <form id="ScheduleReviewForm" class="needs-validation" novalidate onsubmit="SubmitScheduleReview(event)">
-                <div class="modal-header bg-light border-bottom border-light-subtle">
-                    <h5 class="modal-title fw-bold" id="ScheduleReviewModalLabel">Schedule Performance Review</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <form id="ScheduleReviewForm" class="modal-content border border-light-subtle" style="border-radius: 6px; box-shadow: 0 5px 15px rgba(0,0,0,0.08);" novalidate method="post" onsubmit="SubmitScheduleReview(event)">
+            <div class="modal-header">
+                <h4 class="modal-title" id="ScheduleReviewModalLabel">Schedule Performance Review</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="sch_review_id" value="0">
+                
+                <div class="mb-3">
+                    <label for="sch_employee_id" class="form-label">Employee <span class="text-danger">*</span></label>
+                    <select class="form-select" id="sch_employee_id" required>
+                        <option value="">Select Employee</option>
+                    </select>
                 </div>
-                <div class="modal-body p-4">
-                    <input type="hidden" id="sch_review_id" value="0">
-                    
-                    <div class="mb-3">
-                        <label for="sch_employee_id" class="form-label fw-medium text-dark">Employee <span class="text-danger">*</span></label>
-                        <select class="form-select border-light-subtle" id="sch_employee_id" required>
-                            <option value="">Select Employee</option>
-                        </select>
-                    </div>
 
-                    <div class="mb-3">
-                        <label for="sch_reviewer_id" class="form-label fw-medium text-dark">Reviewer <span class="text-danger">*</span></label>
-                        <select class="form-select border-light-subtle" id="sch_reviewer_id" required>
-                            <option value="">Select Reviewer</option>
-                        </select>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="sch_cycle_id" class="form-label fw-medium text-dark">Review Cycle <span class="text-danger">*</span></label>
-                        <select class="form-select border-light-subtle" id="sch_cycle_id" required>
-                            <option value="">Select Review Cycle</option>
-                        </select>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="sch_date" class="form-label fw-medium text-dark">Review Date <span class="text-danger">*</span></label>
-                        <input type="date" class="form-control border-light-subtle" id="sch_date" required>
-                    </div>
+                <div class="mb-3">
+                    <label for="sch_reviewer_id" class="form-label">Reviewer <span class="text-danger">*</span></label>
+                    <select class="form-select" id="sch_reviewer_id" required>
+                        <option value="">Select Reviewer</option>
+                    </select>
                 </div>
-                <div class="modal-footer bg-light border-top border-light-subtle">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Schedule Review</button>
+
+                <div class="mb-3">
+                    <label for="sch_cycle_id" class="form-label">Review Cycle <span class="text-danger">*</span></label>
+                    <select class="form-select" id="sch_cycle_id" required>
+                        <option value="">Select Review Cycle</option>
+                    </select>
                 </div>
-            </form>
-        </div>
+
+                <div class="mb-3">
+                    <label for="sch_date" class="form-label">Review Date <span class="text-danger">*</span></label>
+                    <input type="date" class="form-control" id="sch_date" required>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-soft-primary" id="btnScheduleSubmit">Schedule Review</button>
+            </div>
+        </form>
     </div>
 </div>
 
 <!-- 2. Conduct Review Modal -->
-<div class="modal fade" id="ConductReviewModal" tabindex="-1" aria-labelledby="ConductReviewModalLabel" aria-hidden="true" data-bs-backdrop="static">
-    <div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
-        <div class="modal-content border-0 shadow-lg rounded-3">
-            <form id="ConductReviewForm" onsubmit="SubmitConductedReview(event)">
-                <div class="modal-header bg-light border-bottom border-light-subtle py-3">
-                    <div class="d-flex align-items-center">
-                        <i data-lucide="clipboard-signature" class="text-primary me-2" style="width: 24px; height: 24px;"></i>
-                        <div>
-                            <h5 class="modal-title fw-bold mb-0" id="ConductReviewModalLabel">Conduct Performance Review</h5>
-                            <span class="text-muted small">Fill in the review details below</span>
-                        </div>
-                    </div>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body p-4 bg-light-subtle">
-                    <!-- Review Information Header -->
-                    <div class="card border-0 shadow-sm rounded-3 mb-4">
-                        <div class="card-body p-3">
-                            <h6 class="fw-bold text-uppercase fs-xxs text-primary mb-3">Review Information</h6>
-                            <div class="row g-3">
-                                <div class="col-md-3 col-sm-6">
-                                    <span class="text-muted small d-block">Employee</span>
-                                    <span class="fw-semibold text-dark" id="cond_employee_name">-</span>
-                                </div>
-                                <div class="col-md-3 col-sm-6">
-                                    <span class="text-muted small d-block">Reviewer</span>
-                                    <span class="fw-semibold text-dark" id="cond_reviewer_name">-</span>
-                                </div>
-                                <div class="col-md-3 col-sm-6">
-                                    <span class="text-muted small d-block">Review Cycle</span>
-                                    <span class="fw-semibold text-dark" id="cond_cycle_name">-</span>
-                                </div>
-                                <div class="col-md-3 col-sm-6">
-                                    <span class="text-muted small d-block">Review Date</span>
-                                    <span class="fw-semibold text-dark" id="cond_date">-</span>
-                                </div>
+<div id="ConductReviewModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+        <form id="ConductReviewForm" class="modal-content border border-light-subtle" style="border-radius: 6px; box-shadow: 0 5px 15px rgba(0,0,0,0.08);" novalidate method="post" onsubmit="SubmitConductedReview(event)">
+            <div class="modal-header">
+                <h4 class="modal-title">Conduct Performance Review</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Info Header card -->
+                <div class="card border border-light-subtle bg-light mb-4 shadow-none">
+                    <div class="card-body p-3">
+                        <div class="row g-3 fs-xs text-dark">
+                            <div class="col-md-3 col-sm-6">
+                                <span class="text-muted d-block font-size-10 text-uppercase fw-semibold mb-1">Employee</span>
+                                <span class="fw-bold" id="cond_employee_name">-</span>
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- Performance Rating Section -->
-                    <h5 class="fw-bold mb-3">Performance Ratings</h5>
-                    <p class="text-muted small mb-4">Rate the employee on each performance indicator configured for their role.</p>
-
-                    <div id="conductQuestionsContainer">
-                        <!-- Questions categories will be inserted here dynamically -->
-                    </div>
-
-                    <!-- Overall Comments -->
-                    <div class="card border-0 shadow-sm rounded-3 mt-4">
-                        <div class="card-body">
-                            <h5 class="fw-semibold mb-3">Overall Comments</h5>
-                            <div class="mb-0">
-                                <label for="cond_overall_comments" class="form-label small text-muted">Add overall feedback and recommendations for the employee</label>
-                                <textarea class="form-control border-light-subtle" id="cond_overall_comments" rows="3" placeholder="Enter overall comments..."></textarea>
+                            <div class="col-md-3 col-sm-6">
+                                <span class="text-muted d-block font-size-10 text-uppercase fw-semibold mb-1">Reviewer</span>
+                                <span class="fw-bold" id="cond_reviewer_name">-</span>
+                            </div>
+                            <div class="col-md-3 col-sm-6">
+                                <span class="text-muted d-block font-size-10 text-uppercase fw-semibold mb-1">Review Cycle</span>
+                                <span class="fw-bold" id="cond_cycle_name">-</span>
+                            </div>
+                            <div class="col-md-3 col-sm-6">
+                                <span class="text-muted d-block font-size-10 text-uppercase fw-semibold mb-1">Review Date</span>
+                                <span class="fw-bold" id="cond_date">-</span>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer bg-light border-top border-light-subtle py-3">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-success d-inline-flex align-items-center">
-                        <i data-lucide="check" class="fs-xs me-1" style="width: 16px; height: 16px;"></i> Submit Review
-                    </button>
+
+                <h5 class="fw-bold mb-3 fs-sm border-bottom pb-2">Indicators Performance Rating</h5>
+
+                <div id="conductQuestionsContainer">
+                    <!-- Dynamic Questions Categories -->
                 </div>
-            </form>
-        </div>
+
+                <!-- Overall Comments card -->
+                <div class="card border border-light-subtle shadow-none mb-2 mt-4">
+                    <div class="card-header bg-light py-2">
+                        <h6 class="fw-semibold text-dark mb-0 fs-xs">Overall Review Comments</h6>
+                    </div>
+                    <div class="card-body">
+                        <textarea class="form-control" id="cond_overall_comments" rows="3" placeholder="Enter overall remarks and goals settings recommendations..."></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-soft-primary">Submit Review</button>
+            </div>
+        </form>
     </div>
 </div>
 
 <!-- 3. View Review Details Modal (Read-Only) -->
-<div class="modal fade" id="ViewReviewModal" tabindex="-1" aria-labelledby="ViewReviewModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
-        <div class="modal-content border-0 shadow-lg rounded-3">
-            <div class="modal-header bg-light border-bottom border-light-subtle py-3">
-                <div class="d-flex align-items-center">
-                    <i data-lucide="eye" class="text-info me-2" style="width: 24px; height: 24px;"></i>
-                    <div>
-                        <h5 class="modal-title fw-bold mb-0" id="ViewReviewModalLabel">View Performance Review Details</h5>
-                        <span class="text-muted small">Completed Rating Summary</span>
-                    </div>
-                </div>
+<div id="ViewReviewModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+        <div class="modal-content border border-light-subtle" style="border-radius: 6px; box-shadow: 0 5px 15px rgba(0,0,0,0.08);">
+            <div class="modal-header">
+                <h4 class="modal-title">View Performance Review</h4>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body p-4 bg-light-subtle">
-                <!-- Review Information Header -->
-                <div class="card border-0 shadow-sm rounded-3 mb-4">
+            <div class="modal-body">
+                <!-- Info Header card -->
+                <div class="card border border-light-subtle bg-light mb-4 shadow-none">
                     <div class="card-body p-3">
                         <div class="row g-3 align-items-center">
-                            <div class="col-md-9 border-end border-light-subtle">
-                                <h6 class="fw-bold text-uppercase fs-xxs text-primary mb-3">Review Information</h6>
-                                <div class="row g-3">
+                            <div class="col-md-9">
+                                <div class="row g-3 fs-xs text-dark">
                                     <div class="col-md-4 col-sm-6">
-                                        <span class="text-muted small d-block">Employee</span>
-                                        <span class="fw-semibold text-dark" id="view_employee_name">-</span>
+                                        <span class="text-muted d-block font-size-10 text-uppercase fw-semibold mb-1">Employee</span>
+                                        <span class="fw-bold" id="view_employee_name">-</span>
                                     </div>
                                     <div class="col-md-4 col-sm-6">
-                                        <span class="text-muted small d-block">Reviewer</span>
-                                        <span class="fw-semibold text-dark" id="view_reviewer_name">-</span>
+                                        <span class="text-muted d-block font-size-10 text-uppercase fw-semibold mb-1">Reviewer</span>
+                                        <span class="fw-bold" id="view_reviewer_name">-</span>
                                     </div>
                                     <div class="col-md-4 col-sm-6">
-                                        <span class="text-muted small d-block">Review Cycle</span>
-                                        <span class="fw-semibold text-dark" id="view_cycle_name">-</span>
+                                        <span class="text-muted d-block font-size-10 text-uppercase fw-semibold mb-1">Review Cycle</span>
+                                        <span class="fw-bold" id="view_cycle_name">-</span>
                                     </div>
                                     <div class="col-md-4 col-sm-6">
-                                        <span class="text-muted small d-block">Review Date</span>
-                                        <span class="fw-semibold text-dark" id="view_date">-</span>
+                                        <span class="text-muted d-block font-size-10 text-uppercase fw-semibold mb-1">Review Date</span>
+                                        <span class="fw-bold" id="view_date">-</span>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-3 text-center">
-                                <span class="text-muted small d-block mb-1">Overall Rating</span>
-                                <h2 class="fw-bold text-primary mb-0" id="view_overall_rating">-</h2>
-                                <div class="text-warning fs-sm" id="view_rating_stars"></div>
+                            <div class="col-md-3 text-center border-start border-light-subtle">
+                                <span class="text-muted d-block font-size-10 text-uppercase fw-semibold mb-1">Overall Rating</span>
+                                <h3 class="fw-bold text-primary mb-0" id="view_overall_rating">-</h3>
+                                <div class="text-warning font-size-12 mt-1" id="view_rating_stars"></div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Performance Rating Section -->
-                <h5 class="fw-bold mb-3">Performance Ratings</h5>
-                
+                <h5 class="fw-bold mb-3 fs-sm border-bottom pb-2">Completed Ratings</h5>
+
                 <div id="viewQuestionsContainer">
-                    <!-- Rated Questions categories will be inserted here dynamically -->
+                    <!-- Dynamic Question Results -->
                 </div>
 
-                <!-- Overall Comments -->
-                <div class="card border-0 shadow-sm rounded-3 mt-4">
+                <!-- Overall Comments card -->
+                <div class="card border border-light-subtle shadow-none mb-2 mt-4">
+                    <div class="card-header bg-light py-2">
+                        <h6 class="fw-semibold text-dark mb-0 fs-xs">Overall Comments</h6>
+                    </div>
                     <div class="card-body">
-                        <h5 class="fw-semibold mb-2">Overall Comments</h5>
-                        <div class="bg-light p-3 rounded-2 text-muted fst-italic" id="view_overall_comments" style="white-space: pre-wrap;">
-                            No overall comments provided.
+                        <div class="p-2 bg-light rounded text-muted fs-xs fst-italic" id="view_overall_comments" style="white-space: pre-wrap;">
+                            -
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="modal-footer bg-light border-top border-light-subtle py-3">
+            <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
@@ -326,33 +431,156 @@
      JAVASCRIPT LOGIC
      ============================================== -->
 <script>
-    var allReviews = [];
-    var filteredReviews = [];
     var currentTab = 'All';
     var activeReviewId = 0;
     var isAdminUser = @(isAdmin ? "true" : "false");
 
     $(document).ready(function () {
-        LoadReviews();
         LoadDropdowns();
-    });
 
-    function LoadReviews() {
-        $.ajax({
-            url: '/Performance/GetEmployeeReviews',
-            type: 'GET',
-            success: function (res) {
-                if (res.success) {
-                    allReviews = res.data;
-                    ApplyFilters();
-                } else {
-                    toastr.error("Error loading reviews: " + res.message);
+        // 1. Hook search extension for DataTable filters
+        if ($.fn.dataTable) {
+            $.fn.dataTable.ext.search.push(
+                function (settings, data, dataIndex) {
+                    if (settings.nTable.id !== 'checkbox-select-data') return true;
+
+                    // Filter values
+                    var cycleVal = $("#filterReviewCycle").val();
+                    var startDateVal = $("#filterStartDate").val();
+                    var endDateVal = $("#filterEndDate").val();
+
+                    // Review Cycle Match
+                    if (cycleVal && data[3] !== cycleVal) {
+                        return false;
+                    }
+
+                    // Tab status Match (Status is column 6)
+                    var statusText = data[6].trim();
+                    if (currentTab !== 'All' && statusText !== currentTab) {
+                        return false;
+                    }
+
+                    // Date range Match (Date is column 4)
+                    if (startDateVal || endDateVal) {
+                        var dateStr = data[4].trim(); // yyyy-MM-dd
+                        if (dateStr) {
+                            var rowDate = new Date(dateStr);
+                            rowDate.setHours(0,0,0,0);
+
+                            if (startDateVal) {
+                                var startDate = new Date(startDateVal);
+                                startDate.setHours(0,0,0,0);
+                                if (rowDate < startDate) return false;
+                            }
+                            if (endDateVal) {
+                                var endDate = new Date(endDateVal);
+                                endDate.setHours(23,59,59,999);
+                                if (rowDate > endDate) return false;
+                            }
+                        }
+                    }
+
+                    return true;
                 }
-            },
-            error: function () {
-                toastr.error("An unexpected error occurred while loading reviews.");
+            );
+
+            // Re-apply filter draw on input trigger
+            $("#filterReviewCycle").on("change", function () { ApplyFilters(); });
+            $("#filterStartDate").on("change", function () { ApplyFilters(); });
+            $("#filterEndDate").on("change", function () { ApplyFilters(); });
+
+            // Initialize counts
+            UpdateTabCounts();
+        }
+
+        $("#ScheduleReviewModal").on("show.bs.modal", function () {
+            if ($("#sch_review_id").val() === "0") {
+                $("#ScheduleReviewForm")[0].reset();
+                $("#ScheduleReviewForm").removeClass('was-validated');
             }
         });
+    });
+
+    function ApplyFilters() {
+        var table = $('#checkbox-select-data').DataTable();
+        table.draw();
+        UpdateTabCounts();
+    }
+
+    function UpdateTabCounts() {
+        var table = $('#checkbox-select-data').DataTable();
+        
+        var countAll = 0;
+        var countSch = 0;
+        var countProg = 0;
+        var countComp = 0;
+
+        table.rows().every(function (rowIdx, tableLoop, rowLoop) {
+            var rowData = this.data();
+            var statusText = $(rowData[6]).text().trim() || rowData[6].trim();
+
+            if (MatchesFiltersExceptTab(rowData)) {
+                countAll++;
+                if (statusText === 'Scheduled') countSch++;
+                else if (statusText === 'In Progress') countProg++;
+                else if (statusText === 'Completed') countComp++;
+            }
+        });
+
+        $("#countAll").text(countAll);
+        $("#countScheduled").text(countSch);
+        $("#countInProgress").text(countProg);
+        $("#countCompleted").text(countComp);
+    }
+
+    function MatchesFiltersExceptTab(data) {
+        var cycleVal = $("#filterReviewCycle").val();
+        var startDateVal = $("#filterStartDate").val();
+        var endDateVal = $("#filterEndDate").val();
+
+        if (cycleVal && data[3] !== cycleVal) {
+            return false;
+        }
+
+        if (startDateVal || endDateVal) {
+            var dateStr = data[4].trim();
+            if (dateStr) {
+                var rowDate = new Date(dateStr);
+                rowDate.setHours(0,0,0,0);
+
+                if (startDateVal) {
+                    var startDate = new Date(startDateVal);
+                    startDate.setHours(0,0,0,0);
+                    if (rowDate < startDate) return false;
+                }
+                if (endDateVal) {
+                    var endDate = new Date(endDateVal);
+                    endDate.setHours(23,59,59,999);
+                    if (rowDate > endDate) return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    function SetCurrentTab(tabName) {
+        currentTab = tabName;
+        
+        // Update nav links active styling
+        $("#reviewTabs .nav-link").removeClass("active");
+        event.currentTarget.classList.add("active");
+        
+        ApplyFilters();
+    }
+
+    function ClearFilters() {
+        var table = $('#checkbox-select-data').DataTable();
+        table.search(''); // Clear default DataTable search
+        $("#filterReviewCycle").val('');
+        $("#filterStartDate").val('');
+        $("#filterEndDate").val('');
+        ApplyFilters();
     }
 
     function LoadDropdowns() {
@@ -381,186 +609,22 @@
             type: 'GET',
             success: function (data) {
                 var selectCycle = $("#sch_cycle_id");
-                var selectFilter = $("#filterReviewCycle");
                 
                 selectCycle.empty().append('<option value="">Select Review Cycle</option>');
-                selectFilter.empty().append('<option value="">All Review Cycle</option>');
-                
                 $.each(data, function (i, item) {
                     selectCycle.append('<option value="' + item.ReviewCycleId + '">' + item.ReviewCycleName + '</option>');
-                    selectFilter.append('<option value="' + item.ReviewCycleId + '">' + item.ReviewCycleName + '</option>');
                 });
             }
         });
     }
 
-    function ApplyFilters() {
-        var searchVal = $("#reviewSearch").val().toLowerCase();
-        var cycleVal = $("#filterReviewCycle").val();
-        var startDateVal = $("#filterStartDate").val();
-        var endDateVal = $("#filterEndDate").val();
-
-        filteredReviews = allReviews.filter(function (r) {
-            // Search Match
-            var searchMatch = !searchVal || 
-                r.EmployeeName.toLowerCase().indexOf(searchVal) !== -1 ||
-                r.ReviewerName.toLowerCase().indexOf(searchVal) !== -1 ||
-                r.ReviewCycleName.toLowerCase().indexOf(searchVal) !== -1;
-
-            // Cycle Match
-            var cycleMatch = !cycleVal || r.ReviewCycleId.toString() === cycleVal;
-
-            // Date Match
-            var dateObj = new Date(parseInt(r.ReviewDate.substr(6)));
-            var dateMatch = true;
-            if (startDateVal) {
-                var startLimit = new Date(startDateVal);
-                startLimit.setHours(0,0,0,0);
-                dateMatch = dateMatch && dateObj >= startLimit;
-            }
-            if (endDateVal) {
-                var endLimit = new Date(endDateVal);
-                endLimit.setHours(23,59,59,999);
-                dateMatch = dateMatch && dateObj <= endLimit;
-            }
-
-            return searchMatch && cycleMatch && dateMatch;
-        });
-
-        // Update counts
-        UpdateTabCounts();
-        
-        // Render current list
-        RenderTableList();
-    }
-
-    function UpdateTabCounts() {
-        var countAll = filteredReviews.length;
-        var countSch = filteredReviews.filter(r => r.Status === 'Scheduled').length;
-        var countProg = filteredReviews.filter(r => r.Status === 'In Progress').length;
-        var countComp = filteredReviews.filter(r => r.Status === 'Completed').length;
-
-        $("#countAll").text(countAll);
-        $("#countScheduled").text(countSch);
-        $("#countInProgress").text(countProg);
-        $("#countCompleted").text(countComp);
-    }
-
-    function SetCurrentTab(tabName) {
-        currentTab = tabName;
-        RenderTableList();
-    }
-
-    function RenderTableList() {
-        var targetList = filteredReviews;
-        if (currentTab !== 'All') {
-            targetList = filteredReviews.filter(r => r.Status === currentTab);
-        }
-
-        var tbody = $("#reviewsTableBody");
-        tbody.empty();
-
-        if (targetList.length === 0) {
-            $("#reviewsTable").addClass("d-none");
-            $("#noDataContainer").removeClass("d-none");
-            return;
-        }
-
-        $("#reviewsTable").removeClass("d-none");
-        $("#noDataContainer").addClass("d-none");
-
-        $.each(targetList, function (i, r) {
-            // Formatting Review Date
-            var dateObj = new Date(parseInt(r.ReviewDate.substr(6)));
-            var yyyy = dateObj.getFullYear();
-            var mm = String(dateObj.getMonth() + 1).padStart(2, '0');
-            var dd = String(dateObj.getDate()).padStart(2, '0');
-            var formattedDate = yyyy + '-' + mm + '-' + dd;
-
-            // Rating rendering
-            var ratingText = r.Rating ? r.Rating.toFixed(1) : '-';
-
-            // Status Badge
-            var statusBadge = '';
-            if (r.Status === 'Completed') {
-                statusBadge = '<span class="badge bg-success-subtle text-success px-2 py-1 fs-xxs rounded-pill">Completed</span>';
-            } else if (r.Status === 'In Progress') {
-                statusBadge = '<span class="badge bg-warning-subtle text-warning px-2 py-1 fs-xxs rounded-pill">In Progress</span>';
-            } else {
-                statusBadge = '<span class="badge bg-info-subtle text-info px-2 py-1 fs-xxs rounded-pill">Scheduled</span>';
-            }
-
-            // Avatars
-            var empAvatar = r.EmployeeImage ? r.EmployeeImage : '/assets/images/users/avatar-1.jpg';
-            var revAvatar = r.ReviewerImage ? r.ReviewerImage : '/assets/images/users/avatar-2.jpg';
-
-            // Actions mapping
-            var actionHtml = '';
-            if (r.Status === 'Completed') {
-                actionHtml += '<a onclick="OpenViewReviewModal(' + r.ReviewId + ')" class="btn btn-sm btn-soft-primary me-1" title="View Review Details"><i data-lucide="eye" style="width:16px;height:16px;"></i></a>';
-            } else {
-                actionHtml += '<a onclick="OpenConductReviewModal(' + r.ReviewId + ', ' + r.EmployeeId + ')" class="btn btn-sm btn-soft-success me-1" title="Conduct Performance Review"><i data-lucide="clipboard-signature" style="width:16px;height:16px;"></i></a>';
-            }
-
-            if (isAdminUser) {
-                actionHtml += '<a onclick="OpenEditReviewModal(' + r.ReviewId + ')" class="btn btn-sm btn-soft-info me-1" title="Edit Schedule"><i data-lucide="square-pen" style="width:16px;height:16px;"></i></a>';
-                actionHtml += '<a onclick="ResetReview(' + r.ReviewId + ')" class="btn btn-sm btn-soft-warning me-1" title="Reset Review Ratings"><i data-lucide="refresh-cw" style="width:16px;height:16px;"></i></a>';
-                actionHtml += '<a onclick="DeleteReview(' + r.ReviewId + ')" class="btn btn-sm btn-soft-danger" title="Delete Schedule"><i data-lucide="trash-2" style="width:16px;height:16px;"></i></a>';
-            }
-
-            var rowHtml = '<tr>' +
-                '<td class="ps-3 fw-semibold">' + (i + 1) + '</td>' +
-                '<td>' +
-                    '<div class="d-flex align-items-center">' +
-                        '<img src="' + empAvatar + '" class="rounded-circle me-2 border" style="width:34px;height:34px;object-fit:cover;" onerror="this.onerror=null; this.src=\'/assets/images/users/avatar-1.jpg\';">' +
-                        '<div>' +
-                            '<div class="fw-semibold text-dark lh-sm">' + r.EmployeeName + '</div>' +
-                            '<div class="text-muted small font-size-11">' + r.EmployeeEmail + '</div>' +
-                        '</div>' +
-                    '</div>' +
-                '</td>' +
-                '<td>' +
-                    '<div class="d-flex align-items-center">' +
-                        '<img src="' + revAvatar + '" class="rounded-circle me-2 border" style="width:34px;height:34px;object-fit:cover;" onerror="this.onerror=null; this.src=\'/assets/images/users/avatar-2.jpg\';">' +
-                        '<div>' +
-                            '<div class="fw-semibold text-dark lh-sm">' + r.ReviewerName + '</div>' +
-                            '<div class="text-muted small font-size-11">' + r.ReviewerEmail + '</div>' +
-                        '</div>' +
-                    '</div>' +
-                '</td>' +
-                '<td class="fw-medium text-dark">' + r.ReviewCycleName + '</td>' +
-                '<td>' +
-                    '<div class="d-inline-flex align-items-center text-muted small">' +
-                        '<i data-lucide="calendar" class="me-1" style="width:14px;height:14px;"></i>' + formattedDate +
-                    '</div>' +
-                '</td>' +
-                '<td class="fw-bold text-primary">' + ratingText + '</td>' +
-                '<td>' + statusBadge + '</td>' +
-                '<td class="pe-3 text-end">' + actionHtml + '</td>' +
-                '</tr>';
-            tbody.append(rowHtml);
-        });
-
-        // Trigger Lucide Icon rendering
-        if (window.lucide) {
-            lucide.createIcons();
-        }
-    }
-
-    function ClearFilters() {
-        $("#reviewSearch").val('');
-        $("#filterReviewCycle").val('');
-        $("#filterStartDate").val('');
-        $("#filterEndDate").val('');
-        ApplyFilters();
-    }
-
-    // Schedule actions
+    // Schedule / Edit Methods
     function OpenScheduleModal() {
         $("#sch_review_id").val("0");
         $("#ScheduleReviewForm")[0].reset();
+        $("#ScheduleReviewForm").removeClass('was-validated');
         $("#ScheduleReviewModalLabel").text("Schedule Performance Review");
-        $("#ScheduleReviewModal button[type='submit']").text("Schedule Review");
+        $("#btnScheduleSubmit").text("Schedule Review");
         $("#ScheduleReviewModal").modal("show");
     }
 
@@ -570,7 +634,7 @@
             type: 'GET',
             data: { id: id },
             success: function (res) {
-                if (res.success) {
+                if (res.success && res.data) {
                     var r = res.data;
                     $("#sch_review_id").val(r.ReviewId);
                     $("#sch_employee_id").val(r.EmployeeId);
@@ -584,10 +648,11 @@
                     $("#sch_date").val(yyyy + '-' + mm + '-' + dd);
 
                     $("#ScheduleReviewModalLabel").text("Edit Scheduled Review");
-                    $("#ScheduleReviewModal button[type='submit']").text("Save Changes");
+                    $("#btnScheduleSubmit").text("Save Changes");
+                    $("#ScheduleReviewForm").removeClass('was-validated');
                     $("#ScheduleReviewModal").modal("show");
                 } else {
-                    toastr.error(res.message);
+                    alert("Error: " + res.message);
                 }
             }
         });
@@ -597,7 +662,8 @@
         e.preventDefault();
         var form = $("#ScheduleReviewForm")[0];
         if (!form.checkValidity()) {
-            form.classList.add('was-validated');
+            e.stopPropagation();
+            $(form).addClass('was-validated');
             return;
         }
 
@@ -616,38 +682,32 @@
             data: JSON.stringify(formData),
             success: function (res) {
                 if (res.success) {
-                    toastr.success(res.message);
-                    $("#ScheduleReviewModal").modal("hide");
-                    LoadReviews();
+                    location.reload();
                 } else {
-                    toastr.error(res.message);
+                    alert("Error: " + res.message);
                 }
             }
         });
     }
 
-    // Conduct actions
+    // Conduct Review Methods
     function OpenConductReviewModal(reviewId, employeeId) {
         activeReviewId = reviewId;
         
-        // Find review detail
-        var r = allReviews.find(item => item.ReviewId === reviewId);
-        if (!r) return;
+        // Find review detail row from DOM or internal model
+        var rowEl = $(event.currentTarget).closest('tr');
+        var empName = rowEl.find('td:nth-child(2) .fw-semibold').text();
+        var revName = rowEl.find('td:nth-child(3) .fw-semibold').text();
+        var cycleName = rowEl.find('td:nth-child(4)').text();
+        var dateText = rowEl.find('td:nth-child(5) span').text();
 
-        // Set Info Header
-        $("#cond_employee_name").text(r.EmployeeName);
-        $("#cond_reviewer_name").text(r.ReviewerName);
-        $("#cond_cycle_name").text(r.ReviewCycleName);
-        
-        var dateObj = new Date(parseInt(r.ReviewDate.substr(6)));
-        var yyyy = dateObj.getFullYear();
-        var mm = String(dateObj.getMonth() + 1).padStart(2, '0');
-        var dd = String(dateObj.getDate()).padStart(2, '0');
-        $("#cond_date").text(yyyy + '-' + mm + '-' + dd);
-        
-        $("#cond_overall_comments").val(r.OverallComments);
+        $("#cond_employee_name").text(empName);
+        $("#cond_reviewer_name").text(revName);
+        $("#cond_cycle_name").text(cycleName);
+        $("#cond_date").text(dateText);
+        $("#cond_overall_comments").val("");
 
-        // Fetch Indicators for the employee's role
+        // Fetch indicators list
         $.ajax({
             url: '/Performance/GetIndicatorsForEmployee',
             type: 'GET',
@@ -657,7 +717,7 @@
                     RenderConductIndicators(res.data);
                     $("#ConductReviewModal").modal("show");
                 } else {
-                    toastr.error("Error loading indicators: " + res.message);
+                    alert("Error loading indicators: " + res.message);
                 }
             }
         });
@@ -668,11 +728,10 @@
         container.empty();
 
         if (indicators.length === 0) {
-            container.append('<div class="alert alert-warning text-center">No active performance indicators configured for this employee\'s role. Please contact the administrator.</div>');
+            container.append('<div class="alert alert-warning text-center fs-xs py-2">No active performance indicators/questions configured for this employee\'s role.</div>');
             return;
         }
 
-        // Group by category
         var categories = {};
         $.each(indicators, function (i, item) {
             if (!categories[item.CategoryName]) {
@@ -681,48 +740,44 @@
             categories[item.CategoryName].push(item);
         });
 
-        // Loop through each category and render cards
         $.each(categories, function (catName, items) {
-            var catHtml = '<div class="card border-0 shadow-sm rounded-3 mb-4">' +
-                '<div class="card-header bg-transparent py-3 border-bottom border-light-subtle">' +
-                    '<h5 class="card-title fw-bold text-dark mb-0">' + catName + '</h5>' +
+            var catHtml = '<div class="card border border-light-subtle shadow-none mb-3">' +
+                '<div class="card-header bg-light py-2">' +
+                    '<h6 class="fw-semibold text-dark mb-0 fs-xs">' + catName + '</h6>' +
                 '</div>' +
-                '<div class="card-body p-4">';
+                '<div class="card-body p-3">';
 
             $.each(items, function (i, ind) {
-                var measUnit = ind.MeasurementUnit ? ind.MeasurementUnit : '-';
-                var targetVal = ind.TargetValue ? ind.TargetValue : '-';
+                var meas = ind.MeasurementUnit ? ind.MeasurementUnit : '-';
+                var target = ind.TargetValue ? ind.TargetValue : '-';
 
-                catHtml += '<div class="indicator-row border-bottom border-light-subtle pb-3 mb-3" data-indicator-id="' + ind.IndicatorId + '">' +
+                catHtml += '<div class="indicator-row pb-3 mb-3 border-bottom border-light-subtle" data-indicator-id="' + ind.IndicatorId + '">' +
                     '<div class="row align-items-center">' +
                         '<div class="col-md-6">' +
-                            '<h6 class="fw-semibold text-dark mb-1">' + ind.IndicatorName + '</h6>' +
-                            '<p class="text-muted small mb-2">' + ind.Description + '</p>' +
-                            '<div class="d-inline-flex flex-wrap font-size-11 text-muted gap-3">' +
-                                '<span><strong>Measurement:</strong> ' + measUnit + '</span>' +
-                                '<span><strong>Target:</strong> ' + targetVal + '</span>' +
+                            '<h6 class="fw-semibold text-dark fs-sm mb-1">' + ind.IndicatorName + '</h6>' +
+                            '<p class="text-muted fs-xxs mb-1">' + ind.Description + '</p>' +
+                            '<div class="text-muted fs-xxs">' +
+                                '<strong>Measurement:</strong> ' + meas + ' | <strong>Target:</strong> ' + target +
                             '</div>' +
                         '</div>' +
-                        '<div class="col-md-6 mt-3 mt-md-0">' +
-                            '<div class="d-flex align-items-center justify-content-between mb-2">' +
-                                '<span class="text-muted small fw-medium">Rating</span>' +
-                                '<span class="badge bg-primary text-white rating-badge fw-bold" id="badge_rating_' + ind.IndicatorId + '">3 ★</span>' +
+                        '<div class="col-md-6 mt-2 mt-md-0">' +
+                            '<div class="d-flex align-items-center justify-content-between mb-1">' +
+                                '<span class="text-muted fs-xxs">Rating</span>' +
+                                '<span class="badge rating-badge" id="badge_rating_' + ind.IndicatorId + '">3 ★</span>' +
                             '</div>' +
                             '<input type="range" class="form-range rating-slider" min="1" max="5" value="3" oninput="OnSliderChange(this, ' + ind.IndicatorId + ')">' +
-                            '<div class="d-flex justify-content-between text-muted fs-xxs px-1 mt-1">' +
+                            '<div class="d-flex justify-content-between text-muted fs-xxs mt-1" style="font-size: 9px;">' +
                                 '<span>Poor</span>' +
                                 '<span>Average</span>' +
                                 '<span>Excellent</span>' +
                             '</div>' +
                         '</div>' +
                     '</div>' +
-                    '<div class="mt-3">' +
-                        '<textarea class="form-control form-control-sm border-light-subtle ind-comments" rows="2" placeholder="Add specific feedback for this indicator..."></textarea>' +
-                    '</div>' +
+                    '<textarea class="form-control form-control-sm mt-2 ind-comments" rows="1" placeholder="Add specific feedback for this indicator..."></textarea>' +
                 '</div>';
             });
 
-            // Strip last border
+            // Clean last row border
             catHtml = catHtml.replace(/border-bottom border-light-subtle pb-3 mb-3"(?![\s\S]*border-bottom border-light-subtle pb-3 mb-3")/, '"');
 
             catHtml += '</div></div>';
@@ -739,9 +794,9 @@
 
         var ratings = [];
         var rows = $("#conductQuestionsContainer .indicator-row");
-        
+
         if (rows.length === 0) {
-            toastr.error("Cannot submit a review without rating indicators.");
+            alert("No indicators/questions to evaluate.");
             return;
         }
 
@@ -770,31 +825,27 @@
             data: JSON.stringify(submission),
             success: function (res) {
                 if (res.success) {
-                    toastr.success(res.message);
-                    $("#ConductReviewModal").modal("hide");
-                    LoadReviews();
+                    location.reload();
                 } else {
-                    toastr.error(res.message);
+                    alert("Error: " + res.message);
                 }
             }
         });
     }
 
-    // View actions
+    // View Completed Review Methods
     function OpenViewReviewModal(reviewId) {
         $.ajax({
             url: '/Performance/GetConductedReviewDetails',
             type: 'GET',
             data: { reviewId: reviewId },
             success: function (res) {
-                if (res.success) {
+                if (res.success && res.review) {
                     var r = res.review;
-                    
-                    // Set Info
                     $("#view_employee_name").text(r.EmployeeName);
                     $("#view_reviewer_name").text(r.ReviewerName);
                     $("#view_cycle_name").text(r.ReviewCycleName);
-                    
+
                     var dateObj = new Date(parseInt(r.ReviewDate.substr(6)));
                     var yyyy = dateObj.getFullYear();
                     var mm = String(dateObj.getMonth() + 1).padStart(2, '0');
@@ -802,33 +853,21 @@
                     $("#view_date").text(yyyy + '-' + mm + '-' + dd);
 
                     $("#view_overall_rating").text(r.Rating ? r.Rating.toFixed(1) : '-');
-                    
-                    // Draw stars
-                    var starsHtml = '';
+
+                    // Draw static rating stars
+                    var stars = '';
                     if (r.Rating) {
-                        var rounded = Math.round(r.Rating);
-                        for (var i = 1; i <= 5; i++) {
-                            if (i <= rounded) {
-                                starsHtml += '<i data-lucide="star" class="fill-warning text-warning" style="width:16px;height:16px;display:inline-block;margin-right:2px;"></i>';
-                            } else {
-                                starsHtml += '<i data-lucide="star" class="text-muted" style="width:16px;height:16px;display:inline-block;margin-right:2px;"></i>';
-                            }
-                        }
+                        var score = Math.round(r.Rating);
+                        stars += '★'.repeat(score) + '☆'.repeat(5 - score);
                     }
-                    $("#view_rating_stars").html(starsHtml);
+                    $("#view_rating_stars").text(stars);
 
-                    $("#view_overall_comments").text(r.OverallComments ? r.OverallComments : 'No overall comments provided.');
+                    $("#view_overall_comments").text(r.OverallComments ? r.OverallComments : 'No overall review remarks recorded.');
 
-                    // Render questions list
                     RenderViewIndicators(res.ratings);
-
                     $("#ViewReviewModal").modal("show");
-                    
-                    if (window.lucide) {
-                        lucide.createIcons();
-                    }
                 } else {
-                    toastr.error(res.message);
+                    alert("Error: " + res.message);
                 }
             }
         });
@@ -839,11 +878,10 @@
         container.empty();
 
         if (ratings.length === 0) {
-            container.append('<div class="alert alert-light text-center text-muted">No ratings recorded for this review.</div>');
+            container.append('<div class="alert alert-light text-center text-muted fs-xs py-2">No rating indicator marks logged.</div>');
             return;
         }
 
-        // Group by category
         var categories = {};
         $.each(ratings, function (i, item) {
             if (!categories[item.IndicatorCategoryName]) {
@@ -852,52 +890,50 @@
             categories[item.IndicatorCategoryName].push(item);
         });
 
-        // Loop through each category and render cards
         $.each(categories, function (catName, items) {
-            var catHtml = '<div class="card border-0 shadow-sm rounded-3 mb-4">' +
-                '<div class="card-header bg-transparent py-3 border-bottom border-light-subtle">' +
-                    '<h5 class="card-title fw-bold text-dark mb-0">' + catName + '</h5>' +
+            var catHtml = '<div class="card border border-light-subtle shadow-none mb-3">' +
+                '<div class="card-header bg-light py-2">' +
+                    '<h6 class="fw-semibold text-dark mb-0 fs-xs">' + catName + '</h6>' +
                 '</div>' +
-                '<div class="card-body p-4">';
+                '<div class="card-body p-3">';
 
             $.each(items, function (i, r) {
-                var measUnit = r.MeasurementUnit ? r.MeasurementUnit : '-';
-                var targetVal = r.TargetValue ? r.TargetValue : '-';
-                var commentsHtml = r.Comments ? 
-                    '<div class="bg-light p-2 rounded-2 mt-2 font-size-12 text-muted fst-italic border-start border-3 border-light-subtle ps-3">Feedback: ' + r.Comments + '</div>' : 
-                    '<div class="text-muted font-size-11 mt-1 fst-italic">No feedback entered.</div>';
+                var meas = r.MeasurementUnit ? r.MeasurementUnit : '-';
+                var target = r.TargetValue ? r.TargetValue : '-';
+                var feedbackHtml = r.Comments ?
+                    '<div class="bg-light p-2 rounded mt-2 border-start border-3 border-light-subtle fs-xxs text-muted fst-italic">Feedback: ' + r.Comments + '</div>' :
+                    '<div class="text-muted font-size-10 mt-1 fst-italic">No comment feedback added.</div>';
 
-                var starBadgeColor = 'bg-danger-subtle text-danger';
+                var badgeClass = 'bg-danger-subtle text-danger';
                 if (r.RatingValue >= 4) {
-                    starBadgeColor = 'bg-success-subtle text-success';
+                    badgeClass = 'bg-success-subtle text-success';
                 } else if (r.RatingValue >= 3) {
-                    starBadgeColor = 'bg-primary-subtle text-primary';
+                    badgeClass = 'bg-primary-subtle text-primary';
                 } else if (r.RatingValue >= 2) {
-                    starBadgeColor = 'bg-warning-subtle text-warning';
+                    badgeClass = 'bg-warning-subtle text-warning';
                 }
 
-                catHtml += '<div class="border-bottom border-light-subtle pb-3 mb-3">' +
+                catHtml += '<div class="pb-3 mb-3 border-bottom border-light-subtle">' +
                     '<div class="row align-items-center">' +
                         '<div class="col-md-8">' +
-                            '<h6 class="fw-semibold text-dark mb-1">' + r.IndicatorName + '</h6>' +
-                            '<p class="text-muted small mb-2">' + r.Description + '</p>' +
-                            '<div class="d-inline-flex flex-wrap font-size-11 text-muted gap-3">' +
-                                '<span><strong>Measurement:</strong> ' + measUnit + '</span>' +
-                                '<span><strong>Target:</strong> ' + targetVal + '</span>' +
+                            '<h6 class="fw-semibold text-dark fs-sm mb-1">' + r.IndicatorName + '</h6>' +
+                            '<p class="text-muted fs-xxs mb-1">' + r.Description + '</p>' +
+                            '<div class="text-muted fs-xxs">' +
+                                '<strong>Measurement:</strong> ' + meas + ' | <strong>Target:</strong> ' + target +
                             '</div>' +
                         '</div>' +
-                        '<div class="col-md-4 mt-3 mt-md-0 text-md-end">' +
+                        '<div class="col-md-4 mt-2 mt-md-0 text-md-end">' +
                             '<div class="d-inline-flex align-items-center">' +
-                                '<span class="badge ' + starBadgeColor + ' py-1.5 px-3 rounded-pill fw-bold text-uppercase fs-xxs me-2">Score: ' + r.RatingValue + ' / 5</span>' +
-                                '<span class="text-warning fs-sm">' + '★'.repeat(r.RatingValue) + '☆'.repeat(5 - r.RatingValue) + '</span>' +
+                                '<span class="badge ' + badgeClass + ' py-1 px-2 rounded-pill fw-bold text-uppercase fs-xxs me-2">Score: ' + r.RatingValue + ' / 5</span>' +
+                                '<span class="text-warning fs-xs">' + '★'.repeat(r.RatingValue) + '☆'.repeat(5 - r.RatingValue) + '</span>' +
                             '</div>' +
                         '</div>' +
                     '</div>' +
-                    commentsHtml +
+                    feedbackHtml +
                 '</div>';
             });
 
-            // Strip last border
+            // Clean last row border
             catHtml = catHtml.replace(/border-bottom border-light-subtle pb-3 mb-3"(?![\s\S]*border-bottom border-light-subtle pb-3 mb-3")/, '"');
 
             catHtml += '</div></div>';
@@ -914,10 +950,9 @@
                 data: { id: id },
                 success: function (res) {
                     if (res.success) {
-                        toastr.success(res.message);
-                        LoadReviews();
+                        location.reload();
                     } else {
-                        toastr.error(res.message);
+                        alert("Error: " + res.message);
                     }
                 }
             });
@@ -933,10 +968,9 @@
                 data: { id: id },
                 success: function (res) {
                     if (res.success) {
-                        toastr.success(res.message);
-                        LoadReviews();
+                        location.reload();
                     } else {
-                        toastr.error(res.message);
+                        alert("Error: " + res.message);
                     }
                 }
             });

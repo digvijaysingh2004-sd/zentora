@@ -1311,7 +1311,52 @@ namespace zentoraHRMS.Controllers
             ViewBag.IsAdmin = currentRole.Equals("Superadmin", StringComparison.OrdinalIgnoreCase) || 
                               currentRole.Equals("Admin", StringComparison.OrdinalIgnoreCase);
 
-            return View();
+            List<EmployeeReviewModel> list = new List<EmployeeReviewModel>();
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                string query = @"
+                    SELECT r.ReviewId, r.EmployeeId, r.ReviewerId, r.ReviewCycleId, r.ReviewDate, r.Rating, r.Status, r.OverallComments,
+                           emp.FirstName AS EmpFirst, emp.LastName AS EmpLast, emp.Email AS EmpEmail, emp.ProfileImage AS EmpImg, emp.RoleType AS EmpRoleId,
+                           rev.FirstName AS RevFirst, rev.LastName AS RevLast, rev.Email AS RevEmail, rev.ProfileImage AS RevImg,
+                           c.ReviewCycleName
+                    FROM EmployeeReviews r
+                    INNER JOIN EmployeeDetails emp ON r.EmployeeId = emp.Id
+                    INNER JOIN EmployeeDetails rev ON r.ReviewerId = rev.Id
+                    INNER JOIN ReviewCycles c ON r.ReviewCycleId = c.ReviewCycleId
+                    ORDER BY r.ReviewId DESC";
+
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+                    con.Open();
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            list.Add(new EmployeeReviewModel
+                            {
+                                ReviewId = Convert.ToInt32(reader["ReviewId"]),
+                                EmployeeId = Convert.ToInt32(reader["EmployeeId"]),
+                                EmployeeName = reader["EmpFirst"].ToString() + " " + reader["EmpLast"].ToString(),
+                                EmployeeEmail = reader["EmpEmail"].ToString(),
+                                EmployeeImage = reader["EmpImg"] != DBNull.Value ? reader["EmpImg"].ToString() : "",
+                                ReviewerId = Convert.ToInt32(reader["ReviewerId"]),
+                                ReviewerName = reader["RevFirst"].ToString() + " " + reader["RevLast"].ToString(),
+                                ReviewerEmail = reader["RevEmail"].ToString(),
+                                ReviewerImage = reader["RevImg"] != DBNull.Value ? reader["RevImg"].ToString() : "",
+                                ReviewCycleId = Convert.ToInt32(reader["ReviewCycleId"]),
+                                ReviewCycleName = reader["ReviewCycleName"].ToString(),
+                                ReviewDate = Convert.ToDateTime(reader["ReviewDate"]),
+                                Rating = reader["Rating"] != DBNull.Value ? (decimal?)Convert.ToDecimal(reader["Rating"]) : null,
+                                Status = reader["Status"].ToString(),
+                                OverallComments = reader["OverallComments"] != DBNull.Value ? reader["OverallComments"].ToString() : "",
+                                EmployeeRoleId = reader["EmpRoleId"] != DBNull.Value ? (int?)Convert.ToInt32(reader["EmpRoleId"]) : null
+                            });
+                        }
+                    }
+                }
+            }
+
+            return View(list);
         }
 
         [HttpGet]
